@@ -1,0 +1,242 @@
+'use client';
+
+import React, { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/useAuthStore';
+import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, AlertCircle, Sparkles } from 'lucide-react';
+import { Card } from '@/app/components/Card';
+import { Input } from '@/app/components/Input';
+import { Button } from '@/app/components/Button';
+
+// Semantic styling tokens and responsive class name groups
+const styles = {
+  // Page container & backgrounds
+  pageContainer:
+    'relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F9FAFB] px-4 py-12 font-sans selection:bg-[#4F46E5]/20',
+  bgBlob: 'pointer-events-none absolute rounded-full blur-[120px]',
+  bgBlob1: 'top-[-10%] left-[-10%] h-[500px] w-[500px] bg-indigo-200/40',
+  bgBlob2: 'right-[-10%] bottom-[-10%] h-[500px] w-[500px] bg-emerald-100/40',
+  bgBlob3: 'top-[30%] right-[20%] h-[300px] w-[300px] bg-violet-100/50',
+
+  // Core containers
+  mainContainer: 'relative z-10 w-full max-w-[480px]',
+  headerContainer: 'mb-8 flex flex-col items-center text-center',
+  logoContainer:
+    'relative mb-3 flex h-16 w-16 items-center justify-center rounded-full border border-white/50 bg-white/80 p-2 shadow-[0_8px_20px_rgba(0,0,0,0.03)] backdrop-blur-sm',
+  logoText:
+    'font-sans text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase',
+  titleText:
+    'font-display mt-1 text-4xl font-extrabold tracking-tight text-[#4F46E5]',
+  subtitleText: 'mt-2 max-w-xs font-sans text-sm text-gray-500',
+
+  // Bento Card Layout
+  cardHeader: 'mb-6 text-center',
+  cardTitle: 'font-display text-xl font-bold text-gray-800',
+  cardSubtitle: 'mt-1 text-xs text-gray-500',
+
+  // Feedback Banners
+  feedbackContainer:
+    'mb-5 flex items-start gap-3 rounded-2xl border p-4 text-xs font-medium',
+  errorBanner: 'border-red-100 bg-red-50 text-red-600',
+  successBanner: 'border-emerald-100 bg-emerald-50 text-emerald-600',
+  feedbackIcon: 'h-4 w-4 shrink-0',
+  successIcon: 'animate-pulse text-emerald-500',
+  errorIcon: 'text-red-500',
+
+  // Form Fields
+  formFieldWrapper: 'space-y-1.5',
+  inputLabel:
+    'ml-1 block text-xs font-semibold tracking-wider text-gray-500 uppercase',
+  inputLabelFlex: 'flex items-center justify-between px-1',
+  inputLabelLink: 'text-xs font-medium text-[#4F46E5] hover:underline',
+
+  // Footer Links
+  footerText:
+    'mt-8 text-center font-sans text-xs font-medium tracking-wide text-gray-400',
+  linkText: 'mt-6 text-center text-sm text-gray-500',
+  linkAction: 'font-semibold text-[#4F46E5] hover:underline',
+};
+
+export default function LoginPage() {
+  const router = useRouter();
+  const { login, isLoading } = useAuthStore();
+
+  // Form State
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // UI States
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Email format validation
+  const isValidEmail = (emailStr: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr);
+  };
+
+  // Handle Login Submission
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    if (!email) {
+      setErrorMessage('Please enter your university email address.');
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setErrorMessage('Please enter a valid email address.');
+      return;
+    }
+    if (!password) {
+      setErrorMessage('Please enter your password.');
+      return;
+    }
+
+    try {
+      const role = await login(email, password);
+      setSuccessMessage('Successfully signed in! Redirecting...');
+
+      // Redirect based on role
+      setTimeout(() => {
+        if (role === 'executive') {
+          router.push('/admin');
+        } else {
+          router.push('/dashboard');
+        }
+      }, 1000);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Failed to sign in. Please try again.';
+      setErrorMessage(message);
+    }
+  };
+
+  return (
+    <div className={styles.pageContainer}>
+      {/* Premium background decorative shapes */}
+      <div className={cn(styles.bgBlob, styles.bgBlob1)} />
+      <div className={cn(styles.bgBlob, styles.bgBlob2)} />
+      <div className={cn(styles.bgBlob, styles.bgBlob3)} />
+
+      {/* Main Glassmorphic Container */}
+      <main className={styles.mainContainer}>
+        {/* Header (HGU logo & Title) */}
+        <div className={styles.headerContainer}>
+          <div className={styles.logoContainer}>
+            <Image
+              src="/handongunilogo.png"
+              alt="HGU Logo"
+              width={56}
+              height={56}
+              className="object-contain"
+              priority
+            />
+          </div>
+          <div className={styles.logoText}>Handong Global University</div>
+          <h1 className={styles.titleText}>CLUBHUB</h1>
+          <p className={styles.subtitleText}>
+            Connect, discover, and lead in university student life
+          </p>
+        </div>
+
+        {/* Auth Bento Card */}
+        <Card>
+          <div className={styles.cardHeader}>
+            <h2 className={styles.cardTitle}>Sign In</h2>
+            <p className={styles.cardSubtitle}>
+              Enter your credentials to access your account
+            </p>
+          </div>
+
+          {/* Feedback Messages */}
+          <AnimatePresence mode="wait">
+            {errorMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className={cn(styles.feedbackContainer, styles.errorBanner)}
+              >
+                <AlertCircle
+                  className={cn(styles.feedbackIcon, styles.errorIcon)}
+                />
+                <span>{errorMessage}</span>
+              </motion.div>
+            )}
+
+            {successMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className={cn(styles.feedbackContainer, styles.successBanner)}
+              >
+                <Sparkles
+                  className={cn(styles.feedbackIcon, styles.successIcon)}
+                />
+                <span>{successMessage}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Form Area */}
+          <form onSubmit={handleLoginSubmit} className="space-y-5">
+            {/* Email Field */}
+            <Input
+              id="signin-email"
+              type="email"
+              label="University Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="e.g. user@handong.ac.kr"
+              disabled={isLoading}
+              icon={<Mail className="h-4 w-4" />}
+            />
+
+            {/* Password Field */}
+            <div className={styles.formFieldWrapper}>
+              <div className={styles.inputLabelFlex}>
+                <label htmlFor="signin-password" className={styles.inputLabel}>
+                  Password
+                </label>
+                <Link href="#" className={styles.inputLabelLink}>
+                  Forgot Password?
+                </Link>
+              </div>
+              <Input
+                id="signin-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                disabled={isLoading}
+                icon={<Lock className="h-4 w-4" />}
+              />
+            </div>
+
+            {/* Submit Button */}
+            <Button isLoading={isLoading}>Sign In</Button>
+          </form>
+
+          {/* Redirect to Register */}
+          <div className={styles.linkText}>
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className={styles.linkAction}>
+              Register
+            </Link>
+          </div>
+        </Card>
+
+        {/* Footer info */}
+        <div className={styles.footerText}>Handong ClubHub v1.0</div>
+      </main>
+    </div>
+  );
+}
