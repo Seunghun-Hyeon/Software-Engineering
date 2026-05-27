@@ -25,7 +25,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, AlertCircle, Sparkles } from 'lucide-react';
-import { Card } from '@/app/components/Card';
+import { BentoCard } from '@/app/components/BentoCard';
 import { Input } from '@/app/components/Input';
 import { Button } from '@/app/components/Button';
 
@@ -169,7 +169,7 @@ export default function LoginPage() {
         </div>
 
         {/* Primary Glassmorphic Auth Form Bento Card */}
-        <Card>
+        <BentoCard>
           <div className={styles.cardHeader}>
             <h2 className={styles.cardTitle}>Sign In</h2>
             <p className={styles.cardSubtitle}>
@@ -254,7 +254,7 @@ export default function LoginPage() {
               Register
             </Link>
           </div>
-        </Card>
+        </BentoCard>
 
         {/* Client side version telemetry badge */}
         <div className={styles.footerText}>Handong ClubHub v1.0</div>

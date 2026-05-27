@@ -27,7 +27,7 @@
 
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
-import { Card } from '@/app/components/Card';
+import { BentoCard } from '@/app/components/BentoCard';
 import { cn } from '@/lib/utils';
 
 export interface FeatureTileProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -50,7 +50,7 @@ export const FeatureTile = React.forwardRef<HTMLDivElement, FeatureTileProps>(
     ref
   ) => {
     return (
-      <Card
+      <BentoCard
         ref={ref}
         className={cn(
           // Design rules: frosted glass styling, soft shadows, rounded corners, and translate transition on hover
@@ -78,7 +78,7 @@ export const FeatureTile = React.forwardRef<HTMLDivElement, FeatureTileProps>(
         <p className="mt-2 font-sans text-xs leading-relaxed text-gray-400">
           {description}
         </p>
-      </Card>
+      </BentoCard>
     );
   }
 );
