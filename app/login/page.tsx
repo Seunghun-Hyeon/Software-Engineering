@@ -1,3 +1,20 @@
+/**
+ * ============================================================================
+ * Login Page (`/login` route page)
+ * ============================================================================
+ *
+ * [WHAT IT IS FOR]
+ * This is a clientside client component (`'use client'`) that renders the Sign In screen.
+ * It provides form fields for university email and password, executes input validation,
+ * interacts with the global Zustand `useAuthStore` to verify credentials, and redirects
+ * the user according to their account clearance levels.
+ *
+ * [ROUTE MAP]
+ * - Path: `/login`
+ * - Links to: `/signup` (Registration form)
+ * - Redirects to: `/admin` (for Club Executives) or `/dashboard` (for Students) on successful auth.
+ */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -12,7 +29,7 @@ import { Card } from '@/app/components/Card';
 import { Input } from '@/app/components/Input';
 import { Button } from '@/app/components/Button';
 
-// Semantic styling tokens and responsive class name groups
+// Styling tokens for glassmorphism layout, colorful floating blurs, and inputs
 const styles = {
   // Page container & backgrounds
   pageContainer:
@@ -63,27 +80,29 @@ const styles = {
 
 export default function LoginPage() {
   const router = useRouter();
+  // Fetch authentication state and actions from the global Zustand store
   const { login, isLoading } = useAuthStore();
 
-  // Form State
+  // Form State parameters
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // UI States
+  // UI status feedback messages (errors & successes)
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Email format validation
+  // Email format validation helper (checks for presence of local character values and domain tags)
   const isValidEmail = (emailStr: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr);
   };
 
-  // Handle Login Submission
+  // Handles verification and submission when the Form triggers standard postback actions
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
     setSuccessMessage(null);
 
+    // Frontend sanity checks
     if (!email) {
       setErrorMessage('Please enter your university email address.');
       return;
@@ -98,14 +117,17 @@ export default function LoginPage() {
     }
 
     try {
+      // Execute the API handler simulation from the auth store
       const role = await login(email, password);
       setSuccessMessage('Successfully signed in! Redirecting...');
 
-      // Redirect based on role
+      // Redirect user profiles to respective route levels after 1 second delay
       setTimeout(() => {
         if (role === 'executive') {
+          // TODO: Build and redirect to real executive administration dashboard
           router.push('/admin');
         } else {
+          // TODO: Build and redirect to real student homepage dashboard
           router.push('/dashboard');
         }
       }, 1000);
@@ -120,14 +142,14 @@ export default function LoginPage() {
 
   return (
     <div className={styles.pageContainer}>
-      {/* Premium background decorative shapes */}
+      {/* Premium background decorative blur shapes */}
       <div className={cn(styles.bgBlob, styles.bgBlob1)} />
       <div className={cn(styles.bgBlob, styles.bgBlob2)} />
       <div className={cn(styles.bgBlob, styles.bgBlob3)} />
 
-      {/* Main Glassmorphic Container */}
+      {/* Main Glassmorphic layout container wrapper */}
       <main className={styles.mainContainer}>
-        {/* Header (HGU logo & Title) */}
+        {/* Header containing Official Handong Global University Branding */}
         <div className={styles.headerContainer}>
           <div className={styles.logoContainer}>
             <Image
@@ -146,7 +168,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Auth Bento Card */}
+        {/* Primary Glassmorphic Auth Form Bento Card */}
         <Card>
           <div className={styles.cardHeader}>
             <h2 className={styles.cardTitle}>Sign In</h2>
@@ -155,7 +177,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Feedback Messages */}
+          {/* AnimatePresence for smooth showing/hiding of validation warnings */}
           <AnimatePresence mode="wait">
             {errorMessage && (
               <motion.div
@@ -186,9 +208,9 @@ export default function LoginPage() {
             )}
           </AnimatePresence>
 
-          {/* Form Area */}
+          {/* Login Form Fields */}
           <form onSubmit={handleLoginSubmit} className="space-y-5">
-            {/* Email Field */}
+            {/* Email Field with validation bounds */}
             <Input
               id="signin-email"
               type="email"
@@ -200,7 +222,7 @@ export default function LoginPage() {
               icon={<Mail className="h-4 w-4" />}
             />
 
-            {/* Password Field */}
+            {/* Password input section */}
             <div className={styles.formFieldWrapper}>
               <div className={styles.inputLabelFlex}>
                 <label htmlFor="signin-password" className={styles.inputLabel}>
@@ -221,11 +243,11 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Submit Button */}
+            {/* Pill-shaped submit button displaying Framer Motion indicator during requests */}
             <Button isLoading={isLoading}>Sign In</Button>
           </form>
 
-          {/* Redirect to Register */}
+          {/* Redirect to Register link text */}
           <div className={styles.linkText}>
             Don&apos;t have an account?{' '}
             <Link href="/signup" className={styles.linkAction}>
@@ -234,7 +256,7 @@ export default function LoginPage() {
           </div>
         </Card>
 
-        {/* Footer info */}
+        {/* Client side version telemetry badge */}
         <div className={styles.footerText}>Handong ClubHub v1.0</div>
       </main>
     </div>
