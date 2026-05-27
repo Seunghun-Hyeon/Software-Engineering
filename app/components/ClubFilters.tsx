@@ -3,9 +3,21 @@
 import React, { useState } from 'react';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { ClubFiltersState } from '@/types/club';
 
-export function ClubFilters() {
+interface ClubFiltersProps {
+  onSearchChange?: (query: string) => void;
+  onFilterChange?: (filters: Partial<ClubFiltersState>) => void;
+}
+
+export function ClubFilters({
+  onSearchChange,
+  onFilterChange,
+}: ClubFiltersProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // Local state for active category filter
+  const [activeCategory, setActiveCategory] = useState('All');
 
   return (
     <div className="relative mb-10">
@@ -20,6 +32,10 @@ export function ClubFilters() {
           <input
             type="text"
             placeholder="Search clubs by name or keyword..."
+            onChange={(e) => {
+              // TODO: Implement search debounce here before calling API
+              onSearchChange?.(e.target.value);
+            }}
             className="w-full rounded-[16px] bg-[#F3F4F6] py-3 pr-4 pl-12 text-sm text-gray-900 placeholder-gray-500 transition-shadow focus:shadow-[0_0_0_2px_#4F46E5] focus:outline-none"
           />
         </div>
@@ -30,8 +46,13 @@ export function ClubFilters() {
             {['All', 'Academic', 'Engineering', 'Arts', 'Sports'].map((cat) => (
               <button
                 key={cat}
+                onClick={() => {
+                  setActiveCategory(cat);
+                  // TODO: Trigger backend filter API call
+                  onFilterChange?.({ category: cat });
+                }}
                 className={`rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
-                  cat === 'All'
+                  cat === activeCategory
                     ? 'bg-primary text-white shadow-[0_4px_14px_0_rgba(79,70,229,0.39)]'
                     : 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50'
                 }`}
@@ -78,7 +99,12 @@ export function ClubFilters() {
                 Status
               </label>
               <div className="flex flex-wrap gap-2">
-                <button className="bg-secondary/10 text-secondary ring-secondary/20 hover:bg-secondary/20 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 transition-colors ring-inset focus:outline-none">
+                <button
+                  onClick={() =>
+                    onFilterChange?.({ status: 'Currently Recruiting' })
+                  }
+                  className="bg-secondary/10 text-secondary ring-secondary/20 hover:bg-secondary/20 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 transition-colors ring-inset focus:outline-none"
+                >
                   <span className="bg-secondary h-1.5 w-1.5 rounded-full shadow-[0_0_5px_rgba(16,185,129,0.5)]"></span>
                   Currently Recruiting
                 </button>

@@ -2,9 +2,11 @@ import { BentoCard } from '@/app/components/BentoCard';
 import { Badge } from '@/app/components/Badge';
 import { ClubFilters } from '@/app/components/ClubFilters';
 import { Pagination } from '@/app/components/Pagination';
+import type { Club } from '@/types/club';
 
-// Mock Data for demonstration
-const CLUBS = [
+// TODO: API INTEGRATION - Replace this mock data with a backend fetch call.
+// E.g., `const { data: clubs } = await axios.get('/api/clubs');` or use a React Server Component fetch if moving away from mock.
+const CLUBS: Club[] = [
   {
     id: 1,
     name: 'Software Engineering Club',
@@ -136,6 +138,7 @@ export default function ClubsDirectoryPage() {
         </div>
 
         {/* Pagination Section */}
+        {/* TODO: API INTEGRATION - Pass actual pagination metadata from the backend response here */}
         <Pagination currentPage={1} totalPages={5} />
       </div>
     </div>
