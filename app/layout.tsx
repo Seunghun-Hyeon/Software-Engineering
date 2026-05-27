@@ -14,6 +14,8 @@
 
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Poppins, Inter } from 'next/font/google';
+import { Header } from '@/app/components/Header';
+import { Footer } from '@/app/components/Footer';
 import './globals.css';
 
 // Initialize core fonts according to brand design rules: Poppins for headings, Inter for body
@@ -55,8 +57,11 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${inter.variable} h-full antialiased`}
     >
-      {/* Root body element with min-height and flex column configuration */}
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col pt-16">
+        <Header />
+        <main className="flex flex-1 flex-col">{children}</main>
+        <Footer />
+      </body>
     </html>
   );
 }
