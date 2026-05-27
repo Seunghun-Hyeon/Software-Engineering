@@ -1,19 +1,36 @@
+/*
+ * ============================================================================
+ * Global CSS Stylesheet (Tailwind CSS Directives & Theme Settings)
+ * ============================================================================
+ * 
+ * [WHAT IT IS FOR]
+ * This file serves as the main global stylesheet loaded inside the Root Layout
+ * (`app/layout.tsx`). It imports the Tailwind CSS library and establishes the
+ * design system's baseline custom properties (variables), fonts, and colors
+ * according to the Handong ClubHub brand and visual rules.
+ */
+
 @import 'tailwindcss';
 
+/* Core CSS Custom Properties setting light/dark baseline theme bounds */
 :root {
-  --background: #f9fafb;
-  --foreground: #111827;
+  --background: #f9fafb; /* Premium soft bento background (#F9FAFB) */
+  --foreground: #111827; /* Dark slate gray body text color */
 }
 
+/* Tailwind theme inline extensions (v4 mapping style) */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
-  --color-primary: #4f46e5;
-  --color-secondary: #10b981;
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, sans-serif; /* Inter for body typography */
+  --font-display:
+    var(--font-poppins), ui-sans-serif, system-ui, sans-serif; /* Poppins for headings & headlines */
+  --color-primary: #4f46e5; /* Indigo theme base */
+  --color-secondary: #10b981; /* Neon green accent base */
 }
 
+/* Body element styling resets */
 body {
   background: var(--background);
   color: var(--foreground);
