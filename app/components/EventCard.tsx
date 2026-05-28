@@ -44,9 +44,9 @@
 import React from 'react';
 import Image from 'next/image';
 import { Calendar, MapPin, Clock } from 'lucide-react';
-import { Card } from '@/app/components/Card';
+import { BentoCard } from '@/app/components/BentoCard';
 import { Button } from '@/app/components/Button';
-import { CategoryBadge } from '@/app/components/CategoryBadge';
+import { Badge } from '@/app/components/Badge';
 import { cn } from '@/lib/utils';
 
 // Contract defining the properties expected inside the event data model object
@@ -92,7 +92,7 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
     // ====================================================
     if (event.styleType === 'image-top') {
       return (
-        <Card
+        <BentoCard
           ref={ref}
           className={cn(
             'flex h-full flex-col justify-between overflow-hidden border border-white/60 bg-white/85 p-0 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_35px_rgba(79,70,229,0.06)]',
@@ -113,8 +113,8 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
 
               {/* Badges placed on top of the visual content */}
               <div className="absolute top-4 left-4 z-10 flex gap-1.5">
-                <CategoryBadge label={event.categoryBadge} variant="primary" />
-                <CategoryBadge label="FREE" variant="secondary" />
+                <Badge variant="primary">{event.categoryBadge}</Badge>
+                <Badge variant="secondary">FREE</Badge>
               </div>
             </div>
 
@@ -145,7 +145,7 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
               Remind Me
             </Button>
           </div>
-        </Card>
+        </BentoCard>
       );
     }
 
@@ -154,7 +154,7 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
     // ====================================================
     if (event.styleType === 'text-only') {
       return (
-        <Card
+        <BentoCard
           ref={ref}
           className={cn(
             'flex h-full flex-col justify-between border border-white/60 bg-white/85 p-6 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_35px_rgba(79,70,229,0.06)]',
@@ -166,8 +166,8 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
             <div className="flex items-center justify-between">
               {/* Left Side: status badging chips */}
               <div className="flex items-center gap-2">
-                <CategoryBadge label={event.categoryBadge} variant="indigo" />
-                <CategoryBadge label="FREE" variant="emerald" />
+                <Badge variant="indigo">{event.categoryBadge}</Badge>
+                <Badge variant="emerald">FREE</Badge>
               </div>
               {/* Right Side: Circle wrapper clock icon */}
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gray-100 bg-gray-50 text-[#4F46E5] shadow-sm">
@@ -201,13 +201,11 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
                 {event.date} at {event.time}
               </span>
             </div>
-            <CategoryBadge
-              label="Max Capacity: 100"
-              variant="gray"
-              className="shrink-0"
-            />
+            <Badge variant="gray" className="shrink-0">
+              Max Capacity: 100
+            </Badge>
           </div>
-        </Card>
+        </BentoCard>
       );
     }
 
@@ -216,7 +214,7 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
     // ====================================================
     if (event.styleType === 'photo-bg') {
       return (
-        <Card
+        <BentoCard
           ref={ref}
           className={cn(
             'group relative flex h-full min-h-[360px] cursor-pointer flex-col overflow-hidden rounded-[24px] border border-white/60 p-0 shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl',
@@ -237,11 +235,12 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
           {/* Content container aligned absolute on top of background visual */}
           <div className="absolute inset-0 z-10 flex flex-col justify-between p-6 text-left text-white select-none">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <CategoryBadge
-                label={event.categoryBadge}
+              <Badge
                 variant="indigo"
                 className="shrink-0 border-white/25 bg-white/20 text-white backdrop-blur-md"
-              />
+              >
+                {event.categoryBadge}
+              </Badge>
               <span className="max-w-[150px] shrink-0 truncate rounded bg-black/10 px-1.5 py-0.5 text-[10px] font-extrabold tracking-wide text-white/80">
                 {event.date}
               </span>
@@ -287,7 +286,7 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
               </div>
             </div>
           </div>
-        </Card>
+        </BentoCard>
       );
     }
 

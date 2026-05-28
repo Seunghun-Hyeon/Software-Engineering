@@ -1,0 +1,114 @@
+[
+  {
+    "id": 1,
+    "name": "Zizzy",
+    "category": "Performing Arts",
+    "description": "Engaged in dance performances, Zizzy creates cheerful spirits in Handong community as well as outside of the campus as a voluntary service in the villages.",
+    "isActive": true
+  },
+  {
+    "id": 2,
+    "name": "Handong Orchestra",
+    "category": "Performing Arts",
+    "description": "Handong Orchestra is the club that the string music club (Soloists) and the pipe music club (Winds) has generated. We engage in street music performances, and also perform in various regular events.",
+    "isActive": true
+  },
+  {
+    "id": 3,
+    "name": "MIC (Motion in Christ)",
+    "category": "Performing Arts",
+    "description": "Since 1996, MIC’s become famous for its passionate gospel ministry through spectacular dance performances.",
+    "isActive": true
+  },
+  {
+    "id": 4,
+    "name": "Han Pung",
+    "category": "Performing Arts",
+    "description": "Our members are passionate learners of the Korean traditional music instruments.",
+    "isActive": true
+  },
+  {
+    "id": 5,
+    "name": "Holy Rams",
+    "category": "Sports",
+    "description": "Holy Rams is the American Football club and we have four football practices every week.",
+    "isActive": true
+  },
+  {
+    "id": 6,
+    "name": "Armstrong",
+    "category": "Sports",
+    "description": "Armstrong, which is the only marine sports club in Handong, is a boat club.",
+    "isActive": true
+  },
+  {
+    "id": 7,
+    "name": "CCC (Campus Crusade for Christ)",
+    "category": "Christian Groups",
+    "description": "CCC holds chapel twice a week. We gather together every morning to worship God.",
+    "isActive": true
+  },
+  {
+    "id": 8,
+    "name": "IVF (Inter-Varsity Christian Fellowship)",
+    "category": "Christian Groups",
+    "description": "IVF is a Christian club which aims to evangelize the college campus.",
+    "isActive": true
+  },
+  {
+    "id": 9,
+    "name": "Reformist Book Reading Club",
+    "category": "Academic",
+    "description": "This reading club is focused on reading classical books of Christianity.",
+    "isActive": true
+  },
+  {
+    "id": 10,
+    "name": "DUDUS",
+    "category": "Academic",
+    "description": "We study about creation-science and hold an academic conference each year.",
+    "isActive": true
+  },
+  {
+    "id": 11,
+    "name": "Linux Hackers",
+    "category": "Computer",
+    "description": "We form several teams to study Linux, develop mobile applications, webpages, and embedded machines.",
+    "isActive": true
+  },
+  {
+    "id": 12,
+    "name": "CRA",
+    "category": "Computer",
+    "description": "We form groups to study C-programming and Java. One of our achievements was the development of the Intranet page.",
+    "isActive": true
+  },
+  {
+    "id": 13,
+    "name": "GHOST",
+    "category": "Computer",
+    "description": "This club is established to study computer networks, security programs to prevent hacking and to develop software.",
+    "isActive": true
+  },
+  {
+    "id": 14,
+    "name": "Giving Tree",
+    "category": "Social Service",
+    "description": "Giving Tree manages the store to assist foreign students and participate in social services.",
+    "isActive": true
+  },
+  {
+    "id": 15,
+    "name": "Peace Makers",
+    "category": "Social Service",
+    "description": "We are ‘peace educators’ in the middle schools located in Pohang and mentors for children in orphanages.",
+    "isActive": true
+  },
+  {
+    "id": 16,
+    "name": "Canvas",
+    "category": "Exhibition Arts",
+    "description": "Helping students to share creative ideas to produce great art work. We hold art exhibitions twice a year.",
+    "isActive": true
+  }
+]

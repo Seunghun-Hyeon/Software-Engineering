@@ -31,7 +31,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { LucideIcon } from 'lucide-react';
-import { Card } from '@/app/components/Card';
+import { BentoCard } from '@/app/components/BentoCard';
 import { cn } from '@/lib/utils';
 
 export interface CategoryCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -58,7 +58,7 @@ export const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
     ref
   ) => {
     return (
-      <Card
+      <BentoCard
         ref={ref}
         className={cn(
           // Parent container uses absolute overlays, high border radius (24px/rounded-3xl), overflow hidden, shadow-md, and float animation
@@ -108,7 +108,7 @@ export const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
             </p>
           </div>
         </div>
-      </Card>
+      </BentoCard>
     );
   }
 );
