@@ -43,7 +43,7 @@ export function HeroSection() {
         {/* Absolute Background university backdrop image */}
         <div className="absolute inset-0 z-0 select-none">
           <Image
-            src="/handongbackground.jpg"
+            src="/concert2.jpg"
             alt="Handong Campus Background"
             fill
             priority
