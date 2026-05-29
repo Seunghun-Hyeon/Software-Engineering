@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { BentoCard } from '@/app/components/BentoCard';
 import { Badge } from '@/app/components/Badge';
 import { ClubFilters } from '@/app/components/ClubFilters';
@@ -21,6 +23,7 @@ export default function ClubsDirectoryPage() {
         const response = await api.get('/clubs');
         setClubs(response.data);
       } catch (err) {
+        console.error(err);
         setError('Failed to load clubs.');
       } finally {
         setIsLoading(false);
@@ -65,18 +68,22 @@ export default function ClubsDirectoryPage() {
               >
                 {/* Image Section */}
                 <div className="relative h-32 w-full shrink-0 bg-gray-200">
-                  <img
+                  <Image
                     src={`https://picsum.photos/seed/${club.id}/400/200`}
                     alt={`${club.name} cover`}
-                    className="h-full w-full object-cover"
+                    fill
+                    unoptimized
+                    className="object-cover"
                   />
 
                   {/* Small Circle Logo */}
-                  <div className="absolute -bottom-6 left-6 h-12 w-12 rounded-full border-4 border-white bg-white shadow-sm">
-                    <img
+                  <div className="absolute -bottom-6 left-6 h-12 w-12 overflow-hidden rounded-full border-4 border-white bg-white shadow-sm">
+                    <Image
                       src={`https://picsum.photos/seed/logo${club.id}/100/100`}
                       alt={`${club.name} logo`}
-                      className="h-full w-full rounded-full object-cover"
+                      fill
+                      unoptimized
+                      className="object-cover"
                     />
                   </div>
                 </div>
@@ -96,9 +103,12 @@ export default function ClubsDirectoryPage() {
                     {club.description}
                   </p>
 
-                  <button className="bg-primary/10 text-primary hover:bg-primary mt-auto inline-flex w-full items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold transition-colors hover:text-white">
+                  <Link
+                    href={`/clubs/${club.id}`}
+                    className="mt-auto inline-flex w-full items-center justify-center rounded-full bg-[#4F46E5]/10 px-4 py-2.5 text-sm font-semibold text-[#4F46E5] transition-colors hover:bg-[#4F46E5] hover:text-white"
+                  >
                     View Details
-                  </button>
+                  </Link>
                 </div>
               </BentoCard>
             ))}
