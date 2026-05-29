@@ -1,0 +1,34 @@
+[
+  {
+    "title": "Performing Arts",
+    "description": "Traditional drum play, street hip-hop, orchestral classical, musical theatre, and acappella.",
+    "count": "17 Clubs",
+    "iconName": "Palette",
+    "gradient": "from-rose-600/75 to-rose-950/90",
+    "bgImage": "/zizzy.jpg"
+  },
+  {
+    "title": "Computer Science",
+    "description": "Full-stack software application engineering, cybersecurity CTFs, and OS kernel hacking.",
+    "count": "4 Clubs",
+    "iconName": "BookOpen",
+    "gradient": "from-indigo-600/80 to-indigo-950/90",
+    "bgImage": "/computerscience.jpg"
+  },
+  {
+    "title": "Sports & Health",
+    "description": "Collegiate American football, calisthenics routines, and local university cup tournaments.",
+    "count": "8 Clubs",
+    "iconName": "Trophy",
+    "gradient": "from-[#10B981]/70 to-[#064e3b]/90",
+    "bgImage": "/spring_fest.png"
+  },
+  {
+    "title": "Christian & Service",
+    "description": "International mission mobilization, free local tutoring, and North Korean intercessions.",
+    "count": "8 Clubs",
+    "iconName": "HeartHandshake",
+    "gradient": "from-amber-600/70 to-amber-950/90",
+    "bgImage": "/handongbackground.jpg"
+  }
+]

@@ -1,0 +1,754 @@
+[
+  {
+    "id": 1,
+    "name": "Zizzy",
+    "category": "Performing Arts",
+    "description": "Engaged in dance performances, Zizzy creates cheerful spirits in Handong community as well as outside of the campus as a voluntary service in the villages.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "Engaged in dance performances, Zizzy creates cheerful spirits in Handong community as well as outside of the campus as a voluntary service in the villages.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 51,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Performing Arts", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@zizzy_hgu",
+      "kakao": "Zizzy Open Chat",
+      "youtube": "Zizzy TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "Zizzy",
+        "authorInitials": "ZI",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Handong Orchestra",
+    "category": "Performing Arts",
+    "description": "Handong Orchestra is the club that the string music club (Soloists) and the pipe music club (Winds) has generated. We engage in street music performances, and also perform in various regular events.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "Handong Orchestra is the club that the string music club (Soloists) and the pipe music club (Winds) has generated. We engage in street music performances, and also perform in various regular events.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 88,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Performing Arts", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@handongorchestra_hgu",
+      "kakao": "Handong Orchestra Open Chat",
+      "youtube": "Handong Orchestra TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "Handong Orchestra",
+        "authorInitials": "HA",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "MIC (Motion in Christ)",
+    "category": "Performing Arts",
+    "description": "Since 1996, MIC’s become famous for its passionate gospel ministry through spectacular dance performances.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "Since 1996, MIC’s become famous for its passionate gospel ministry through spectacular dance performances.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 58,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Performing Arts", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@micmotioninchrist_hgu",
+      "kakao": "MIC (Motion in Christ) Open Chat",
+      "youtube": "MIC (Motion in Christ) TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "MIC (Motion in Christ)",
+        "authorInitials": "MI",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Han Pung",
+    "category": "Performing Arts",
+    "description": "Our members are passionate learners of the Korean traditional music instruments.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "Our members are passionate learners of the Korean traditional music instruments.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 113,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Performing Arts", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@hanpung_hgu",
+      "kakao": "Han Pung Open Chat",
+      "youtube": "Han Pung TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "Han Pung",
+        "authorInitials": "HA",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Holy Rams",
+    "category": "Sports",
+    "description": "Holy Rams is the American Football club and we have four football practices every week.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "Holy Rams is the American Football club and we have four football practices every week.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 117,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Sports", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@holyrams_hgu",
+      "kakao": "Holy Rams Open Chat",
+      "youtube": "Holy Rams TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "Holy Rams",
+        "authorInitials": "HO",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Armstrong",
+    "category": "Sports",
+    "description": "Armstrong, which is the only marine sports club in Handong, is a boat club.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "Armstrong, which is the only marine sports club in Handong, is a boat club.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 117,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Sports", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@armstrong_hgu",
+      "kakao": "Armstrong Open Chat",
+      "youtube": "Armstrong TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "Armstrong",
+        "authorInitials": "AR",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "CCC (Campus Crusade for Christ)",
+    "category": "Christian Groups",
+    "description": "CCC holds chapel twice a week. We gather together every morning to worship God.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "CCC holds chapel twice a week. We gather together every morning to worship God.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 116,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Christian Groups", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@ccccampuscrusadeforchrist_hgu",
+      "kakao": "CCC (Campus Crusade for Christ) Open Chat",
+      "youtube": "CCC (Campus Crusade for Christ) TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "CCC (Campus Crusade for Christ)",
+        "authorInitials": "CC",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "IVF (Inter-Varsity Christian Fellowship)",
+    "category": "Christian Groups",
+    "description": "IVF is a Christian club which aims to evangelize the college campus.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "IVF is a Christian club which aims to evangelize the college campus.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 110,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Christian Groups", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@ivfintervarsitychristianfellowship_hgu",
+      "kakao": "IVF (Inter-Varsity Christian Fellowship) Open Chat",
+      "youtube": "IVF (Inter-Varsity Christian Fellowship) TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "IVF (Inter-Varsity Christian Fellowship)",
+        "authorInitials": "IV",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Reformist Book Reading Club",
+    "category": "Academic",
+    "description": "This reading club is focused on reading classical books of Christianity.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "This reading club is focused on reading classical books of Christianity.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 145,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Academic", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@reformistbookreadingclub_hgu",
+      "kakao": "Reformist Book Reading Club Open Chat",
+      "youtube": "Reformist Book Reading Club TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "Reformist Book Reading Club",
+        "authorInitials": "RE",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "name": "DUDUS",
+    "category": "Academic",
+    "description": "We study about creation-science and hold an academic conference each year.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "We study about creation-science and hold an academic conference each year.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 141,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Academic", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@dudus_hgu",
+      "kakao": "DUDUS Open Chat",
+      "youtube": "DUDUS TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "DUDUS",
+        "authorInitials": "DU",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Linux Hackers",
+    "category": "Computer",
+    "description": "We form several teams to study Linux, develop mobile applications, webpages, and embedded machines.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "We form several teams to study Linux, develop mobile applications, webpages, and embedded machines.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 100,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Computer", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@linuxhackers_hgu",
+      "kakao": "Linux Hackers Open Chat",
+      "youtube": "Linux Hackers TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "Linux Hackers",
+        "authorInitials": "LI",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "name": "CRA",
+    "category": "Computer",
+    "description": "We form groups to study C-programming and Java. One of our achievements was the development of the Intranet page.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "We form groups to study C-programming and Java. One of our achievements was the development of the Intranet page.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 59,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Computer", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@cra_hgu",
+      "kakao": "CRA Open Chat",
+      "youtube": "CRA TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "CRA",
+        "authorInitials": "CR",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "name": "GHOST",
+    "category": "Computer",
+    "description": "This club is established to study computer networks, security programs to prevent hacking and to develop software.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "This club is established to study computer networks, security programs to prevent hacking and to develop software.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 103,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Computer", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@ghost_hgu",
+      "kakao": "GHOST Open Chat",
+      "youtube": "GHOST TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "GHOST",
+        "authorInitials": "GH",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "name": "Giving Tree",
+    "category": "Social Service",
+    "description": "Giving Tree manages the store to assist foreign students and participate in social services.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "Giving Tree manages the store to assist foreign students and participate in social services.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 125,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Social Service", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@givingtree_hgu",
+      "kakao": "Giving Tree Open Chat",
+      "youtube": "Giving Tree TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "Giving Tree",
+        "authorInitials": "GI",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "name": "Peace Makers",
+    "category": "Social Service",
+    "description": "We are ‘peace educators’ in the middle schools located in Pohang and mentors for children in orphanages.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "We are ‘peace educators’ in the middle schools located in Pohang and mentors for children in orphanages.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 105,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Social Service", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@peacemakers_hgu",
+      "kakao": "Peace Makers Open Chat",
+      "youtube": "Peace Makers TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "Peace Makers",
+        "authorInitials": "PE",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "name": "Canvas",
+    "category": "Exhibition Arts",
+    "description": "Helping students to share creative ideas to produce great art work. We hold art exhibitions twice a year.",
+    "isActive": true,
+    "isAcceptingApplications": true,
+    "logo": "/zizzy.jpg",
+    "heroImage": "/handongbackground.jpg",
+    "shortDescription": "Helping students to share creative ideas to produce great art work. We hold art exhibitions twice a year.",
+    "mission": "To foster a collaborative ecosystem where students learn and grow.",
+    "coreValues": "Excellence, community, and service.",
+    "memberCount": 79,
+    "meetingTime": "Thursdays @ 6:00 PM",
+    "meetingLocation": "Oseok Hall, Room 402",
+    "fee": "₩20,000 / Semester",
+    "tags": ["Exhibition Arts", "Handong", "Community"],
+    "executives": [
+      {
+        "name": "Alex Kim",
+        "role": "President",
+        "avatar": "/zizzy.jpg"
+      },
+      {
+        "name": "Sarah Lee",
+        "role": "Vice President",
+        "avatar": "/zizzy.jpg"
+      }
+    ],
+    "socials": {
+      "instagram": "@canvas_hgu",
+      "kakao": "Canvas Open Chat",
+      "youtube": "Canvas TV"
+    },
+    "posts": [
+      {
+        "id": "p1",
+        "author": "Canvas",
+        "authorInitials": "CA",
+        "timeAgo": "2 hours ago",
+        "content": "Exciting news! We just wrapped up our planning session. Get ready for an amazing semester! 🚀",
+        "imageUrl": "/computerscience.jpg",
+        "likes": 24,
+        "comments": 5
+      }
+    ]
+  }
+]
