@@ -24,7 +24,7 @@ export function HeroProfile({
       {/* Banner */}
       <div className="relative h-64 w-full overflow-hidden rounded-t-[24px] bg-gray-200">
         <Image
-          src={bgImageUrl || '/handongbackground.jpg'}
+          src={bgImageUrl || '/concert.jpg'}
           alt={`${clubName} Background`}
           fill
           priority
@@ -41,7 +41,7 @@ export function HeroProfile({
             <div className="relative mb-4 flex h-32 w-32 items-center justify-center rounded-full border-2 border-white bg-white p-2 shadow-sm md:h-36 md:w-36">
               <div className="relative h-full w-full overflow-hidden rounded-full bg-white">
                 <Image
-                  src={logoUrl || '/handongunilogo.png'}
+                  src={logoUrl || '/concert.jpg'}
                   alt={`${clubName} Logo`}
                   fill
                   className="object-contain"
@@ -73,8 +73,8 @@ export function HeroProfile({
 
           {/* Right Side: Buttons */}
           <div className="mt-6 flex w-full flex-row gap-3 md:mt-4 md:w-1/3 md:justify-end">
-            <Button className="rounded-full border border-gray-300 bg-white px-6 font-bold text-gray-700 shadow-sm hover:bg-gray-50 hover:text-gray-900">
-              Contact
+            <Button className="rounded-full bg-[#10B981] px-6 font-bold text-white shadow-sm hover:bg-[#059669]">
+              Follow
             </Button>
             <Button className="rounded-full bg-[#3323cc] px-6 font-bold shadow-md hover:bg-[#2a1ca8]">
               Join Society
