@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { createClient } from '@/lib/supabase/server';
+import { cookies } from 'next/headers';
 
 export async function GET() {
-  // TODO: Replace this file read with actual database calls (e.g., Prisma or Drizzle query to PostgreSQL)
-  const filePath = path.join(process.cwd(), 'data', 'events.json');
-  const fileData = await fs.readFile(filePath, 'utf8');
-  const UPCOMING_EVENTS = JSON.parse(fileData);
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
 
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return NextResponse.json(UPCOMING_EVENTS);
+  const { data: events, error } = await supabase.from('events').select('*');
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(events);
 }
