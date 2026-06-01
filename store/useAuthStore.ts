@@ -1,18 +1,4 @@
 /**
- * ============================================================================
- * useAuthStore Store (Zustand Global Authentication State)
- * ============================================================================
- *
- * [WHAT IT IS FOR]
- * This is the global state management store for authentication and session status.
- * It manages the logged-in user's JSON Web Token (JWT), their role permission levels
- * (e.g. 'student' or 'executive'), and handles client-side authentication routines.
- *
- * [WHERE IT IS USED]
- * - Login form page (`app/login/page.tsx`) to trigger signs ins and set auth tokens.
- * - Signup form page (`app/signup/page.tsx`) to trigger registrations.
- * - Global layouts and conditional renders that check roles (e.g. showing "Sign In" vs "Dashboard").
- *
  * [STATE CONTRACT]
  * - token: (string | null) The active JWT authorization token string.
  * - role: ('student' | 'executive' | null) Authorization profile levels.
@@ -32,8 +18,9 @@ export type Role = 'student' | 'executive' | null;
 interface AuthState {
   token: string | null; // Current session JSON Web Token
   role: Role; // Authenticated user role profile
+  userName: string | null; // Authenticated user's name
   isLoading: boolean; // Flag tracking network flight status
-  setAuth: (token: string, role: Role) => void; // Directly updates session details
+  setAuth: (token: string, role: Role, userName?: string | null) => void; // Directly updates session details
   clearAuth: () => void; // Reset store parameters (logout action)
   login: (email: string, password: string) => Promise<Role>; // Validates user credentials
   register: (
@@ -50,13 +37,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   // ----------------------------------------------------
   token: null,
   role: null,
+  userName: null,
   isLoading: false,
 
   // ----------------------------------------------------
   // Sync Store Actions
   // ----------------------------------------------------
-  setAuth: (token, role) => set({ token, role }),
-  clearAuth: () => set({ token: null, role: null }),
+  setAuth: (token, role, userName = null) => set({ token, role, userName }),
+  clearAuth: () => set({ token: null, role: null, userName: null }),
 
   // ----------------------------------------------------
   // Async Authentication API Actions (Simulated)
@@ -69,7 +57,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw new Error('Password is required');
     }
 
-    // TODO: Replace this simulated login delay with an actual POST request to the backend:
     // const response = await axios.post('/api/auth/login', { email, password });
     // Simulate API response delay
     await new Promise((resolve) => setTimeout(resolve, 800));
@@ -81,7 +68,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         ? 'executive'
         : 'student';
 
-    set({ token: 'mock-jwt-token', role, isLoading: false });
+    // const response = await axios.post('/api/auth/login', { email, password });
+    // const userName = response.data.firstName + ' ' + response.data.lastName;
+    const userName = null;
+
+    set({ token: 'mock-jwt-token', role, userName, isLoading: false });
     return role;
   },
 
@@ -93,7 +84,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw new Error('Missing required registration details');
     }
 
-    // TODO: Replace this simulated signup delay with an actual POST request to the backend:
     // const response = await axios.post('/api/auth/signup', { email, password, firstName, lastName });
     // Simulate API response delay
     await new Promise((resolve) => setTimeout(resolve, 800));
@@ -105,7 +95,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         ? 'executive'
         : 'student';
 
-    set({ token: 'mock-jwt-token', role, isLoading: false });
+    const userName = `${firstName} ${lastName}`;
+
+    set({ token: 'mock-jwt-token', role, userName, isLoading: false });
     return role;
   },
 }));

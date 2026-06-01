@@ -114,15 +114,6 @@ When building any page that displays data, always follow these rules to make bac
    const [error, setError] = useState<string | null>(null)
 8. Never hardcode the backend URL — always use the axios instance in `lib/axios.ts`.
 
-## Comments Policy
-
-Every file must have:
-
-- A comment block at the top explaining what the file does
-- Inline comments explaining each section
-- TODO comments in API routes for real DB connections
-- Plain English comments that any developer can understand
-
 ## Reusable Components Rules
 
 Before building any new UI element, check app/components/ first to see if it already exists.
