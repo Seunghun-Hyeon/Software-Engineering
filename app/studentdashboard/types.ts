@@ -20,3 +20,10 @@ export interface SavedEvent {
   location: string;
   category: string;
 }
+
+export interface FavouriteClub {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+}

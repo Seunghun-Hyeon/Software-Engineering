@@ -5,8 +5,14 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/lib/utils';
 import { WelcomeSection } from './WelcomeSection';
 import { SavedEventsTab } from './SavedEventsTab';
+import { FavouriteClubsTab } from './FavouriteClubsTab';
 import { ApplicationsTab } from './ApplicationsTab';
-import type { StudentProfile, SavedEvent, Application } from './types';
+import type {
+  StudentProfile,
+  SavedEvent,
+  Application,
+  FavouriteClub,
+} from './types';
 import api from '@/lib/axios';
 
 export default function StudentDashboard() {
@@ -14,11 +20,12 @@ export default function StudentDashboard() {
   const { userName } = useAuthStore();
 
   // Establish state parameters for dynamic views
-  const [activeTab, setActiveTab] = useState<'saved_events' | 'applications'>(
-    'saved_events'
-  );
+  const [activeTab, setActiveTab] = useState<
+    'saved_events' | 'favourite_clubs' | 'applications'
+  >('saved_events');
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
+  const [favouriteClubs, setFavouriteClubs] = useState<FavouriteClub[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +40,11 @@ export default function StudentDashboard() {
         // Expected: GET /api/events/saved or similar
         const savedEventsResponse = await api.get('/events/saved');
         setSavedEvents(savedEventsResponse.data);
+
+        // TODO: Replace with GET /api/clubs/favourites when backend is connected
+        // Expected: GET /api/clubs/favourites or similar
+        const favouriteClubsResponse = await api.get('/clubs/favourites');
+        setFavouriteClubs(favouriteClubsResponse.data);
 
         // TODO:  endpoint for getting student applications
         // Expected: GET /api/applications or similar
@@ -65,7 +77,7 @@ export default function StudentDashboard() {
         {profile && <WelcomeSection profile={profile} />}
 
         {/* Tab Controls Bar */}
-        <div className="flex max-w-sm rounded-[18px] border border-white/40 bg-white/50 p-1.5 shadow-[0_4px_25px_rgba(0,0,0,0.02)] backdrop-blur-md">
+        <div className="flex max-w-md rounded-[18px] border border-white/40 bg-white/50 p-1.5 shadow-[0_4px_25px_rgba(0,0,0,0.02)] backdrop-blur-md">
           <button
             type="button"
             onClick={() => setActiveTab('saved_events')}
@@ -77,6 +89,18 @@ export default function StudentDashboard() {
             )}
           >
             Saved Events
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('favourite_clubs')}
+            className={cn(
+              'flex-1 rounded-[14px] px-5 py-2.5 text-sm font-bold transition-all duration-300 focus:outline-none',
+              activeTab === 'favourite_clubs'
+                ? 'bg-[#4F46E5] text-white shadow-md'
+                : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'
+            )}
+          >
+            Favourite Clubs
           </button>
           <button
             type="button"
@@ -103,9 +127,13 @@ export default function StudentDashboard() {
           </div>
         ) : (
           <div>
-            {activeTab === 'saved_events' ? (
+            {activeTab === 'saved_events' && (
               <SavedEventsTab events={savedEvents} />
-            ) : (
+            )}
+            {activeTab === 'favourite_clubs' && (
+              <FavouriteClubsTab clubs={favouriteClubs} />
+            )}
+            {activeTab === 'applications' && (
               <ApplicationsTab applications={applications} />
             )}
           </div>
