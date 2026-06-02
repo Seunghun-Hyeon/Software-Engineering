@@ -25,7 +25,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, AlertCircle, Sparkles } from 'lucide-react';
-import { BentoCard } from '@/app/components/BentoCard';
+import { BentoCard as Card } from '@/app/components/BentoCard';
 import { Input } from '@/app/components/Input';
 import { Button } from '@/app/components/Button';
 
@@ -87,6 +87,9 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  // Show role selection UI if executive signs in
+  const [showRoleSelection, setShowRoleSelection] = useState(false);
+
   // UI status feedback messages (errors & successes)
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -140,6 +143,93 @@ export default function LoginPage() {
     }
   };
 
+  if (showRoleSelection) {
+    return (
+      <div className={styles.pageContainer}>
+        {/* Premium background decorative blur shapes */}
+        <div className={cn(styles.bgBlob, styles.bgBlob1)} />
+        <div className={cn(styles.bgBlob, styles.bgBlob2)} />
+        <div className={cn(styles.bgBlob, styles.bgBlob3)} />
+
+        <main className="relative z-10 w-full max-w-[800px] px-4">
+          <div className="mb-10 flex flex-col items-center text-center">
+            <div className={styles.logoContainer}>
+              <Image
+                src="/handongunilogo.png"
+                alt="HGU Logo"
+                width={56}
+                height={56}
+                className="object-contain"
+                priority
+              />
+            </div>
+            <h1 className="font-display mt-2 text-3xl leading-tight font-extrabold tracking-tight text-gray-900 md:text-4xl">
+              Which account would you like to access?
+            </h1>
+            <p className="mt-3 max-w-md text-sm text-gray-500">
+              Choose the interface you want to work with.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Student Account Card */}
+            <Card className="transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(79,70,229,0.1)]">
+              <div className="flex min-h-[220px] flex-1 flex-col justify-between">
+                <div>
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-100/50 bg-indigo-50 text-xl">
+                    🎓
+                  </div>
+                  <h2 className="font-display text-xl font-bold text-gray-900">
+                    Student Account
+                  </h2>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-500">
+                    Browse clubs, save events, track applications
+                  </p>
+                </div>
+                <div className="mt-6">
+                  <Button
+                    type="button"
+                    onClick={() => router.push('/studentdashboard')}
+                  >
+                    Continue to Student
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            {/* Executive Account Card */}
+            <Card className="transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(16,185,129,0.1)]">
+              <div className="flex min-h-[220px] flex-1 flex-col justify-between">
+                <div>
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-100/50 bg-emerald-50 text-emerald-600">
+                    <Lock className="h-6 w-6" />
+                  </div>
+                  <h2 className="font-display text-xl font-bold text-gray-900">
+                    Executive Account
+                  </h2>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-500">
+                    Manage your club, review applications
+                  </p>
+                </div>
+                <div className="mt-6">
+                  <Button
+                    type="button"
+                    onClick={() => router.push('/admin')}
+                    className="bg-emerald-600 shadow-[0_4px_12px_rgba(16,185,129,0.2)] hover:bg-emerald-700 hover:shadow-[0_4px_20px_rgba(16,185,129,0.4)]"
+                  >
+                    Continue to Executive
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <div className={styles.footerText}>Handong ClubHub v1.0</div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.pageContainer}>
       {/* Premium background decorative blur shapes */}
@@ -169,7 +259,7 @@ export default function LoginPage() {
         </div>
 
         {/* Primary Glassmorphic Auth Form Bento Card */}
-        <BentoCard>
+        <Card>
           <div className={styles.cardHeader}>
             <h2 className={styles.cardTitle}>Sign In</h2>
             <p className={styles.cardSubtitle}>
@@ -254,7 +344,7 @@ export default function LoginPage() {
               Register
             </Link>
           </div>
-        </BentoCard>
+        </Card>
 
         {/* Client side version telemetry badge */}
         <div className={styles.footerText}>Handong ClubHub v1.0</div>
