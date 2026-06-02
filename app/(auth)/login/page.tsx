@@ -1,3 +1,20 @@
+/**
+ * ============================================================================
+ * Login Page (`/login` route page)
+ * ============================================================================
+ *
+ * [WHAT IT IS FOR]
+ * This is a clientside client component (`'use client'`) that renders the Sign In screen.
+ * It provides form fields for university email and password, executes input validation,
+ * interacts with the global Zustand `useAuthStore` to verify credentials, and redirects
+ * the user according to their account clearance levels.
+ *
+ * [ROUTE MAP]
+ * - Path: `/login`
+ * - Links to: `/signup` (Registration form)
+ * - Redirects to: `/admin` (for Club Executives) or `/studentdashboard` (for Students) on successful auth.
+ */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -7,12 +24,12 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, AlertCircle, Sparkles } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Sparkles } from 'lucide-react';
 import { BentoCard } from '@/app/components/BentoCard';
 import { Input } from '@/app/components/Input';
 import { Button } from '@/app/components/Button';
 
-// Semantic styling tokens and responsive class name groups
+// Styling tokens for glassmorphism layout, colorful floating blurs, and inputs
 const styles = {
   // Page container & backgrounds
   pageContainer:
@@ -47,6 +64,13 @@ const styles = {
   successIcon: 'animate-pulse text-emerald-500',
   errorIcon: 'text-red-500',
 
+  // Form Fields
+  formFieldWrapper: 'space-y-1.5',
+  inputLabel:
+    'ml-1 block text-xs font-semibold tracking-wider text-gray-500 uppercase',
+  inputLabelFlex: 'flex items-center justify-between px-1',
+  inputLabelLink: 'text-xs font-medium text-[#4F46E5] hover:underline',
+
   // Footer Links
   footerText:
     'mt-8 text-center font-sans text-xs font-medium tracking-wide text-gray-400',
@@ -54,36 +78,31 @@ const styles = {
   linkAction: 'font-semibold text-[#4F46E5] hover:underline',
 };
 
-export default function SignupPage() {
+export default function LoginPage() {
   const router = useRouter();
-  const { register, isLoading } = useAuthStore();
+  // Fetch authentication state and actions from the global Zustand store
+  const { login, isLoading } = useAuthStore();
 
-  // Form State
+  // Form State parameters
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
-  // UI States
+  // UI status feedback messages (errors & successes)
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Email format validation
+  // Email format validation helper (checks for presence of local character values and domain tags)
   const isValidEmail = (emailStr: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr);
   };
 
-  // Handle Register Submission
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
+  // Handles verification and submission when the Form triggers standard postback actions
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    if (!firstName || !lastName) {
-      setErrorMessage('Please enter your first and last name.');
-      return;
-    }
+    // Frontend sanity checks
     if (!email) {
       setErrorMessage('Please enter your university email address.');
       return;
@@ -93,45 +112,44 @@ export default function SignupPage() {
       return;
     }
     if (!password) {
-      setErrorMessage('Please create a password.');
-      return;
-    }
-    if (password.length < 6) {
-      setErrorMessage('Password must be at least 6 characters long.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match.');
+      setErrorMessage('Please enter your password.');
       return;
     }
 
     try {
-      await register(email, password, firstName, lastName);
-      setSuccessMessage('Registration successful! Redirecting...');
+      // Execute the API handler simulation from the auth store
+      const role = await login(email, password);
+      setSuccessMessage('Successfully signed in! Redirecting...');
 
-      // Redirect to studentdashboard
+      // Redirect user profiles to respective route levels after 1 second delay
       setTimeout(() => {
-        router.push('/studentdashboard');
+        if (role === 'executive') {
+          // Redirect to club manager dashboard
+          router.push('/manager');
+        } else {
+          // Redirect to student dashboard
+          router.push('/student');
+        }
       }, 1000);
     } catch (err) {
       const message =
         err instanceof Error
           ? err.message
-          : 'Registration failed. Please try again.';
+          : 'Failed to sign in. Please try again.';
       setErrorMessage(message);
     }
   };
 
   return (
     <div className={styles.pageContainer}>
-      {/* Premium background decorative shapes */}
+      {/* Premium background decorative blur shapes */}
       <div className={cn(styles.bgBlob, styles.bgBlob1)} />
       <div className={cn(styles.bgBlob, styles.bgBlob2)} />
       <div className={cn(styles.bgBlob, styles.bgBlob3)} />
 
-      {/* Main Glassmorphic Container */}
+      {/* Main Glassmorphic layout container wrapper */}
       <main className={styles.mainContainer}>
-        {/* Header (HGU logo & Title) */}
+        {/* Header containing Official Handong Global University Branding */}
         <div className={styles.headerContainer}>
           <div className={styles.logoContainer}>
             <Image
@@ -150,16 +168,16 @@ export default function SignupPage() {
           </p>
         </div>
 
-        {/* Auth Bento Card */}
+        {/* Primary Glassmorphic Auth Form Bento Card */}
         <BentoCard>
           <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>Register</h2>
+            <h2 className={styles.cardTitle}>Sign In</h2>
             <p className={styles.cardSubtitle}>
-              Create an account to join the community
+              Enter your credentials to access your account
             </p>
           </div>
 
-          {/* Feedback Messages */}
+          {/* AnimatePresence for smooth showing/hiding of validation warnings */}
           <AnimatePresence mode="wait">
             {errorMessage && (
               <motion.div
@@ -190,35 +208,11 @@ export default function SignupPage() {
             )}
           </AnimatePresence>
 
-          {/* Form Area */}
-          <form onSubmit={handleRegisterSubmit} className="space-y-4">
-            {/* First and Last Name (Side by Side) */}
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                id="reg-first"
-                type="text"
-                label="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="John"
-                disabled={isLoading}
-                icon={<User className="h-3.5 w-3.5" />}
-              />
-              <Input
-                id="reg-last"
-                type="text"
-                label="Last Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Doe"
-                disabled={isLoading}
-                icon={<User className="h-3.5 w-3.5" />}
-              />
-            </div>
-
-            {/* Email Field */}
+          {/* Login Form Fields */}
+          <form onSubmit={handleLoginSubmit} className="space-y-5">
+            {/* Email Field with validation bounds */}
             <Input
-              id="reg-email"
+              id="signin-email"
               type="email"
               label="University Email"
               value={email}
@@ -228,46 +222,41 @@ export default function SignupPage() {
               icon={<Mail className="h-4 w-4" />}
             />
 
-            {/* Password Field */}
-            <Input
-              id="reg-password"
-              type="password"
-              label="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Create a password"
-              disabled={isLoading}
-              icon={<Lock className="h-4 w-4" />}
-            />
+            {/* Password input section */}
+            <div className={styles.formFieldWrapper}>
+              <div className={styles.inputLabelFlex}>
+                <label htmlFor="signin-password" className={styles.inputLabel}>
+                  Password
+                </label>
+                <Link href="#" className={styles.inputLabelLink}>
+                  Forgot Password?
+                </Link>
+              </div>
+              <Input
+                id="signin-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                disabled={isLoading}
+                icon={<Lock className="h-4 w-4" />}
+              />
+            </div>
 
-            {/* Confirm Password Field */}
-            <Input
-              id="reg-confirm"
-              type="password"
-              label="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your password"
-              disabled={isLoading}
-              icon={<Lock className="h-4 w-4" />}
-            />
-
-            {/* Submit Button */}
-            <Button isLoading={isLoading} className="mt-2">
-              Register
-            </Button>
+            {/* Pill-shaped submit button displaying Framer Motion indicator during requests */}
+            <Button isLoading={isLoading}>Sign In</Button>
           </form>
 
-          {/* Redirect to Sign In */}
+          {/* Redirect to Register link text */}
           <div className={styles.linkText}>
-            Already have an account?{' '}
-            <Link href="/login" className={styles.linkAction}>
-              Sign In
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className={styles.linkAction}>
+              Register
             </Link>
           </div>
         </BentoCard>
 
-        {/* Footer info */}
+        {/* Client side version telemetry badge */}
         <div className={styles.footerText}>Handong ClubHub v1.0</div>
       </main>
     </div>

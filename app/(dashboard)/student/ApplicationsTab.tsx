@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Briefcase, CheckCircle2, Circle } from 'lucide-react';
-import { Application } from './types';
+import { Application } from '../../../types/types';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/app/components/Badge';
 

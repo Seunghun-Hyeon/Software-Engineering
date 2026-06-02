@@ -3,16 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/lib/utils';
-import { WelcomeSection } from './WelcomeSection';
-import { SavedEventsTab } from './SavedEventsTab';
-import { FavouriteClubsTab } from './FavouriteClubsTab';
-import { ApplicationsTab } from './ApplicationsTab';
+import { WelcomeSection } from '../WelcomeSection';
+import { SavedEventsTab } from '../SavedEventsTab';
+import { FavouriteClubsTab } from '../FavouriteClubsTab';
+import { ApplicationsTab } from '../ApplicationsTab';
 import type {
   StudentProfile,
   SavedEvent,
   Application,
   FavouriteClub,
-} from './types';
+} from '../../../../types/types';
 import api from '@/lib/axios';
 
 export default function StudentDashboard() {
