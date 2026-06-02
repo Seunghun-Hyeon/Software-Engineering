@@ -2,6 +2,8 @@
  * [STATE CONTRACT]
  * - token: (string | null) The active JWT authorization token string.
  * - role: ('student' | 'executive' | null) Authorization profile levels.
+ * - userName: (string | null) Authenticated user's name.
+ * - isExecutive: (boolean) Flag tracking whether user is an executive.
  * - isLoading: (boolean) Loading feedback state indicator during credential verification.
  * - setAuth: (function) Helper action to manually set token and role levels.
  * - clearAuth: (function) Action used during user logout to flush active states.
@@ -19,10 +21,20 @@ interface AuthState {
   token: string | null; // Current session JSON Web Token
   role: Role; // Authenticated user role profile
   userName: string | null; // Authenticated user's name
+  isExecutive: boolean; // Flag tracking whether user is an executive
   isLoading: boolean; // Flag tracking network flight status
-  setAuth: (token: string, role: Role, userName?: string | null) => void; // Directly updates session details
+  setAuth: (
+    token: string,
+    role: Role,
+    userName?: string | null,
+    isExecutive?: boolean
+  ) => void; // Directly updates session details
   clearAuth: () => void; // Reset store parameters (logout action)
-  login: (email: string, password: string) => Promise<Role>; // Validates user credentials
+  login: (
+    email: string,
+    password: string,
+    isExecutiveMock?: boolean
+  ) => Promise<Role>; // Validates user credentials
   register: (
     email: string,
     password: string,
@@ -38,18 +50,21 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   role: null,
   userName: null,
+  isExecutive: false,
   isLoading: false,
 
   // ----------------------------------------------------
   // Sync Store Actions
   // ----------------------------------------------------
-  setAuth: (token, role, userName = null) => set({ token, role, userName }),
-  clearAuth: () => set({ token: null, role: null, userName: null }),
+  setAuth: (token, role, userName = null, isExecutive = false) =>
+    set({ token, role, userName, isExecutive }),
+  clearAuth: () =>
+    set({ token: null, role: null, userName: null, isExecutive: false }),
 
   // ----------------------------------------------------
   // Async Authentication API Actions (Simulated)
   // ----------------------------------------------------
-  login: async (email, password) => {
+  login: async (email, password, isExecutiveMock = false) => {
     set({ isLoading: true });
 
     // Validate password parameter to use it in simulated logic
@@ -68,11 +83,19 @@ export const useAuthStore = create<AuthState>((set) => ({
         ? 'executive'
         : 'student';
 
-    // const response = await axios.post('/api/auth/login', { email, password });
+    // TODO: isExecutive will come from backend API response after login
+    const isExecutive = isExecutiveMock || role === 'executive';
+
     // const userName = response.data.firstName + ' ' + response.data.lastName;
     const userName = null;
 
-    set({ token: 'mock-jwt-token', role, userName, isLoading: false });
+    set({
+      token: 'mock-jwt-token',
+      role,
+      userName,
+      isExecutive,
+      isLoading: false,
+    });
     return role;
   },
 
@@ -97,7 +120,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     const userName = `${firstName} ${lastName}`;
 
-    set({ token: 'mock-jwt-token', role, userName, isLoading: false });
+    set({
+      token: 'mock-jwt-token',
+      role,
+      userName,
+      isExecutive: role === 'executive',
+      isLoading: false,
+    });
     return role;
   },
 }));
