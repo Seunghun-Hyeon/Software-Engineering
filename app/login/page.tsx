@@ -12,7 +12,7 @@
  * [ROUTE MAP]
  * - Path: `/login`
  * - Links to: `/signup` (Registration form)
- * - Redirects to: `/admin` (for Club Executives) or `/dashboard` (for Students) on successful auth.
+ * - Redirects to: `/admin` (for Club Executives) or `/studentdashboard` (for Students) on successful auth.
  */
 
 'use client';
@@ -128,7 +128,7 @@ export default function LoginPage() {
           router.push('/admin');
         } else {
           // TODO: Build and redirect to real student homepage dashboard
-          router.push('/dashboard');
+          router.push('/studentdashboard');
         }
       }, 1000);
     } catch (err) {

@@ -60,7 +60,7 @@ export default function RootLayout({
       {/* Root body element with min-height and flex column configuration */}
       <body className="flex min-h-full flex-col">
         <Header />
-        <main className="flex-grow">{children}</main>
+        <main className="grow">{children}</main>
         <Footer />
       </body>
     </html>
