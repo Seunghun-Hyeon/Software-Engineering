@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClubHub — Executive Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --indigo: #4F46E5;
+      --indigo-light: #EEF2FF;
+      --indigo-dark: #3730A3;
+      --emerald: #10B981;
+      --amber: #F59E0B;
+      --rose: #F43F5E;
+      --sidebar-bg: #F8F9FA;
+      --card-bg: #FFFFFF;
+      --page-bg: #F3F4F6;
+      --text-main: #111827;
+      --text-sub: #6B7280;
+      --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--page-bg); color: var(--text-main); }
+
+    /* Sidebar Navigation Links */
+    .nav-link { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 14px; font-size: 14px; font-weight: 500; color: var(--text-sub); text-decoration: none; transition: all .18s; cursor: pointer; }
+    .nav-link:hover { background: #F3F4F6; color: var(--text-main); }
+    .nav-link.active { background: var(--indigo); color: white; box-shadow: 0 4px 14px rgba(79,70,229,.25); }
+    .nav-link i { width: 18px; text-align: center; }
+
+    /* Fade-in animation for dynamic page content */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up { animation: fadeUp .3s ease both; }
+
+    /* Scrollbar customization */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 99px; }
+  </style>
+</head>
+<body>
+
+<div class="flex min-h-screen">
+
+  <aside class="w-[230px] shrink-0 bg-[#F8F9FA] border-r border-gray-200 flex flex-col justify-between p-5 sticky top-0 h-screen overflow-y-auto">
+    <div>
+      <div class="flex items-center gap-2.5 mb-7">
+        <div class="w-8 h-8 bg-[#4F46E5] rounded-xl flex items-center justify-center text-white text-sm shadow-sm">
+          <i class="fa-solid fa-shapes"></i>
+        </div>
+        <span class="text-lg font-bold text-[#1E1B4B]">ClubHub</span>
+      </div>
+
+      <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 mb-5 shadow-sm">
+        <div class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
+          <i class="fa-solid fa-user-tie text-sm"></i>
+        </div>
+        <div>
+          <div class="text-sm font-bold text-gray-800 leading-tight">Club Admin</div>
+          <div class="text-xs text-gray-400">Executive Suite</div>
+        </div>
+      </div>
+
+      <nav class="space-y-1" id="main-nav">
+        <div class="nav-link active" onclick="loadPage('DashBoard')">
+          <i class="fa-solid fa-gauge"></i><span>Dashboard</span>
+        </div>
+        <div class="nav-link" onclick="loadPage('Analytics')">
+          <i class="fa-solid fa-chart-pie"></i><span>Analytics</span>
+        </div>
+        <div class="nav-link" onclick="loadPage('Member')">
+          <i class="fa-solid fa-users"></i><span>Members</span>
+        </div>
+        <div class="nav-link" onclick="loadPage('Applications')">
+          <i class="fa-solid fa-file-invoice"></i><span>Applications</span>
+        </div>
+        <div class="nav-link" onclick="loadPage('Settings')">
+          <i class="fa-solid fa-gear"></i><span>Settings</span>
+        </div>
+      </nav>
+    </div>
+
+    <button class="w-full py-3 bg-[#4F46E5] hover:bg-indigo-700 text-white font-semibold rounded-xl transition shadow-lg shadow-indigo-100 text-sm flex items-center justify-center gap-2">
+      <i class="fa-solid fa-plus text-xs"></i>Create Event
+    </button>
+  </aside>
+
+  <main class="flex-1 overflow-y-auto" id="content-viewport">
+    </main>
+</div>
+
+<script>
+  // 페이지 맵핑 정의 (내비게이션 인덱스 매칭용)
+  const pageIndices = { 'DashBoard': 0, 'Analytics': 1, 'Member': 2, 'Applications': 3, 'Settings': 4 };
+
+  /**
+   * 컴포넌트를 동적으로 로드하고 스크립트를 실행하는 함수
+   */
+  async function loadPage(pageName) {
+    const viewport = document.getElementById('content-viewport');
+    
+    try {
+      // 1. HTML 컴포넌트 패치
+      const response = await fetch(`components/${pageName}.html`);
+      if (!response.ok) throw new Error(`Failed to load ${pageName}.html`);
+      
+      const htmlContent = await response.text();
+      
+      // 2. 뷰포트에 콘텐츠 삽입 및 애니메이션 클래스 추가
+      viewport.innerHTML = htmlContent;
+      if (viewport.firstElementChild) {
+        viewport.firstElementChild.classList.add('fade-up');
+      }
+
+      // 3. 내비게이션 활성화 상태 업데이트
+      const navLinks = document.querySelectorAll('#main-nav .nav-link');
+      navLinks.forEach(link => link.classList.remove('active'));
+      navLinks[pageIndices[pageName]].classList.add('active');
+
+      // 4. 삽입된 HTML 내부의 script 태그 추출 및 강제 재실행
+      const scripts = viewport.querySelectorAll('script');
+      scripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        if (oldScript.src) {
+          newScript.src = oldScript.src;
+        } else {
+          newScript.text = oldScript.textContent;
+        }
+        document.body.appendChild(newScript);
+        oldScript.remove(); // 기존 태그 제거
+      });
+
+    } catch (error) {
+      console.error("Error loading component:", error);
+      viewport.innerHTML = `<div class="p-8 text-rose-500 font-medium">Error loading section: ${error.message}</div>`;
+    }
+  }
+
+  // 초기 실행 시 대시보드 로드
+  document.addEventListener('DOMContentLoaded', () => {
+    loadPage('DashBoard');
+  });
+</script>
+</body>
+</html>
