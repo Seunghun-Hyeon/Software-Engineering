@@ -86,7 +86,6 @@ export default function LoginPage() {
   // Form State parameters
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isExecutiveCheckbox, setIsExecutiveCheckbox] = useState(false);
 
   // Show role selection UI if executive signs in
   const [showRoleSelection, setShowRoleSelection] = useState(false);
@@ -121,10 +120,13 @@ export default function LoginPage() {
     }
 
     try {
-      // Execute the API handler simulation from the auth store, passing our mock checkbox
-      const role = await login(email, password, isExecutiveCheckbox);
+      // Execute the API handler simulation from the auth store
+      await login(email, password);
 
-      if (isExecutiveCheckbox || role === 'executive') {
+      // Check the fresh isExecutive value from the Zustand store
+      const userIsExecutive = useAuthStore.getState().isExecutive;
+
+      if (userIsExecutive) {
         setSuccessMessage('Successfully signed in!');
         setTimeout(() => {
           setShowRoleSelection(true);
@@ -333,23 +335,6 @@ export default function LoginPage() {
                 disabled={isLoading}
                 icon={<Lock className="h-4 w-4" />}
               />
-            </div>
-
-            {/* Executive Mock Simulation Checkbox */}
-            <div className="flex items-center gap-2.5 px-1 py-1">
-              <input
-                id="is-executive-checkbox"
-                type="checkbox"
-                checked={isExecutiveCheckbox}
-                onChange={(e) => setIsExecutiveCheckbox(e.target.checked)}
-                className="h-4 w-4 cursor-pointer rounded border-gray-300 text-[#4F46E5] focus:ring-[#4F46E5]"
-              />
-              <label
-                htmlFor="is-executive-checkbox"
-                className="cursor-pointer text-xs font-semibold text-gray-500 select-none"
-              >
-                I am also an executive (Mock Simulation)
-              </label>
             </div>
 
             {/* Pill-shaped submit button displaying Framer Motion indicator during requests */}

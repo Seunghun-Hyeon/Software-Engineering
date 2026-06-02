@@ -1,16 +1,3 @@
-/**
- * [STATE CONTRACT]
- * - token: (string | null) The active JWT authorization token string.
- * - role: ('student' | 'executive' | null) Authorization profile levels.
- * - userName: (string | null) Authenticated user's name.
- * - isExecutive: (boolean) Flag tracking whether user is an executive.
- * - isLoading: (boolean) Loading feedback state indicator during credential verification.
- * - setAuth: (function) Helper action to manually set token and role levels.
- * - clearAuth: (function) Action used during user logout to flush active states.
- * - login: (function) Async handler for verifying credentials and fetching profiles.
- * - register: (function) Async handler for user profile creation.
- */
-
 import { create } from 'zustand';
 
 // Define the role types supported by our application access control list
@@ -30,11 +17,7 @@ interface AuthState {
     isExecutive?: boolean
   ) => void; // Directly updates session details
   clearAuth: () => void; // Reset store parameters (logout action)
-  login: (
-    email: string,
-    password: string,
-    isExecutiveMock?: boolean
-  ) => Promise<Role>; // Validates user credentials
+  login: (email: string, password: string) => Promise<Role>; // Validates user credentials
   register: (
     email: string,
     password: string,
@@ -64,7 +47,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   // ----------------------------------------------------
   // Async Authentication API Actions (Simulated)
   // ----------------------------------------------------
-  login: async (email, password, isExecutiveMock = false) => {
+  login: async (email, password) => {
     set({ isLoading: true });
 
     // Validate password parameter to use it in simulated logic
@@ -84,7 +67,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         : 'student';
 
     // TODO: isExecutive will come from backend API response after login
-    const isExecutive = isExecutiveMock || role === 'executive';
+    const isExecutive = false;
 
     // const userName = response.data.firstName + ' ' + response.data.lastName;
     const userName = null;
