@@ -109,9 +109,9 @@ export default function SignupPage() {
       await register(email, password, firstName, lastName);
       setSuccessMessage('Registration successful! Redirecting...');
 
-      // Redirect to dashboard
+      // Redirect to studentdashboard
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/studentdashboard');
       }, 1000);
     } catch (err) {
       const message =
