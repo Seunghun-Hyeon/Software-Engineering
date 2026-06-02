@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { StudentProfile } from './types';
+import { StudentProfile } from '../../../types/types';
 
 interface WelcomeSectionProps {
   profile: StudentProfile;

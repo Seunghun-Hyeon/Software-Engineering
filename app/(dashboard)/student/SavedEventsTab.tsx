@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Bell, MapPin, Calendar, Clock, BellOff } from 'lucide-react';
-import { SavedEvent } from './types';
+import { SavedEvent } from '../../../types/types';
 import { Badge } from '@/app/components/Badge';
 
 interface SavedEventsTabProps {

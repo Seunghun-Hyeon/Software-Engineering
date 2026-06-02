@@ -121,23 +121,19 @@ export default function LoginPage() {
 
     try {
       // Execute the API handler simulation from the auth store
-      await login(email, password);
+      const role = await login(email, password);
+      setSuccessMessage('Successfully signed in! Redirecting...');
 
-      // Check the fresh isExecutive value from the Zustand store
-      const userIsExecutive = useAuthStore.getState().isExecutive;
-
-      if (userIsExecutive) {
-        setSuccessMessage('Successfully signed in!');
-        setTimeout(() => {
-          setShowRoleSelection(true);
-          setSuccessMessage(null);
-        }, 1000);
-      } else {
-        setSuccessMessage('Successfully signed in! Redirecting...');
-        setTimeout(() => {
-          router.push('/studentdashboard');
-        }, 1000);
-      }
+      // Redirect user profiles to respective route levels after 1 second delay
+      setTimeout(() => {
+        if (role === 'executive') {
+          // Redirect to club manager dashboard
+          router.push('/manager');
+        } else {
+          // Redirect to student dashboard
+          router.push('/student');
+        }
+      }, 1000);
     } catch (err) {
       const message =
         err instanceof Error

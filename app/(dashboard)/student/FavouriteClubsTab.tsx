@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Heart, HeartOff, ArrowRight } from 'lucide-react';
-import { FavouriteClub } from './types';
+import { Heart, ArrowRight } from 'lucide-react';
+import { FavouriteClub } from '../../../types/types';
 import { Badge } from '@/app/components/Badge';
 
 interface FavouriteClubsTabProps {
