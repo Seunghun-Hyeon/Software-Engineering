@@ -56,46 +56,95 @@ Follow the official Next.js project structure guidelines: https://nextjs.org/doc
 ## Current File Structure
 
 app/
-api/
-categories/route.ts # API for categories
-clubs/route.ts # API for clubs
-events/route.ts # API for events
-components/ # Reusable UI components
-Button.tsx # Pill-shaped primary button
-BentoCard.tsx # Glassmorphism bento card container
-Input.tsx # Form input with indigo focus glow
-EventCard.tsx # Upcoming events card
-Badge.tsx # Unified label badge (e.g. ACADEMIC, FREE)
-FeatureTile.tsx # Feature highlight tile
-CategoryCard.tsx # Explore Interests category card
-Header.tsx # Sticky frosted-glass navigation bar
-Footer.tsx # Page footer with HGU logo and copyright
+(auth)/ # Route group for auth pages
 login/
 page.tsx # /login route
 signup/
 page.tsx # /signup route
+(dashboard)/ # Route group for dashboard pages
+manager/
+dashboard/
+page.tsx # /manager/dashboard route
+AnalyticsTab.tsx
+ApplicationsTab.tsx
+DashboardTab.tsx
+MembersTab.tsx
+SettingsTab.tsx
+student/
+dashboard/
+page.tsx # /student/dashboard route
+ApplicationsTab.tsx
+FavouriteClubsTab.tsx
+SavedEventsTab.tsx
+WelcomeSection.tsx
+api/
+categories/
+route.ts
 clubs/
-page.tsx # /clubs directory route
-layout.tsx # Global layout
-page.tsx # Main homepage route
+route.ts
+events/
+route.ts
+clubs/
+[id]/
+tabs/ # Club detail page tabs
+EventsTab.tsx
+GalleryTab.tsx
+InfoTab.tsx
+NewsTab.tsx
+OverviewTab.tsx
+ClubContent.tsx
+HeroProfile.tsx
+page.tsx
+PostFeed.tsx
+Sidebar.tsx
+SidebarWidget.tsx
+types.ts
+page.tsx # /clubs route
+components/ # Reusable UI components
+Badge.tsx
+BentoCard.tsx
+Button.tsx
+CategoryCard.tsx
+ClubFilters.tsx
+EventCard.tsx
+FeatureTile.tsx
+Footer.tsx
+Header.tsx
+Input.tsx
+Pagination.tsx
+events/
+BentoView.tsx
+EventFilters.tsx
+page.tsx
+StructuredView.tsx
+ViewToggle.tsx
+homepage/
+ExploreInterestsSection.tsx
+FeaturesSection.tsx
+HeroSection.tsx
+UpcomingEventsSection.tsx
+favicon.ico
+globals.css
+layout.tsx
+page.tsx # Landing page /
 data/
-categories.json # JSON mock data for categories
-clubs.json # JSON mock data for clubs
-events.json # JSON mock data for events
-types/
-category.ts # Type for Category
-club.ts # Type for Club
-event.ts # Type for Event
-store/
-useAuthStore.ts # Zustand auth store (token, role)
+categories.json
+clubs.json
+events.json
 lib/
-utils.ts # cn() utility function
-axios.ts # Axios base configuration
-public/
-handongunilogo.png # HGU official logo
-handongbackground.png # HGU university background for hero
-zizzy.jpg # Zizzy club image
-computerscience.jpg # Computer category image
+supabase/
+client.ts
+middleware.ts
+server.ts
+axios.ts
+utils.ts
+store/
+useAuthStore.ts
+types/
+category.ts
+club.ts
+event.ts
+types.ts
 
 ## Backend Connection Rules
 

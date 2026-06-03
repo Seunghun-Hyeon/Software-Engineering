@@ -50,7 +50,7 @@ export function HeroSection() {
             className="object-cover"
           />
           {/* Stitch Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
+          <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/20 to-black/60" />
         </div>
 
         <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center">

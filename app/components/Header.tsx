@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -7,7 +8,13 @@ import { cn } from '@/lib/utils';
 
 export function Header({ activeLabel }: { activeLabel?: string }) {
   const router = useRouter();
-  const { token, userName, clearAuth } = useAuthStore();
+  const { token, userName, activeRole, clearAuth } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const handle = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(handle);
+  }, []);
 
   const handleSignOut = () => {
     clearAuth();
@@ -56,7 +63,9 @@ export function Header({ activeLabel }: { activeLabel?: string }) {
           </Link>
         </nav>
         <div className="flex items-center gap-4">
-          {!token ? (
+          {!mounted ? (
+            <div className="h-9 w-[150px]" aria-hidden="true" />
+          ) : !token ? (
             <>
               <Link
                 href="/login"
@@ -78,12 +87,16 @@ export function Header({ activeLabel }: { activeLabel?: string }) {
           ) : (
             <>
               <Link
-                href="/studentdashboard"
+                href={
+                  activeRole === 'executive'
+                    ? '/manager/dashboard'
+                    : '/student/dashboard'
+                }
                 className={cn(
                   'flex items-center gap-2 text-sm font-semibold text-gray-700 transition-colors hover:text-[#4F46E5]'
                 )}
               >
-                <span>My Profile</span>
+                <span>{userName || 'My Profile'}</span>
               </Link>
               <button
                 onClick={handleSignOut}
