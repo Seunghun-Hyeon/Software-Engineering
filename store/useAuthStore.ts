@@ -68,18 +68,19 @@ export const useAuthStore = create<AuthState>()(
           throw new Error('Password is required');
         }
 
+        // TODO: Replace this simulated login delay with an actual POST request to the backend:
         // const response = await axios.post('/api/auth/login', { email, password });
         // Simulate API response delay
         await new Promise((resolve) => setTimeout(resolve, 800));
 
-        // Determine role and executive status based on email (mock behavior)
-        const isExecutive =
-          email.toLowerCase().includes('admin') ||
-          email.toLowerCase().includes('executive');
+        // TODO: Replace with actual isExecutive value from backend API response
+        // const response = await axios.post('/api/auth/login', { email, password });
+        // set({ isExecutive: response.data.isExecutive })
+        // TODO: isExecutive will come from backend API response after login is connected
+        const isExecutive = false;
         const role: Role = isExecutive ? 'executive' : 'student';
 
-        // TODO: isExecutive will come from backend API response
-
+        // TODO: Replace hardcoded userName with actual name from backend API response
         // const userName = response.data.firstName + ' ' + response.data.lastName;
         const userName = null;
 
@@ -102,16 +103,15 @@ export const useAuthStore = create<AuthState>()(
           throw new Error('Missing required registration details');
         }
 
+        // TODO: Replace this simulated signup delay with an actual POST request to the backend:
         // const response = await axios.post('/api/auth/signup', { email, password, firstName, lastName });
         // Simulate API response delay
         await new Promise((resolve) => setTimeout(resolve, 800));
 
-        // Determine role based on email containing "admin" or "executive" (mock behavior)
-        const role: Role =
-          email.toLowerCase().includes('admin') ||
-          email.toLowerCase().includes('executive')
-            ? 'executive'
-            : 'student';
+        // TODO: Replace with actual role and isExecutive value from backend API response
+        // const response = await axios.post('/api/auth/signup', { email, password, firstName, lastName });
+        const role: Role = 'student';
+        const isExecutive = false;
 
         const userName = `${firstName} ${lastName}`;
 
@@ -119,7 +119,7 @@ export const useAuthStore = create<AuthState>()(
           token: 'mock-jwt-token',
           role,
           userName,
-          isExecutive: role === 'executive',
+          isExecutive,
           isLoading: false,
           activeRole: 'student',
         });
