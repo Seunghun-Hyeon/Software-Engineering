@@ -89,7 +89,7 @@ export default function ClubsDirectoryPage() {
                 </div>
 
                 {/* Text Section */}
-                <div className="flex flex-grow flex-col p-6 pt-8">
+                <div className="flex grow flex-col p-6 pt-8">
                   <div className="mb-4 flex items-start justify-between">
                     <Badge>{club.category}</Badge>
                     {club.isActive && <Badge variant="active">Active</Badge>}
@@ -99,7 +99,7 @@ export default function ClubsDirectoryPage() {
                     {club.name}
                   </h3>
 
-                  <p className="mb-6 line-clamp-2 flex-grow text-sm text-gray-600">
+                  <p className="mb-6 line-clamp-2 grow text-sm text-gray-600">
                     {club.description}
                   </p>
 

@@ -1,17 +1,3 @@
-/**
- * ============================================================================
- * Root Layout Component
- * ============================================================================
- *
- * [WHAT IT IS FOR]
- * This is the root layout component that sets up the high-level HTML document
- * structure, injects standard fonts, configures meta tags for search engines (SEO),
- * and loads the global CSS stylesheets. It wraps all page templates rendered inside the app.
- *
- * [ROUTE MAP]
- * - Applies globally to all page paths (e.g. `/homepage`, `/login`, `/signup`).
- */
-
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Poppins, Inter } from 'next/font/google';
 import './globals.css';

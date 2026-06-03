@@ -34,7 +34,7 @@ function CustomSelect({
   }, []);
 
   return (
-    <div className="group relative z-[100]" ref={containerRef}>
+    <div className="group relative z-100" ref={containerRef}>
       <Icon className="pointer-events-none absolute top-1/2 left-4 z-10 h-5 w-5 -translate-y-1/2 text-gray-400" />
       <button
         type="button"
@@ -56,8 +56,8 @@ function CustomSelect({
       </button>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] left-0 z-[100] w-full overflow-hidden rounded-[24px] border border-white/30 bg-white p-2 shadow-[0_10px_30px_rgba(0,0,0,0.1)] backdrop-blur-xl">
-          <div className="max-h-60 [scrollbar-width:none] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+        <div className="absolute top-[calc(100%+8px)] left-0 z-100 w-full overflow-hidden rounded-[24px] border border-white/30 bg-white p-2 shadow-[0_10px_30px_rgba(0,0,0,0.1)] backdrop-blur-xl">
+          <div className="[scrollbar-none] max-h-60 overflow-y-auto [&::-webkit-scrollbar]:hidden">
             {options.map((option) => (
               <button
                 key={option}
@@ -120,7 +120,7 @@ export function EventFilters() {
         </div>
 
         {/* Week Toggle / Dropdown */}
-        <div className="z-[100] flex flex-1 flex-col gap-2">
+        <div className="z-100 flex flex-1 flex-col gap-2">
           <label className="ml-1 text-sm font-semibold text-gray-500">
             Academic Week
           </label>

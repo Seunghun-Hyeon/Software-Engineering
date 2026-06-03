@@ -3,16 +3,10 @@
  * Login Page (`/login` route page)
  * ============================================================================
  *
- * [WHAT IT IS FOR]
- * This is a clientside client component (`'use client'`) that renders the Sign In screen.
- * It provides form fields for university email and password, executes input validation,
- * interacts with the global Zustand `useAuthStore` to verify credentials, and redirects
- * the user according to their account clearance levels.
- *
  * [ROUTE MAP]
  * - Path: `/login`
  * - Links to: `/signup` (Registration form)
- * - Redirects to: `/admin` (for Club Executives) or `/studentdashboard` (for Students) on successful auth.
+ * - Redirects to: `/manager/dashboard` (for Club Executives) or `/student/dashboard` (for Students) on successful auth.
  */
 
 'use client';
@@ -29,59 +23,10 @@ import { BentoCard as Card } from '@/app/components/BentoCard';
 import { Input } from '@/app/components/Input';
 import { Button } from '@/app/components/Button';
 
-// Styling tokens for glassmorphism layout, colorful floating blurs, and inputs
-const styles = {
-  // Page container & backgrounds
-  pageContainer:
-    'relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F9FAFB] px-4 py-12 font-sans selection:bg-[#4F46E5]/20',
-  bgBlob: 'pointer-events-none absolute rounded-full blur-[120px]',
-  bgBlob1: 'top-[-10%] left-[-10%] h-[500px] w-[500px] bg-indigo-200/40',
-  bgBlob2: 'right-[-10%] bottom-[-10%] h-[500px] w-[500px] bg-emerald-100/40',
-  bgBlob3: 'top-[30%] right-[20%] h-[300px] w-[300px] bg-violet-100/50',
-
-  // Core containers
-  mainContainer: 'relative z-10 w-full max-w-[480px]',
-  headerContainer: 'mb-8 flex flex-col items-center text-center',
-  logoContainer:
-    'relative mb-3 flex h-16 w-16 items-center justify-center rounded-full border border-white/50 bg-white/80 p-2 shadow-[0_8px_20px_rgba(0,0,0,0.03)] backdrop-blur-sm',
-  logoText:
-    'font-sans text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase',
-  titleText:
-    'font-display mt-1 text-4xl font-extrabold tracking-tight text-[#4F46E5]',
-  subtitleText: 'mt-2 max-w-xs font-sans text-sm text-gray-500',
-
-  // Bento Card Layout
-  cardHeader: 'mb-6 text-center',
-  cardTitle: 'font-display text-xl font-bold text-gray-800',
-  cardSubtitle: 'mt-1 text-xs text-gray-500',
-
-  // Feedback Banners
-  feedbackContainer:
-    'mb-5 flex items-start gap-3 rounded-2xl border p-4 text-xs font-medium',
-  errorBanner: 'border-red-100 bg-red-50 text-red-600',
-  successBanner: 'border-emerald-100 bg-emerald-50 text-emerald-600',
-  feedbackIcon: 'h-4 w-4 shrink-0',
-  successIcon: 'animate-pulse text-emerald-500',
-  errorIcon: 'text-red-500',
-
-  // Form Fields
-  formFieldWrapper: 'space-y-1.5',
-  inputLabel:
-    'ml-1 block text-xs font-semibold tracking-wider text-gray-500 uppercase',
-  inputLabelFlex: 'flex items-center justify-between px-1',
-  inputLabelLink: 'text-xs font-medium text-[#4F46E5] hover:underline',
-
-  // Footer Links
-  footerText:
-    'mt-8 text-center font-sans text-xs font-medium tracking-wide text-gray-400',
-  linkText: 'mt-6 text-center text-sm text-gray-500',
-  linkAction: 'font-semibold text-[#4F46E5] hover:underline',
-};
-
 export default function LoginPage() {
   const router = useRouter();
   // Fetch authentication state and actions from the global Zustand store
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, isExecutive, setActiveRole } = useAuthStore();
 
   // Form State parameters
   const [email, setEmail] = useState('');
@@ -121,17 +66,20 @@ export default function LoginPage() {
 
     try {
       // Execute the API handler simulation from the auth store
-      const role = await login(email, password);
+      await login(email, password);
       setSuccessMessage('Successfully signed in! Redirecting...');
 
       // Redirect user profiles to respective route levels after 1 second delay
       setTimeout(() => {
-        if (role === 'executive') {
-          // Redirect to club manager dashboard
-          router.push('/manager');
+        const isExec = useAuthStore.getState().isExecutive;
+        if (isExec) {
+          // Show the role selection screen
+          setShowRoleSelection(true);
         } else {
-          // Redirect to student dashboard
-          router.push('/student');
+          // If user is not executive, automatically set activeRole to 'student' after login
+          setActiveRole('student');
+          // Redirect directly to student dashboard
+          router.push('/student/dashboard');
         }
       }, 1000);
     } catch (err) {
@@ -145,15 +93,15 @@ export default function LoginPage() {
 
   if (showRoleSelection) {
     return (
-      <div className={styles.pageContainer}>
+      <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F9FAFB] px-4 py-12 font-sans selection:bg-[#4F46E5]/20">
         {/* Premium background decorative blur shapes */}
-        <div className={cn(styles.bgBlob, styles.bgBlob1)} />
-        <div className={cn(styles.bgBlob, styles.bgBlob2)} />
-        <div className={cn(styles.bgBlob, styles.bgBlob3)} />
+        <div className="pointer-events-none absolute top-[-10%] left-[-10%] h-[500px] w-[500px] rounded-full bg-indigo-200/40 blur-[120px]" />
+        <div className="pointer-events-none absolute right-[-10%] bottom-[-10%] h-[500px] w-[500px] rounded-full bg-emerald-100/40 blur-[120px]" />
+        <div className="pointer-events-none absolute top-[30%] right-[20%] h-[300px] w-[300px] rounded-full bg-violet-100/50 blur-[120px]" />
 
-        <main className="relative z-10 w-full max-w-[800px] px-4">
+        <main className="relative z-10 w-full max-w-[800px] px-4 pt-12">
           <div className="mb-10 flex flex-col items-center text-center">
-            <div className={styles.logoContainer}>
+            <div className="relative mb-3 flex h-16 w-16 items-center justify-center rounded-full border border-white/50 bg-white/80 p-2 shadow-[0_8px_20px_rgba(0,0,0,0.03)] backdrop-blur-sm">
               <Image
                 src="/handongunilogo.png"
                 alt="HGU Logo"
@@ -189,7 +137,10 @@ export default function LoginPage() {
                 <div className="mt-6">
                   <Button
                     type="button"
-                    onClick={() => router.push('/studentdashboard')}
+                    onClick={() => {
+                      setActiveRole('student');
+                      router.push('/student/dashboard');
+                    }}
                   >
                     Continue to Student
                   </Button>
@@ -214,7 +165,10 @@ export default function LoginPage() {
                 <div className="mt-6">
                   <Button
                     type="button"
-                    onClick={() => router.push('/admin')}
+                    onClick={() => {
+                      setActiveRole('executive');
+                      router.push('/manager/dashboard');
+                    }}
                     className="bg-emerald-600 shadow-[0_4px_12px_rgba(16,185,129,0.2)] hover:bg-emerald-700 hover:shadow-[0_4px_20px_rgba(16,185,129,0.4)]"
                   >
                     Continue to Executive
@@ -224,24 +178,26 @@ export default function LoginPage() {
             </Card>
           </div>
 
-          <div className={styles.footerText}>Handong ClubHub v1.0</div>
+          <div className="mt-8 text-center font-sans text-xs font-medium tracking-wide text-gray-400">
+            Handong ClubHub v1.0
+          </div>
         </main>
       </div>
     );
   }
 
   return (
-    <div className={styles.pageContainer}>
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F9FAFB] px-4 py-12 font-sans selection:bg-[#4F46E5]/20">
       {/* Premium background decorative blur shapes */}
-      <div className={cn(styles.bgBlob, styles.bgBlob1)} />
-      <div className={cn(styles.bgBlob, styles.bgBlob2)} />
-      <div className={cn(styles.bgBlob, styles.bgBlob3)} />
+      <div className="pointer-events-none absolute top-[-10%] left-[-10%] h-[500px] w-[500px] rounded-full bg-indigo-200/40 blur-[120px]" />
+      <div className="pointer-events-none absolute right-[-10%] bottom-[-10%] h-[500px] w-[500px] rounded-full bg-emerald-100/40 blur-[120px]" />
+      <div className="pointer-events-none absolute top-[30%] right-[20%] h-[300px] w-[300px] rounded-full bg-violet-100/50 blur-[120px]" />
 
       {/* Main Glassmorphic layout container wrapper */}
-      <main className={styles.mainContainer}>
+      <main className="relative z-10 w-full max-w-[480px] pt-12">
         {/* Header containing Official Handong Global University Branding */}
-        <div className={styles.headerContainer}>
-          <div className={styles.logoContainer}>
+        <div className="mb-8 flex flex-col items-center text-center">
+          <div className="relative mb-3 flex h-16 w-16 items-center justify-center rounded-full border border-white/50 bg-white/80 p-2 shadow-[0_8px_20px_rgba(0,0,0,0.03)] backdrop-blur-sm">
             <Image
               src="/handongunilogo.png"
               alt="HGU Logo"
@@ -251,18 +207,24 @@ export default function LoginPage() {
               priority
             />
           </div>
-          <div className={styles.logoText}>Handong Global University</div>
-          <h1 className={styles.titleText}>CLUBHUB</h1>
-          <p className={styles.subtitleText}>
+          <div className="font-sans text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase">
+            Handong Global University
+          </div>
+          <h1 className="font-display mt-1 text-4xl font-extrabold tracking-tight text-[#4F46E5]">
+            CLUBHUB
+          </h1>
+          <p className="mt-2 max-w-xs font-sans text-sm text-gray-500">
             Connect, discover, and lead in university student life
           </p>
         </div>
 
         {/* Primary Glassmorphic Auth Form Bento Card */}
         <Card>
-          <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>Sign In</h2>
-            <p className={styles.cardSubtitle}>
+          <div className="mb-6 text-center">
+            <h2 className="font-display text-xl font-bold text-gray-800">
+              Sign In
+            </h2>
+            <p className="mt-1 text-xs text-gray-500">
               Enter your credentials to access your account
             </p>
           </div>
@@ -274,11 +236,9 @@ export default function LoginPage() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className={cn(styles.feedbackContainer, styles.errorBanner)}
+                className="mb-5 flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 text-xs font-medium text-red-600"
               >
-                <AlertCircle
-                  className={cn(styles.feedbackIcon, styles.errorIcon)}
-                />
+                <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
                 <span>{errorMessage}</span>
               </motion.div>
             )}
@@ -288,11 +248,9 @@ export default function LoginPage() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className={cn(styles.feedbackContainer, styles.successBanner)}
+                className="mb-5 flex items-start gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-xs font-medium text-emerald-600"
               >
-                <Sparkles
-                  className={cn(styles.feedbackIcon, styles.successIcon)}
-                />
+                <Sparkles className="h-4 w-4 shrink-0 animate-pulse text-emerald-500" />
                 <span>{successMessage}</span>
               </motion.div>
             )}
@@ -313,12 +271,18 @@ export default function LoginPage() {
             />
 
             {/* Password input section */}
-            <div className={styles.formFieldWrapper}>
-              <div className={styles.inputLabelFlex}>
-                <label htmlFor="signin-password" className={styles.inputLabel}>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between px-1">
+                <label
+                  htmlFor="signin-password"
+                  className="ml-1 block text-xs font-semibold tracking-wider text-gray-500 uppercase"
+                >
                   Password
                 </label>
-                <Link href="#" className={styles.inputLabelLink}>
+                <Link
+                  href="#"
+                  className="text-xs font-medium text-[#4F46E5] hover:underline"
+                >
                   Forgot Password?
                 </Link>
               </div>
@@ -338,16 +302,21 @@ export default function LoginPage() {
           </form>
 
           {/* Redirect to Register link text */}
-          <div className={styles.linkText}>
+          <div className="mt-6 text-center text-sm text-gray-500">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className={styles.linkAction}>
+            <Link
+              href="/signup"
+              className="font-semibold text-[#4F46E5] hover:underline"
+            >
               Register
             </Link>
           </div>
         </Card>
 
         {/* Client side version telemetry badge */}
-        <div className={styles.footerText}>Handong ClubHub v1.0</div>
+        <div className="mt-8 text-center font-sans text-xs font-medium tracking-wide text-gray-400">
+          Handong ClubHub v1.0
+        </div>
       </main>
     </div>
   );
