@@ -1,0 +1,97 @@
+<style>
+  .card { background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border); }
+  .stat-card { background: var(--card-bg); border-radius: 18px; border: 1px solid var(--border); padding: 20px; transition: box-shadow .2s; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #D1FAE5; color: #059669; }
+  .badge-blue  { background: #DBEAFE; color: #2563EB; }
+  .badge-amber { background: #FEF3C7; color: #D97706; }
+  .badge-rose  { background: #FFE4E6; color: #E11D48; }
+  .badge-purple{ background: #EDE9FE; color: #7C3AED; }
+  .prog-bar { height: 6px; background: #E5E7EB; border-radius: 99px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 99px; background: var(--indigo); transition: width .8s cubic-bezier(.4,0,.2,1); }
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th { font-size: 11px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: .06em; padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+  .data-table td { padding: 13px 14px; font-size: 13.5px; border-bottom: 1px solid #F9FAFB; vertical-align: middle; }
+</style>
+
+<div id="page-members" class="p-8">
+  <div class="flex justify-between items-start mb-7">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Member Management</h1>
+      <p class="text-sm text-gray-500 mt-1">Review and manage your club's community.</p>
+    </div>
+    <div class="flex gap-3">
+      <div class="relative">
+        <span class="absolute inset-y-0 left-3 flex items-center text-gray-400 text-sm"><i class="fa-solid fa-magnifying-glass"></i></span>
+        <input type="text" placeholder="Search members..." class="pl-9 pr-4 py-2.5 w-56 bg-white border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm">
+      </div>
+      <button class="flex items-center gap-2 px-4 py-2.5 bg-[#4F46E5] text-white rounded-full text-sm font-semibold shadow-md shadow-indigo-100 hover:bg-indigo-700 transition">
+        <i class="fa-solid fa-user-plus text-xs"></i>Add Member
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-4 gap-4 mb-6">
+    <div class="stat-card text-center">
+      <div class="text-2xl font-bold text-gray-900">1,284</div>
+      <div class="text-xs text-gray-500 mt-1">Total Members</div>
+      <div class="flex gap-1 justify-center mt-2"><span class="badge badge-green">Active</span><span class="badge badge-blue">Pending</span><span class="badge badge-rose">Inactive</span></div>
+    </div>
+    <div class="stat-card text-center">
+      <div class="text-2xl font-bold text-indigo-600">847</div>
+      <div class="text-xs text-gray-500 mt-1">Active Members</div>
+      <div class="prog-bar mt-2"><div class="prog-fill" style="width:66%"></div></div>
+    </div>
+    <div class="stat-card text-center"><div class="text-2xl font-bold text-amber-500">216</div><div class="text-xs text-gray-500 mt-1">Pending Members</div></div>
+    <div class="stat-card text-center"><div class="text-2xl font-bold text-gray-400">221</div><div class="text-xs text-gray-500 mt-1">Inactive Members</div></div>
+  </div>
+
+  <div class="card">
+    <div class="p-5 border-b border-gray-100 flex gap-2">
+      <button class="px-4 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-lg">All Members</button>
+      <button class="px-4 py-1.5 bg-white border border-gray-200 text-gray-500 text-xs font-semibold rounded-lg hover:bg-gray-50">Active</button>
+      <button class="px-4 py-1.5 bg-white border border-gray-200 text-gray-500 text-xs font-semibold rounded-lg hover:bg-gray-50">Pending</button>
+      <button class="px-4 py-1.5 bg-white border border-gray-200 text-gray-500 text-xs font-semibold rounded-lg hover:bg-gray-50">Inactive</button>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>MEMBER NAME</th><th>MAJOR</th><th>ROLE</th><th>JOIN DATE</th><th>ACTIONS</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">AB</div><div><div class="font-semibold text-gray-800">Alex Boudreau</div><div class="text-xs text-gray-400">alex@boudreau.edu</div></div></div></td>
+          <td class="text-gray-600">Computer Science</td><td><span class="badge badge-amber">Club President</span></td><td class="text-gray-400 text-sm">Sep 12, 2022</td>
+          <td><button class="text-xs text-indigo-600 font-semibold hover:underline mr-3">Edit</button><button class="text-xs text-rose-500 font-semibold hover:underline">Remove</button></td>
+        </tr>
+        <tr>
+          <td><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-xs font-bold">MA</div><div><div class="font-semibold text-gray-800">Maria Alvarez</div><div class="text-xs text-gray-400">m.alvarez@school.edu</div></div></div></td>
+          <td class="text-gray-600">Media Business</td><td><span class="badge badge-blue">Treasurer</span></td><td class="text-gray-400 text-sm">Oct 30, 2022</td>
+          <td><button class="text-xs text-indigo-600 font-semibold hover:underline mr-3">Edit</button><button class="text-xs text-rose-500 font-semibold hover:underline">Remove</button></td>
+        </tr>
+        <tr>
+          <td><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold">HK</div><div><div class="font-semibold text-gray-800">Hana Kang</div><div class="text-xs text-gray-400">hana.k@studio.edu</div></div></div></td>
+          <td class="text-gray-600">Visual Design</td><td><span class="badge badge-purple">Committee</span></td><td class="text-gray-400 text-sm">Jun 15, 2023</td>
+          <td><button class="text-xs text-indigo-600 font-semibold hover:underline mr-3">Edit</button><button class="text-xs text-rose-500 font-semibold hover:underline">Remove</button></td>
+        </tr>
+        <tr>
+          <td><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">LL</div><div><div class="font-semibold text-gray-800">Lily Lawson</div><div class="text-xs text-gray-400">lily.l@campus.edu</div></div></div></td>
+          <td class="text-gray-600">Political Science</td><td><span class="badge badge-green">Member</span></td><td class="text-gray-400 text-sm">Mar 07, 2023</td>
+          <td><button class="text-xs text-indigo-600 font-semibold hover:underline mr-3">Edit</button><button class="text-xs text-rose-500 font-semibold hover:underline">Remove</button></td>
+        </tr>
+        <tr>
+          <td><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold">RP</div><div><div class="font-semibold text-gray-800">Ryan Park</div><div class="text-xs text-gray-400">ryan.p@labs.edu</div></div></div></td>
+          <td class="text-gray-600">Data Science</td><td><span class="badge badge-rose">Applicant</span></td><td class="text-gray-400 text-sm">Apr 19, 2023</td>
+          <td><button class="text-xs text-indigo-600 font-semibold hover:underline mr-3">Approve</button><button class="text-xs text-rose-500 font-semibold hover:underline">Reject</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="p-4 flex justify-between items-center border-t border-gray-100">
+      <div class="text-xs text-gray-400">Showing 5 of 1,284 members</div>
+      <div class="flex gap-1">
+        <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 text-xs">‹</button>
+        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-semibold">1</button>
+        <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 text-xs">2</button>
+        <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 text-xs">3</button>
+        <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 text-xs">›</button>
+      </div>
+    </div>
+  </div>
+</div>
