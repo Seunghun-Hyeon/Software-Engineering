@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, BookOpen, ChevronRight } from 'lucide-react';
 import { Button } from '@/app/components/Button';
@@ -20,32 +21,55 @@ const CATEGORY_FILTER_OPTIONS = [
 ];
 
 export function HeroSection() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const targetUrl = `/directory?`;
-    const params = [];
-    if (searchQuery.trim()) {
-      params.push(`search=${encodeURIComponent(searchQuery)}`);
+    const query = searchQuery.trim();
+    setSearchError(null);
+
+    // If search query is empty, redirect with category only (if selected)
+    if (query === '') {
+      const queryParts = [];
+      if (selectedCategory && selectedCategory !== 'All Categories') {
+        queryParts.push(`category=${encodeURIComponent(selectedCategory)}`);
+      }
+      const queryString =
+        queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
+      router.push(`/clubs${queryString}`);
+      return;
     }
-    if (selectedCategory !== 'All Categories') {
-      params.push(`category=${encodeURIComponent(selectedCategory)}`);
+
+    // If query has less than 3 characters, show error message
+    if (query.length < 3) {
+      setSearchError('Please enter at least 3 characters to search');
+      return;
     }
-    window.location.href = targetUrl + params.join('&');
+
+    // Redirect with search and category
+    const queryParts = [];
+    queryParts.push(`search=${encodeURIComponent(query)}`);
+    if (selectedCategory && selectedCategory !== 'All Categories') {
+      queryParts.push(`category=${encodeURIComponent(selectedCategory)}`);
+    }
+    const queryString = `?${queryParts.join('&')}`;
+    router.push(`/clubs${queryString}`);
   };
 
   return (
-    <section className="mx-auto mt-12 max-w-7xl px-6 py-12 lg:px-8">
-      <div className="relative flex min-h-[560px] w-full flex-col items-center justify-center overflow-hidden rounded-3xl p-6 text-center text-white shadow-sm md:p-12">
+    <section className="mx-auto mt-12 max-w-7xl overflow-visible px-6 py-12 lg:px-8">
+      <div className="relative flex min-h-[560px] w-full flex-col items-center justify-center overflow-visible rounded-3xl p-6 text-center text-white shadow-sm md:p-12">
         {/* Absolute Background university backdrop image */}
-        <div className="absolute inset-0 z-0 select-none">
+        <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl select-none">
           <Image
             src="/concert2.jpg"
-            alt="Handong Campus Background"
+            alt="Concert"
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority
             className="object-cover"
           />
@@ -78,9 +102,12 @@ export function HeroSection() {
                 <div className="relative z-10 flex w-full grow items-center">
                   <Input
                     type="text"
-                    placeholder="Search clubs, events, or hobbies..."
+                    placeholder="Search clubs, or events..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      if (searchError) setSearchError(null);
+                    }}
                     className="w-full border-0 bg-transparent p-0 text-sm font-medium text-gray-900 placeholder-gray-500 shadow-none focus:border-0 focus:bg-transparent focus:ring-0 focus:outline-none"
                   />
                 </div>
@@ -118,7 +145,7 @@ export function HeroSection() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 12 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute top-[calc(100%+16px)] left-0 z-50 flex w-64 flex-col gap-1 rounded-2xl border border-white/50 bg-white/95 p-2 shadow-2xl backdrop-blur-xl"
+                      className="absolute top-[calc(100%+16px)] left-0 z-100 flex w-64 flex-col gap-1 rounded-2xl border border-white/50 bg-white/95 p-2 shadow-2xl backdrop-blur-xl"
                     >
                       {CATEGORY_FILTER_OPTIONS.map((opt) => (
                         <button
@@ -151,6 +178,11 @@ export function HeroSection() {
                 Search
               </Button>
             </form>
+            {searchError && (
+              <p className="mx-auto mt-2 max-w-2xl px-6 text-left text-sm font-semibold text-red-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
+                {searchError}
+              </p>
+            )}
           </div>
         </div>
       </div>

@@ -69,7 +69,7 @@ export default function LoginPage() {
       await login(email, password);
       setSuccessMessage('Successfully signed in! Redirecting...');
 
-      // Redirect user profiles to respective route levels after 1 second delay
+      // Redirect user profiles to respective route levels: if isExecutive is false, redirect to /student/dashboard. If true, show role selection screen.
       setTimeout(() => {
         const isExec = useAuthStore.getState().isExecutive;
         if (isExec) {

@@ -1,46 +1,3 @@
-/**
- * ============================================================================
- * EventCard Component (Dynamic Multi-Template Upcoming Events Card)
- * ============================================================================
- *
- * [WHAT IT IS FOR]
- * This is a highly flexible, multi-style event card component that represents
- * campus activities. It supports three distinct visual layouts ('image-top',
- * 'text-only', and 'photo-bg') to keep grids looking organic, dynamic, and
- * content-rich without visual fatigue.
- *
- * [WHAT IT LOOKS LIKE]
- * Depending on the styleType prop:
- * 1. 'image-top': Standard glassmorphism card with a 16:9 aspect image header,
- *    floating category badges, descriptive text, and a primary "Remind Me" action button.
- * 2. 'text-only': Bento-styled card featuring text and icons without images. It places
- *    emphasis on clock metrics, host detail, and includes a capacity indicator.
- * 3. 'photo-bg': Full-bleed card where the event image occupies the background.
- *    It uses dark gradients for text readability and presents floating actions at the
- *    bottom including ticket purchases or event reminders.
- *
- * [WHERE IT IS USED]
- * - Homepage: Featured in the grid under the "Upcoming Events" section.
- *
- * [PROPS CONTRACT]
- * - event: (EventProps) The data structure modeling the event database object.
- *   - id: Unique event ID.
- *   - title: Name of the event.
- *   - host: Hosting club name.
- *   - date: Calendar date.
- *   - time: Event start/end hours.
- *   - location: Geographic or building venue.
- *   - description: Longer descriptive paragraph.
- *   - image: Public file path to the illustration image.
- *   - requiresTickets: Boolean indicating if entry requires purchasing a ticket.
- *   - categoryBadge: Theme label (e.g. "ACADEMIC", "FREE", "SOCIAL").
- *   - styleType: Design template option ('image-top' | 'text-only' | 'photo-bg').
- *   - tabPeriod: Filter group classification ('this-week' | 'next-month').
- * - onRemindClick: (function) Optional callback handler triggered when requesting notifications.
- * - onTicketsClick: (function) Optional callback handler triggered when booking tickets.
- * - className: (string) Custom CSS classes to customize layout positioning.
- */
-
 import React from 'react';
 import Image from 'next/image';
 import { Calendar, MapPin, Clock } from 'lucide-react';
@@ -102,14 +59,15 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
         >
           <div>
             {/* Aspect ratio constrained image wrapper with subtle zoom hover interaction */}
-            <div className="group relative aspect-[16/9] w-full overflow-hidden bg-gray-50 shadow-sm select-none">
+            <div className="group relative aspect-video w-full overflow-hidden bg-gray-50 shadow-sm select-none">
               <Image
                 src={event.image}
                 alt={event.title}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-102"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/10 to-transparent" />
 
               {/* Badges placed on top of the visual content */}
               <div className="absolute top-4 left-4 z-10 flex gap-1.5">
@@ -227,10 +185,11 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
             src={event.image}
             alt={event.title}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover transition-transform duration-750 select-none group-hover:scale-102"
           />
           {/* Strong gradient wash overlay to maximize text legibility */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/55 to-black/85" />
+          <div className="absolute inset-0 bg-linear-to-b from-black/25 via-black/55 to-black/85" />
 
           {/* Content container aligned absolute on top of background visual */}
           <div className="absolute inset-0 z-10 flex flex-col justify-between p-6 text-left text-white select-none">
@@ -264,13 +223,13 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
                   <div className="flex gap-2">
                     <button
                       onClick={handleTickets}
-                      className="flex-grow cursor-pointer rounded-full border-0 bg-[#4F46E5] py-2 text-xs font-black text-white shadow-md transition-all duration-300 outline-none hover:bg-[#4338CA]"
+                      className="grow cursor-pointer rounded-full border-0 bg-[#4F46E5] py-2 text-xs font-black text-white shadow-md transition-all duration-300 outline-none hover:bg-[#4338CA]"
                     >
                       Buy Tickets
                     </button>
                     <button
                       onClick={handleRemind}
-                      className="flex-grow cursor-pointer rounded-full border border-0 border-white/25 bg-white/10 py-2 text-xs font-black text-white backdrop-blur-md transition-all duration-300 outline-none hover:bg-white/20"
+                      className="grow cursor-pointer rounded-full border border-white/25 bg-white/10 py-2 text-xs font-black text-white backdrop-blur-md transition-all duration-300 outline-none hover:bg-white/20"
                     >
                       Remind Me
                     </button>
@@ -278,7 +237,7 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
                 ) : (
                   <button
                     onClick={handleRemind}
-                    className="w-full cursor-pointer rounded-full border border-0 border-white/25 bg-white/10 py-2 text-xs font-black text-white backdrop-blur-md transition-all duration-300 outline-none hover:bg-white/20"
+                    className="w-full cursor-pointer rounded-full border border-white/25 bg-white/10 py-2 text-xs font-black text-white backdrop-blur-md transition-all duration-300 outline-none hover:bg-white/20"
                   >
                     Remind Me
                   </button>

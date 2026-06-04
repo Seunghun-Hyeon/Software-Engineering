@@ -1,42 +1,13 @@
 'use client';
 
-/**
- * ============================================================================
- * Input Component (Form Field Text/Password Input Control)
- * ============================================================================
- *
- * [WHAT IT IS FOR]
- * This is the standard, reusable text input component. It automatically handles
- * top-aligned form labels, left-side helper icons, and provides a built-in
- * show/hide toggle trigger button for password input fields.
- *
- * [WHAT IT LOOKS LIKE]
- * A clean, rounded input bar (16px border-radius) with a light cool-gray fill
- * (#F3F4F6). On focus, the background turns to pure white, and an ambient
- * 2px indigo glow shadow outlines the input boundary (focus:ring-[#4F46E5]).
- *
- * [WHERE IT IS USED]
- * - Email / Password entry fields (login/signup pages)
- * - Hero section search bar (homepage)
- * - Newsletter subscribe email forms (footer)
- * - Custom query filter inputs
- *
- * [PROPS CONTRACT]
- * - label: (string) Optional text label printed above the input field.
- * - icon: (ReactNode) Optional Lucide helper icon displayed on the left inside the input.
- * - type: (string) Input type attribute (text, email, password, etc.).
- * - className: (string) Used for custom CSS overrides (e.g. transparent background).
- * - All standard HTML input attributes (placeholder, value, onChange, etc.)
- */
-
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff } from 'lucide-react';
 
 // Define the properties contract for our Input component
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string; // Optional: Displays a text label above the input
-  icon?: React.ReactNode; // Optional: Renders an icon inside the input on the left
+  label?: string;
+  icon?: React.ReactNode;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(

@@ -8,14 +8,18 @@ import { cn } from '@/lib/utils';
 import type { Event } from '@/types/event';
 
 interface UpcomingEventsSectionProps {
-  events: Event[];
-  isLoadingEvents: boolean;
+  events?: Event[];
+  isLoadingEvents?: boolean;
 }
 
 export function UpcomingEventsSection({
-  events,
-  isLoadingEvents,
+  events: propEvents,
+  isLoadingEvents: propIsLoading,
 }: UpcomingEventsSectionProps) {
+  // TODO: Connect to GET /api/events when backend adds this endpoint
+  const events: Event[] = [];
+  const isLoadingEvents = false;
+
   const [activeEventTab, setActiveEventTab] = useState<
     'this-week' | 'next-month'
   >('this-week');
@@ -70,6 +74,12 @@ export function UpcomingEventsSection({
       {isLoadingEvents ? (
         <div className="flex h-64 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#4F46E5] border-t-transparent"></div>
+        </div>
+      ) : filteredEvents.length === 0 ? (
+        <div className="flex h-64 flex-col items-center justify-center rounded-[24px] border border-white/50 bg-white/70 p-8 text-center shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md">
+          <p className="font-sans text-base font-bold text-gray-700">
+            No upcoming events yet. Check back soon!
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-3">

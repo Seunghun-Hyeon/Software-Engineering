@@ -1,31 +1,30 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { Heart, ArrowRight } from 'lucide-react';
-import { FavouriteClub } from '../../../types/types';
+export interface FavouriteClub {
+  id: string;
+  name: string;
+  categories: {
+    name: string;
+  };
+  description?: string;
+}
 import { Badge } from '@/app/components/Badge';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface FavouriteClubsTabProps {
   clubs: FavouriteClub[];
 }
 
 export function FavouriteClubsTab({ clubs }: FavouriteClubsTabProps) {
-  // TODO: Replace with GET /api/clubs/favourites when backend is connected
+  // TODO: Replace with GET /api/clubs/favourites when backend adds this endpoint
+  const { favouriteClubIds, toggleFavouriteClub } = useAuthStore();
 
-  // Keep track of locally unfavourited clubs for rich interactive simulation
-  const [unfavouritedClubs, setUnfavouritedClubs] = useState<
-    Record<string, boolean>
-  >({});
-
-  const toggleFavourite = (id: string) => {
-    setUnfavouritedClubs((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  const activeClubs = clubs.filter((club) => !unfavouritedClubs[club.id]);
+  const activeClubs = clubs.filter((club) =>
+    favouriteClubIds.includes(club.id)
+  );
 
   if (activeClubs.length === 0) {
     return (
@@ -62,11 +61,16 @@ export function FavouriteClubsTab({ clubs }: FavouriteClubsTabProps) {
               {/* Top Category Badge and Interactive Favourite Heart Toggle */}
               <div className="mb-4 flex items-start justify-between gap-4">
                 <div>
-                  <Badge variant="indigo">{club.category}</Badge>
+                  <Badge variant="indigo">
+                    {club.categories?.name || 'Uncategorized'}
+                  </Badge>
                 </div>
                 <button
                   type="button"
-                  onClick={() => toggleFavourite(club.id)}
+                  onClick={() => {
+                    // TODO: Replace with GET /api/clubs/favourites when backend adds this endpoint
+                    toggleFavouriteClub(club.id);
+                  }}
                   className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-100/50 bg-white/80 text-gray-400 shadow-sm transition-all duration-200 hover:bg-red-50 hover:text-red-500 focus:outline-none active:scale-95"
                   title="Remove from favourites"
                 >

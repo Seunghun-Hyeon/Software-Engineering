@@ -1,32 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Bell, MapPin, Calendar, Clock, BellOff } from 'lucide-react';
+import React from 'react';
+import { Bookmark, MapPin, Calendar, Clock } from 'lucide-react';
 import { SavedEvent } from '../../../types/types';
 import { Badge } from '@/app/components/Badge';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface SavedEventsTabProps {
   events: SavedEvent[];
 }
 
 export function SavedEventsTab({ events }: SavedEventsTabProps) {
-  // TODO: Replace with GET /api/events/saved when backend is connected
+  // TODO: Replace with GET /api/events/saved when backend adds this endpoint
+  const { savedEventIds, toggleSavedEvent } = useAuthStore();
 
-  // Keep track of which event IDs have notifications muted locally for rich interaction
-  const [mutedEvents, setMutedEvents] = useState<Record<string, boolean>>({});
+  const activeEvents = events.filter((event) =>
+    savedEventIds.includes(String(event.id))
+  );
 
-  const toggleMute = (id: string) => {
-    setMutedEvents((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  if (events.length === 0) {
+  if (activeEvents.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-[24px] border border-dashed border-gray-300 bg-white/40 px-6 py-20 text-center backdrop-blur-sm">
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-          <Bell className="h-8 w-8" />
+          <Bookmark className="h-8 w-8" />
         </div>
         <h3 className="font-display mb-1 text-lg font-bold text-gray-900">
           No saved events yet
@@ -41,32 +37,27 @@ export function SavedEventsTab({ events }: SavedEventsTabProps) {
   return (
     <div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {events.map((event) => {
-          const isMuted = mutedEvents[event.id];
-
+        {activeEvents.map((event) => {
           return (
             <div
               key={event.id}
               className="group relative flex flex-col justify-between overflow-hidden rounded-[24px] border border-white/30 bg-white/70 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)]"
             >
-              {/* Top Category Badge and Interactive Bell Notification */}
+              {/* Top Category Badge and Interactive Saved Bookmark Toggle */}
               <div className="mb-4 flex items-start justify-between gap-4">
                 <div>
                   <Badge variant="indigo">{event.category}</Badge>
                 </div>
                 <button
                   type="button"
-                  onClick={() => toggleMute(event.id)}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-100/50 bg-white/80 text-gray-400 shadow-sm transition-all duration-200 hover:bg-[#4F46E5]/10 hover:text-[#4F46E5] focus:outline-none active:scale-95"
-                  title={
-                    isMuted ? 'Turn on notifications' : 'Mute notifications'
-                  }
+                  onClick={() => {
+                    // TODO: Replace with GET /api/events/saved when backend adds this endpoint
+                    toggleSavedEvent(String(event.id));
+                  }}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-100/50 bg-white/80 text-gray-400 shadow-sm transition-all duration-200 hover:bg-indigo-50 hover:text-[#4F46E5] focus:outline-none active:scale-95"
+                  title="Remove from saved events"
                 >
-                  {isMuted ? (
-                    <BellOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Bell className="h-5 w-5 fill-[#4F46E5]/5 text-[#4F46E5]" />
-                  )}
+                  <Bookmark className="h-5 w-5 fill-[#4F46E5] text-[#4F46E5]" />
                 </button>
               </div>
 
