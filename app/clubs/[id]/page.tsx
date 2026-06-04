@@ -3,9 +3,16 @@ import Link from 'next/link';
 import { Header } from '@/app/components/Header';
 import { HeroProfile } from '@/app/clubs/[id]/HeroProfile';
 import { ClubContent } from '@/app/clubs/[id]/ClubContent';
+import { headers } from 'next/headers';
 
-import fs from 'fs/promises';
-import path from 'path';
+interface ApiClub {
+  id: string;
+  name: string;
+  categories: { name: string } | null;
+  description?: string;
+  logoUrl?: string;
+  coverImageUrl?: string;
+}
 
 export default async function ClubProfilePage({
   params,
@@ -14,17 +21,32 @@ export default async function ClubProfilePage({
 }) {
   const { id } = await params;
 
-  // Read clubs.json
-  const filePath = path.join(process.cwd(), 'data', 'clubs.json');
-  const fileData = await fs.readFile(filePath, 'utf8');
-  const CLUBS = JSON.parse(fileData);
+  let apiEndpoint = '';
+  if (process.env.NEXT_PUBLIC_SERVER_URL) {
+    apiEndpoint = `${process.env.NEXT_PUBLIC_SERVER_URL}/clubs`;
+  } else {
+    const headersList = await headers();
+    const host = headersList.get('host') || 'localhost:3000';
+    const protocol =
+      host.includes('localhost') || host.includes('127.0.0.1')
+        ? 'http'
+        : 'https';
+    apiEndpoint = `${protocol}://${host}/api/clubs`;
+  }
 
-  const clubData = CLUBS.find(
-    (c: { id: string | number; [key: string]: unknown }) =>
-      c.id.toString() === id
-  );
+  // TODO: Replace with GET /api/clubs/:id when backend adds this endpoint
+  let foundClub: ApiClub | null = null;
+  try {
+    const res = await fetch(apiEndpoint);
+    if (res.ok) {
+      const clubs: ApiClub[] = await res.json();
+      foundClub = clubs.find((c) => String(c.id) === id) || null;
+    }
+  } catch (err) {
+    console.error('Failed to fetch clubs from backend:', err);
+  }
 
-  if (!clubData) {
+  if (!foundClub) {
     return (
       <div className="relative flex min-h-screen w-full items-center justify-center bg-[#F9FAFB] font-sans">
         <Header activeLabel="Clubs" />
@@ -40,6 +62,30 @@ export default async function ClubProfilePage({
       </div>
     );
   }
+
+  const clubData = {
+    id: foundClub.id,
+    name: foundClub.name,
+    category: foundClub.categories?.name || 'Uncategorized',
+    shortDescription: foundClub.description || 'No description available.',
+    logo: foundClub.logoUrl || '',
+    heroImage: foundClub.coverImageUrl || '',
+    isAcceptingApplications: false, // Hide join CTA section in sidebar
+
+    // Placeholders for fields the backend doesn't return yet
+    mission: 'No mission statement provided.',
+    coreValues: 'No core values listed.',
+    memberCount: 0,
+    meetingTime: 'TBD',
+    meetingLocation: 'TBD',
+    fee: 'TBD',
+    executives: [],
+    socials: {
+      instagram: 'TBD',
+      kakao: 'TBD',
+      youtube: 'TBD',
+    },
+  };
 
   return (
     <div className="relative min-h-screen w-full bg-[#F3F4F6] font-sans selection:bg-[#4F46E5]/20">
