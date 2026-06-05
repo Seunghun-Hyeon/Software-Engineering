@@ -1,117 +1,145 @@
 'use client';
 
 import React, { useState } from 'react';
-import { cn } from '@/lib/utils';
+// Lucide 아이콘 라이브러리 사용 (없으시다면 npm i lucide-react 설치 혹은 svg로 대체 가능)
 import {
-  LayoutDashboard,
-  PieChart,
+  User,
   Users,
-  FileText,
+  ClipboardList,
+  Calendar,
   Settings,
   Plus,
-  Shapes,
-  UserRound,
 } from 'lucide-react';
-import DashboardTab from '../DashboardTab';
-import AnalyticsTab from '../AnalyticsTab';
-import MembersTab from '../MembersTab';
-import ApplicationsTab from '../ApplicationsTab';
-import SettingsTab from '../SettingsTab';
 
-type Tab = 'dashboard' | 'analytics' | 'members' | 'applications' | 'settings';
+// Components
+import ClubProfileTab from '../ClubProfile';
+import MembersTab from '../Members';
+import RecruitmentTab from '../Recruitment';
+import EventsTab from '../Events';
+import SettingsTab from '../Settings';
+
+type Tab = 'clubProfile' | 'members' | 'recruitment' | 'events' | 'settings';
 
 export default function ManagerDashboard() {
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
-
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'analytics', label: 'Analytics', icon: PieChart },
-    { id: 'members', label: 'Members', icon: Users },
-    { id: 'applications', label: 'Applications', icon: FileText },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ] as const;
+  const [activeTab, setActiveTab] = useState<Tab>('clubProfile');
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard':
-        return <DashboardTab />;
-      case 'analytics':
-        return <AnalyticsTab />;
+      case 'clubProfile':
+        return <ClubProfileTab />;
       case 'members':
         return <MembersTab />;
-      case 'applications':
-        return <ApplicationsTab />;
+      case 'recruitment':
+        return <RecruitmentTab />;
+      case 'events':
+        return <EventsTab />;
       case 'settings':
         return <SettingsTab />;
       default:
-        return <DashboardTab />;
+        return <ClubProfileTab />;
     }
   };
 
+  // 메뉴 아이템 구조화
+  const menuItems = [
+    { id: 'clubProfile', label: 'Club Profile', icon: User },
+    { id: 'members', label: 'Members', icon: Users },
+    { id: 'recruitment', label: 'Recruitment', icon: ClipboardList },
+    { id: 'events', label: 'Events', icon: Calendar },
+    { id: 'settings', label: 'Settings', icon: Settings },
+  ] as const;
+
   return (
-    <div className="flex min-h-screen bg-[#F3F4F6] font-sans text-[#111827]">
-      {/* Sidebar */}
-      <aside className="sticky top-0 flex h-screen w-[230px] shrink-0 flex-col justify-between overflow-y-auto border-r border-gray-200 bg-[#F8F9FA] p-5">
-        <div>
-          {/* Logo */}
-          <div className="mb-7 flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#4F46E5] text-sm text-white shadow-sm">
-              <Shapes className="h-4 w-4" />
-            </div>
-            <span className="text-lg font-bold text-[#1E1B4B]">ClubHub</span>
-          </div>
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-[#F8FAFC] font-sans text-slate-900 antialiased">
+      {/* 1. 상단 글로벌 네비게이션 바 (Handong ClubHub) */}
+      <header className="z-10 flex h-16 w-full shrink-0 items-center justify-between border-b border-slate-200 bg-white px-8">
+        <div className="flex items-center gap-2">
+          <span className="text-xl font-black tracking-tight text-indigo-600">
+            Handong ClubHub
+          </span>
+        </div>
+        <div className="flex items-center gap-6 text-sm font-medium text-slate-600">
+          <a href="#" className="transition hover:text-indigo-600">
+            Clubs
+          </a>
+          <a href="#" className="transition hover:text-indigo-600">
+            Events
+          </a>
+          <a href="#" className="transition hover:text-indigo-600">
+            About
+          </a>
+          <div className="h-4 w-px bg-slate-200" />
+          <span className="font-semibold text-slate-700">My Profile</span>
+          <button className="rounded-full border border-slate-200 px-4 py-1.5 text-slate-700 transition hover:bg-slate-50">
+            Sign Out
+          </button>
+        </div>
+      </header>
 
-          {/* User Profile */}
-          <div className="mb-5 flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200 text-gray-600">
-              <UserRound className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-sm leading-tight font-bold text-gray-800">
-                Club Admin
+      {/* 하단 메인 레이아웃 (사이드바 + 콘텐츠) */}
+      <div className="flex w-full flex-1 overflow-hidden">
+        {/* 2. 왼쪽 고정 사이드바 */}
+        <aside className="flex h-full w-64 shrink-0 flex-col justify-between border-r border-slate-100 bg-[#F8FAFC] p-4">
+          {/* 상단: 프로필 & 메뉴 그룹 */}
+          <div className="space-y-6">
+            {/* Club Admin 프로필 카드 */}
+            <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-500">
+                <User size={20} />
               </div>
-              <div className="text-xs text-gray-400">Executive Suite</div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-800">Club Admin</h2>
+                <p className="text-xs font-medium text-slate-400">
+                  Executive Suite
+                </p>
+              </div>
             </div>
+
+            {/* 네비게이션 메뉴 */}
+            <nav className="space-y-1">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
+                      isActive
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100'
+                        : 'text-slate-500 hover:bg-slate-100/70 hover:text-slate-800'
+                    }`}
+                  >
+                    <Icon
+                      size={18}
+                      className={isActive ? 'text-white' : 'text-slate-400'}
+                    />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </nav>
           </div>
 
-          {/* Navigation */}
-          <nav className="space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={cn(
-                    'flex w-full items-center gap-3 rounded-[14px] px-[14px] py-[10px] text-[14px] font-medium transition-all duration-200',
-                    isActive
-                      ? 'bg-[#4F46E5] text-white shadow-[0_4px_14px_rgba(79,70,229,0.25)]'
-                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
-                  )}
-                >
-                  <Icon className="h-[18px] w-[18px]" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
+          {/* 하단: + Create Event 버튼 */}
+          <div className="pt-4">
+            <button
+              onClick={() => setActiveTab('events')} // 클릭 시 이벤트 탭으로 이동 등 커스텀 가능
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3.5 text-sm font-bold text-white shadow-md shadow-indigo-100 transition duration-200 hover:bg-indigo-700"
+            >
+              <Plus size={18} strokeWidth={3} />
+              Create Event
+            </button>
+          </div>
+        </aside>
 
-        {/* Create Event Button */}
-        <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4F46E5] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-100 transition hover:bg-indigo-700">
-          <Plus className="h-4 w-4" />
-          Create Event
-        </button>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto" id="content-viewport">
-        {/* Render Active Tab with Framer Motion or simple CSS transition if preferred. For simplicity, just rendering it */}
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-          {renderContent()}
-        </div>
-      </main>
+        {/* 3. 오른쪽 메인 콘텐츠 영역 */}
+        <main className="h-full flex-1 overflow-y-auto bg-white p-12">
+          <div className="animate-in fade-in mx-auto max-w-5xl duration-200">
+            {renderContent()}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
