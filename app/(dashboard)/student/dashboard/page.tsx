@@ -11,8 +11,35 @@ import type {
   StudentProfile,
   SavedEvent,
   Application,
-  FavouriteClub,
 } from '../../../../types/types';
+
+interface FavouriteClub {
+  id: string;
+  name: string;
+  categories: {
+    name: string;
+  };
+  description?: string;
+}
+
+interface BackendEvent {
+  id: string | number;
+  title: string;
+  date: string;
+  time?: string;
+  location: string;
+  category?: string;
+}
+
+interface BackendClub {
+  id: string | number;
+  name: string;
+  description: string;
+  categories: {
+    name: string;
+  } | null;
+}
+
 import api from '@/lib/axios';
 
 export default function StudentDashboard() {
@@ -36,20 +63,48 @@ export default function StudentDashboard() {
         setIsLoading(true);
         setError(null);
 
-        // TODO: endpoint for getting saved events
-        // Expected: GET /api/events/saved or similar
-        const savedEventsResponse = await api.get('/events/saved');
-        setSavedEvents(savedEventsResponse.data);
+        // Fetch saved events
+        try {
+          const savedEventsResponse = await api.get('/events');
+          const mappedEvents: SavedEvent[] = (
+            savedEventsResponse.data as BackendEvent[]
+          ).map((item) => ({
+            id: String(item.id),
+            title: item.title,
+            date: item.date,
+            time: item.time || '',
+            location: item.location,
+            category: item.category || 'General',
+          }));
+          setSavedEvents(mappedEvents);
+        } catch (err) {
+          console.error('Failed to fetch saved events:', err);
+        }
 
-        // TODO: Replace with GET /api/clubs/favourites when backend is connected
-        // Expected: GET /api/clubs/favourites or similar
-        const favouriteClubsResponse = await api.get('/clubs/favourites');
-        setFavouriteClubs(favouriteClubsResponse.data);
+        // Fetch all clubs to populate favourites
+        // Connected to GET /api/clubs/
+        try {
+          const favouriteClubsResponse = await api.get('/clubs');
+          const mappedClubs: FavouriteClub[] = (
+            favouriteClubsResponse.data as BackendClub[]
+          ).map((item) => ({
+            id: String(item.id),
+            name: item.name,
+            description: item.description,
+            categories: item.categories || { name: 'Uncategorized' },
+          }));
+          setFavouriteClubs(mappedClubs);
+        } catch (err) {
+          console.error('Failed to fetch clubs:', err);
+        }
 
-        // TODO:  endpoint for getting student applications
-        // Expected: GET /api/applications or similar
-        const applicationsResponse = await api.get('/applications');
-        setApplications(applicationsResponse.data);
+        // Fetch applications
+        try {
+          const applicationsResponse = await api.get('/applications');
+          setApplications(applicationsResponse.data);
+        } catch (err) {
+          console.error('Failed to fetch applications:', err);
+        }
 
         // Setup student profile details dynamically
         setProfile({

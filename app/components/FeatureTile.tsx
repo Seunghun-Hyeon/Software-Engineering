@@ -1,21 +1,4 @@
 /**
- * ============================================================================
- * FeatureTile Component (Bento Feature Showcase Card)
- * ============================================================================
- *
- * [WHAT IT IS FOR]
- * This is a highly polished, reusable feature tile component designed to display
- * value propositions or features of the platform in a bento-grid style format.
- * It builds upon the core glassmorphism design language using the reusable Card component.
- *
- * [WHAT IT LOOKS LIKE]
- * A frosted glass card with soft shadows, subtle micro-interactions (lifts up and
- * intensifies shadow on hover), featuring a colorful rounded-xl container for a
- * vector icon, followed by a bold text title and a soft muted gray description.
- *
- * [WHERE IT IS USED]
- * - Homepage: Featured in the 2x2 grid under the "Tired of missing out?" section
- *   to highlight key platform offerings (Alerts, Applications, Scheduling, etc.)
  *
  * [PROPS CONTRACT]
  * - title: (string) The main headline for the feature tile (e.g. "Smart Scheduling").

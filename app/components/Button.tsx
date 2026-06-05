@@ -1,34 +1,5 @@
 'use client';
 
-/**
- * ============================================================================
- * Button Component (Pill-Shaped Primary Action Button)
- * ============================================================================
- *
- * [WHAT IT IS FOR]
- * This is a highly styled, reusable primary button designed to capture the
- * modern pill-shaped design system from the brand rules. It includes a custom
- * loading indicator spinner with smooth circular framer-motion animations.
- *
- * [WHAT IT LOOKS LIKE]
- * A fully rounded, pill-shaped indigo button (#4F46E5) that displays a subtle
- * indigo outer shadow glow. On hover, the button background shifts to a deeper
- * indigo (#4338CA), and the shadow glow intensifies. If disabled or loading,
- * the opacity diminishes and cursor changes to 'not-allowed'.
- *
- * [WHERE IT IS USED]
- * - Sign In / Sign Up authentication forms (login/signup pages)
- * - Navigation drawer buttons
- * - Hero action trigger buttons
- * - Event RSVP / Ticket reservation actions
- *
- * [PROPS CONTRACT]
- * - isLoading: (boolean) If true, displays a spinning loading indicator inside
- *   the button and disables interactions.
- * - All standard HTML button attributes (disabled, type, onClick, etc.)
- * - className: (string) Used for custom CSS overrides (e.g. changing sizes).
- */
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';

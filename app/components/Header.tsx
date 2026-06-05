@@ -2,18 +2,34 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/lib/utils';
 
-export function Header({ activeLabel }: { activeLabel?: string }) {
+export function Header({}: { activeLabel?: string }) {
   const router = useRouter();
-  const { token, userName, activeRole, clearAuth } = useAuthStore();
-  const [mounted, setMounted] = useState(false);
+  const pathname = usePathname() || '';
+  const token = useAuthStore((state) => state.token);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+  const [hydrated, setHydrated] = useState(false);
+
+  // Determine active states for navigation links based on current path
+  const isClubsActive = pathname.startsWith('/clubs');
+  const isEventsActive = pathname.startsWith('/events');
+  const isAboutActive = pathname.startsWith('/about');
 
   useEffect(() => {
-    const handle = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(handle);
+    const unsubFinishHydration = useAuthStore.persist.onFinishHydration(() => {
+      setHydrated(true);
+    });
+    if (useAuthStore.persist.hasHydrated()) {
+      const handle = requestAnimationFrame(() => setHydrated(true));
+      return () => {
+        unsubFinishHydration();
+        cancelAnimationFrame(handle);
+      };
+    }
+    return () => unsubFinishHydration();
   }, []);
 
   const handleSignOut = () => {
@@ -33,37 +49,40 @@ export function Header({ activeLabel }: { activeLabel?: string }) {
         <nav className="hidden items-center gap-6 md:flex">
           <Link
             href="/clubs"
-            className={
-              activeLabel === 'Clubs'
-                ? 'text-sm font-bold text-[#4F46E5] transition-colors'
-                : 'text-sm font-medium text-gray-700 transition-colors hover:text-[#4F46E5]'
-            }
+            className={cn(
+              'border-b-2 pb-1 text-sm transition-all duration-200 hover:text-[#4F46E5]',
+              isClubsActive
+                ? 'border-[#4F46E5] font-bold text-[#4F46E5]'
+                : 'border-transparent font-medium text-gray-700'
+            )}
           >
             Clubs
           </Link>
           <Link
             href="/events"
-            className={
-              activeLabel === 'Events'
-                ? 'text-sm font-bold text-[#4F46E5] transition-colors'
-                : 'text-sm font-medium text-gray-700 transition-colors hover:text-[#4F46E5]'
-            }
+            className={cn(
+              'border-b-2 pb-1 text-sm transition-all duration-200 hover:text-[#4F46E5]',
+              isEventsActive
+                ? 'border-[#4F46E5] font-bold text-[#4F46E5]'
+                : 'border-transparent font-medium text-gray-700'
+            )}
           >
             Events
           </Link>
           <Link
             href="/about"
-            className={
-              activeLabel === 'About'
-                ? 'text-sm font-bold text-[#4F46E5] transition-colors'
-                : 'text-sm font-medium text-gray-700 transition-colors hover:text-[#4F46E5]'
-            }
+            className={cn(
+              'border-b-2 pb-1 text-sm transition-all duration-200 hover:text-[#4F46E5]',
+              isAboutActive
+                ? 'border-[#4F46E5] font-bold text-[#4F46E5]'
+                : 'border-transparent font-medium text-gray-700'
+            )}
           >
             About
           </Link>
         </nav>
         <div className="flex items-center gap-4">
-          {!mounted ? (
+          {!hydrated ? (
             <div className="h-9 w-[150px]" aria-hidden="true" />
           ) : !token ? (
             <>
@@ -87,16 +106,12 @@ export function Header({ activeLabel }: { activeLabel?: string }) {
           ) : (
             <>
               <Link
-                href={
-                  activeRole === 'executive'
-                    ? '/manager/dashboard'
-                    : '/student/dashboard'
-                }
+                href="/student/dashboard"
                 className={cn(
                   'flex items-center gap-2 text-sm font-semibold text-gray-700 transition-colors hover:text-[#4F46E5]'
                 )}
               >
-                <span>{userName || 'My Profile'}</span>
+                <span>My Profile</span>
               </Link>
               <button
                 onClick={handleSignOut}

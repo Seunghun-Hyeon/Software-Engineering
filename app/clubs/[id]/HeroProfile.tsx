@@ -1,6 +1,10 @@
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
 import { Button } from '@/app/components/Button';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter, useParams } from 'next/navigation';
 
 interface HeroProfileProps {
   clubName: string;
@@ -19,6 +23,35 @@ export function HeroProfile({
   category,
   isAcceptingApplications,
 }: HeroProfileProps) {
+  const { token, favouriteClubIds, toggleFavouriteClub } = useAuthStore();
+  const router = useRouter();
+  const params = useParams();
+  const clubId = String(params.id);
+
+  const isFavourited = favouriteClubIds.includes(clubId);
+
+  const handleFollowClick = () => {
+    if (!token) {
+      if (
+        confirm(
+          'Please log in or sign up to follow this club. Would you like to log in now?'
+        )
+      ) {
+        router.push('/login');
+      }
+    } else {
+      toggleFavouriteClub(clubId);
+    }
+  };
+
+  const handleJoinClick = () => {
+    if (isAcceptingApplications) {
+      router.push(`/apply/${clubId}`);
+    } else {
+      alert('This club is not accepting members right now');
+    }
+  };
+
   return (
     <section className="relative mb-12 w-full rounded-[24px] border border-gray-100 bg-white pb-8 shadow-sm">
       {/* Banner */}
@@ -27,8 +60,10 @@ export function HeroProfile({
           src={bgImageUrl || '/concert.jpg'}
           alt={`${clubName} Background`}
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           priority
           className="object-cover"
+          unoptimized
         />
         <div className="absolute inset-0 bg-[#001026]/40"></div>
       </div>
@@ -44,7 +79,9 @@ export function HeroProfile({
                   src={logoUrl || '/concert.jpg'}
                   alt={`${clubName} Logo`}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-contain"
+                  unoptimized
                 />
               </div>
             </div>
@@ -73,10 +110,25 @@ export function HeroProfile({
 
           {/* Right Side: Buttons */}
           <div className="mt-6 flex w-full flex-row gap-3 md:mt-4 md:w-1/3 md:justify-end">
-            <Button className="rounded-full bg-[#10B981] px-6 font-bold text-white shadow-sm hover:bg-[#059669]">
-              Follow
-            </Button>
-            <Button className="rounded-full bg-[#3323cc] px-6 font-bold shadow-md hover:bg-[#2a1ca8]">
+            {!token || !isFavourited ? (
+              <Button
+                onClick={handleFollowClick}
+                className="rounded-full bg-[#10B981] px-6 font-bold text-white shadow-sm hover:bg-[#059669]"
+              >
+                Follow
+              </Button>
+            ) : (
+              <Button
+                onClick={handleFollowClick}
+                className="rounded-full border border-gray-300 bg-gray-100 px-6 font-bold text-gray-500 hover:bg-gray-200"
+              >
+                Following
+              </Button>
+            )}
+            <Button
+              onClick={handleJoinClick}
+              className="rounded-full bg-[#3323cc] px-6 font-bold shadow-md hover:bg-[#2a1ca8]"
+            >
               Join Society
             </Button>
           </div>

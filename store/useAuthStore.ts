@@ -1,5 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import api from '@/lib/axios';
+
+interface AxiosErrorLike {
+  response?: {
+    status: number;
+    data?: unknown;
+  };
+  request?: unknown;
+  message?: string;
+}
 
 // Define the role types supported by our application access control list
 export type Role = 'student' | 'executive' | null;
@@ -12,6 +22,8 @@ interface AuthState {
   isExecutive: boolean; // Flag tracking whether user is an executive
   isLoading: boolean; // Flag tracking network flight status
   activeRole: 'student' | 'executive' | null; // Currently active user role profile view
+  favouriteClubIds: string[]; // Favourited club IDs
+  savedEventIds: string[]; // Saved event IDs
   setAuth: (
     token: string,
     role: Role,
@@ -27,6 +39,8 @@ interface AuthState {
     firstName?: string,
     lastName?: string
   ) => Promise<Role>; // Registers a new user account profile
+  toggleFavouriteClub: (clubId: string) => void; // Toggles favourite status of a club
+  toggleSavedEvent: (eventId: string) => void; // Toggles saved status of an event
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -41,6 +55,8 @@ export const useAuthStore = create<AuthState>()(
       isExecutive: false,
       isLoading: false,
       activeRole: null,
+      favouriteClubIds: [],
+      savedEventIds: [],
 
       // ----------------------------------------------------
       // Sync Store Actions
@@ -54,45 +70,78 @@ export const useAuthStore = create<AuthState>()(
           userName: null,
           isExecutive: false,
           activeRole: null,
+          favouriteClubIds: [],
+          savedEventIds: [],
         }),
       setActiveRole: (role) => set({ activeRole: role }),
+      toggleFavouriteClub: (clubId) =>
+        set((state) => ({
+          favouriteClubIds: state.favouriteClubIds.includes(clubId)
+            ? state.favouriteClubIds.filter((id) => id !== clubId)
+            : [...state.favouriteClubIds, clubId],
+        })),
+      toggleSavedEvent: (eventId) =>
+        set((state) => ({
+          savedEventIds: state.savedEventIds.includes(eventId)
+            ? state.savedEventIds.filter((id) => id !== eventId)
+            : [...state.savedEventIds, eventId],
+        })),
 
       // ----------------------------------------------------
-      // Async Authentication API Actions (Simulated)
+      // Async Authentication API Actions (Connected to Backend)
       // ----------------------------------------------------
       login: async (email, password) => {
         set({ isLoading: true });
 
         // Validate password parameter to use it in simulated logic
         if (!password) {
+          set({ isLoading: false });
           throw new Error('Password is required');
         }
 
-        // TODO: Replace this simulated login delay with an actual POST request to the backend:
-        // const response = await axios.post('/api/auth/login', { email, password });
-        // Simulate API response delay
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        try {
+          const response = await api.post('/api/auth/login', {
+            email,
+            password,
+          });
 
-        // TODO: Replace with actual isExecutive value from backend API response
-        // const response = await axios.post('/api/auth/login', { email, password });
-        // set({ isExecutive: response.data.isExecutive })
-        // TODO: isExecutive will come from backend API response after login is connected
-        const isExecutive = false;
-        const role: Role = isExecutive ? 'executive' : 'student';
+          const token = response.data.session?.access_token || null;
+          const userName = null; // TODO: Backend needs to return user name in login response
 
-        // TODO: Replace hardcoded userName with actual name from backend API response
-        // const userName = response.data.firstName + ' ' + response.data.lastName;
-        const userName = null;
+          set({
+            token,
+            role: 'student',
+            userName,
+            isExecutive: false,
+            isLoading: false,
+            activeRole: 'student',
+          });
+          return 'student';
+        } catch (err) {
+          const axiosErr = err as AxiosErrorLike;
+          set({ isLoading: false });
 
-        set({
-          token: 'mock-jwt-token',
-          role,
-          userName,
-          isExecutive,
-          isLoading: false,
-          activeRole: isExecutive ? null : 'student',
-        });
-        return role;
+          let friendlyMessage = 'Failed to sign in. Please try again.';
+          if (axiosErr.response) {
+            const status = axiosErr.response.status;
+            if (status === 400) {
+              friendlyMessage =
+                'Invalid request. Please check your email and password.';
+            } else if (status === 401) {
+              friendlyMessage =
+                'Incorrect email or password. Please try again.';
+            } else if (status === 500) {
+              friendlyMessage = 'Server error. Please try again later.';
+            }
+          } else if (axiosErr.request) {
+            friendlyMessage =
+              'Connection error. Please check your network connection.';
+          } else if (axiosErr.message) {
+            friendlyMessage = axiosErr.message;
+          }
+
+          throw new Error(friendlyMessage);
+        }
       },
 
       register: async (email, password, firstName, lastName) => {
@@ -100,30 +149,63 @@ export const useAuthStore = create<AuthState>()(
 
         // Validate registration fields to use them in simulated logic
         if (!password || !firstName || !lastName) {
+          set({ isLoading: false });
           throw new Error('Missing required registration details');
         }
 
-        // TODO: Replace this simulated signup delay with an actual POST request to the backend:
-        // const response = await axios.post('/api/auth/signup', { email, password, firstName, lastName });
-        // Simulate API response delay
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        try {
+          // TODO: Replace this simulated signup delay with an actual POST request to the backend:
+          // const response = await axios.post('/api/auth/signup', { email, password, firstName, lastName });
+          const fullName = `${firstName} ${lastName}`;
+          const response = await api.post('/api/auth/signup', {
+            email,
+            password,
+            name: fullName,
+            role: 'student',
+          });
 
-        // TODO: Replace with actual role and isExecutive value from backend API response
-        // const response = await axios.post('/api/auth/signup', { email, password, firstName, lastName });
-        const role: Role = 'student';
-        const isExecutive = false;
+          // TODO: Replace with actual role and isExecutive value from backend API response
+          // const response = await axios.post('/api/auth/signup', { email, password, firstName, lastName });
+          const role: Role = 'student';
+          const isExecutive = false;
 
-        const userName = `${firstName} ${lastName}`;
+          const userName = response.data.userName || fullName;
 
-        set({
-          token: 'mock-jwt-token',
-          role,
-          userName,
-          isExecutive,
-          isLoading: false,
-          activeRole: 'student',
-        });
-        return role;
+          set({
+            token: response.data.token || null,
+            role,
+            userName,
+            isExecutive,
+            isLoading: false,
+            activeRole: 'student',
+          });
+          return role;
+        } catch (err) {
+          const axiosErr = err as AxiosErrorLike;
+          set({ isLoading: false });
+
+          let friendlyMessage = 'Registration failed. Please try again.';
+          if (axiosErr.response) {
+            const status = axiosErr.response.status;
+            if (status === 400) {
+              friendlyMessage =
+                'Invalid registration details. Please check the form data.';
+            } else if (status === 401) {
+              friendlyMessage =
+                'Unauthorized registration. Please check your credentials.';
+            } else if (status === 500) {
+              friendlyMessage =
+                'Server error during registration. Please try again later.';
+            }
+          } else if (axiosErr.request) {
+            friendlyMessage =
+              'Connection error. Please check your network connection.';
+          } else if (axiosErr.message) {
+            friendlyMessage = axiosErr.message;
+          }
+
+          throw new Error(friendlyMessage);
+        }
       },
     }),
     {
@@ -134,6 +216,8 @@ export const useAuthStore = create<AuthState>()(
         userName: state.userName,
         isExecutive: state.isExecutive,
         activeRole: state.activeRole,
+        favouriteClubIds: state.favouriteClubIds,
+        savedEventIds: state.savedEventIds,
       }),
     }
   )
