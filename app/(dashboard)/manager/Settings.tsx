@@ -2,14 +2,22 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-// 사용하지 않는 아이콘들을 정리하고 실제 컴포넌트 내에서 쓰는 아이콘만 남겼습니다.
-import { Upload, AlertTriangle, Trash2 } from 'lucide-react';
+import {
+  Upload,
+  AlertTriangle,
+  Trash2,
+  ShieldAlert,
+  Archive,
+} from 'lucide-react';
 
 export default function Settings() {
   const [activeSubTab, setActiveSubTab] = useState<'profile' | 'danger'>(
     'profile'
   );
   const [isRecruiting, setIsRecruiting] = useState(true);
+
+  // 소유권 이전을 위한 더미 멤버 리스트 상태
+  const [selectedMember, setSelectedMember] = useState('Maria Alvarez');
 
   // 실제 클럽 정보 세팅
   const [clubInfo, setClubInfo] = useState({
@@ -25,6 +33,10 @@ export default function Settings() {
     alert('Changes saved successfully!');
   };
 
+  const handleTransferOwnership = () => {
+    alert(`Ownership has been successfully transferred to ${selectedMember}.`);
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-[#F8FAFC] font-sans text-slate-900 antialiased">
       <main className="flex-1 overflow-y-auto p-10">
@@ -32,12 +44,10 @@ export default function Settings() {
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-              Settings
+              Executive Settings
             </h1>
-            {/* react/no-unescaped-entities 에러 수정을 위해 club's 대신 club&apos;s 를 사용했습니다. */}
             <p className="mt-1 text-sm leading-relaxed font-medium text-gray-400">
-              Configure your club&apos;s presence, executive-only pipeline, and
-              administrative controls.
+              Manage your club&apos;s lifecycle and administrative settings.
             </p>
           </div>
 
@@ -192,42 +202,87 @@ export default function Settings() {
             </div>
           </div>
         ) : (
-          /* Danger Zone 탭 콘텐츠 */
-          <div className="max-w-2xl space-y-5 rounded-2xl border border-rose-100 bg-white p-6 shadow-sm">
-            <div className="mb-2 flex items-center gap-2 text-rose-600">
-              <AlertTriangle className="h-5 w-5" />
-              <h2 className="text-base font-bold">Critical Actions</h2>
-            </div>
-            <p className="text-xs leading-relaxed font-medium text-gray-400">
-              These actions cannot be undone. Please proceed with utmost
-              caution.
-            </p>
-
-            <div className="flex items-center justify-between border-t border-gray-50 pt-4">
-              <div>
-                <h4 className="text-sm font-bold text-gray-800">
-                  Archive Club Data
-                </h4>
-                <p className="mt-0.5 text-xs text-gray-400">
-                  Temporarily disable all club public activity.
-                </p>
-              </div>
-              <button className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-600 transition-all hover:bg-rose-100">
-                Archive
-              </button>
+          /* image_10bae4.png 레이아웃을 기반으로 맞춤 제작한 Danger Zone */
+          <div className="max-w-4xl space-y-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+            {/* 상단 헤더 서브 섹션 */}
+            <div className="flex items-center gap-2 text-rose-600">
+              <AlertTriangle className="h-5 w-5" strokeWidth={2.5} />
+              <h2 className="text-base font-bold tracking-tight">
+                Danger Zone
+              </h2>
             </div>
 
-            <div className="flex items-center justify-between border-t border-gray-50 pt-4">
-              <div>
-                <h4 className="text-sm font-bold text-rose-600">
-                  Delete Club Permanently
+            {/* 1. Transfer Ownership 섹션 (요청하신 Leader 변경 기능) */}
+            <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                    <ShieldAlert className="h-4 w-4 text-rose-500" />
+                    <span>Transfer Ownership</span>
+                  </div>
+                  <p className="max-w-xl text-xs leading-relaxed text-slate-400">
+                    Assign a new primary administrator for the club. Once
+                    completed, your executive status will be revoked.
+                  </p>
+                </div>
+                <button
+                  onClick={handleTransferOwnership}
+                  className="rounded-xl bg-rose-600 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-rose-700"
+                >
+                  Transfer
+                </button>
+              </div>
+
+              {/* 맴버 선택 셀렉트 박스 */}
+              <div className="mt-4 max-w-xs">
+                <label className="mb-1.5 block text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                  SELECT MEMBER
+                </label>
+                <select
+                  value={selectedMember}
+                  onChange={(e) => setSelectedMember(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition outline-none focus:border-indigo-500"
+                >
+                  <option value="Maria Alvarez">Maria Alvarez</option>
+                  <option value="John Doe">John Doe</option>
+                  <option value="Kim Handong">Kim Handong</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 2. Archive Club 섹션 */}
+            <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                    <Archive className="h-4 w-4 text-rose-500" />
+                    <span>Archive Club</span>
+                  </div>
+                  <p className="max-w-xl text-xs leading-relaxed text-slate-400">
+                    Temporarily disable all club activity, hide recruitment
+                    listings, and pause applications.
+                  </p>
+                </div>
+                <button className="rounded-xl border border-rose-100 bg-rose-50/50 px-5 py-2.5 text-xs font-bold text-rose-600 transition hover:bg-rose-100/60">
+                  Archive
+                </button>
+              </div>
+            </div>
+
+            {/* 3. Delete Club 섹션 */}
+            <div className="space-y-3 border-t border-slate-100 pt-6">
+              <div className="space-y-1">
+                <h4 className="text-sm font-bold text-slate-800">
+                  Delete Club & All Associated Data
                 </h4>
-                <p className="mt-0.5 text-xs text-gray-400">
-                  Erase all rosters, events, and records forever.
+                <p className="text-xs leading-relaxed text-slate-400">
+                  Permanently remove this club, its membership list, pending
+                  applications, past news, and events. This action cannot be
+                  reversed.
                 </p>
               </div>
-              <button className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-rose-100 transition-all hover:bg-rose-700">
-                <Trash2 className="h-3.5 w-3.5" /> Delete Club
+              <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 py-3.5 text-xs font-bold text-white shadow-md shadow-rose-100 transition duration-200 hover:bg-rose-700">
+                <Trash2 className="h-4 w-4" /> Delete Club & All Data
               </button>
             </div>
           </div>

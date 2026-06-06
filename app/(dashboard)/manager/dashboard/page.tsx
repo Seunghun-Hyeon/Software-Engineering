@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-// Lucide 아이콘 라이브러리 사용 (없으시다면 npm i lucide-react 설치 혹은 svg로 대체 가능)
+// Lucide 아이콘 라이브러리 사용
 import {
   User,
   Users,
@@ -23,24 +23,28 @@ type Tab = 'clubProfile' | 'members' | 'recruitment' | 'events' | 'settings';
 export default function ManagerDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('clubProfile');
 
+  // 사이드바의 id에 매핑되는 실제 컴포넌트 연결을 변경합니다.
   const renderContent = () => {
     switch (activeTab) {
       case 'clubProfile':
-        return <ClubProfileTab />;
+        // 'Club Profile' 클릭 시 Recruitment 내용이 나오도록 변경
+        return <RecruitmentTab />;
       case 'members':
         return <MembersTab />;
       case 'recruitment':
-        return <RecruitmentTab />;
+        // 'Recruitment' 클릭 시 Club Profile 내용이 나오도록 변경
+        return <ClubProfileTab />;
       case 'events':
         return <EventsTab />;
       case 'settings':
         return <SettingsTab />;
       default:
-        return <ClubProfileTab />;
+        // 기본값은 'clubProfile' 탭이 활성화되었을 때의 매핑인 RecruitmentTab을 바라보게 설정
+        return <RecruitmentTab />;
     }
   };
 
-  // 메뉴 아이템 구조화
+  // 메뉴 아이템 구조화 (사이드바 UI 렌더링 순서는 그대로 유지)
   const menuItems = [
     { id: 'clubProfile', label: 'Club Profile', icon: User },
     { id: 'members', label: 'Members', icon: Users },
@@ -124,7 +128,7 @@ export default function ManagerDashboard() {
           {/* 하단: + Create Event 버튼 */}
           <div className="pt-4">
             <button
-              onClick={() => setActiveTab('events')} // 클릭 시 이벤트 탭으로 이동 등 커스텀 가능
+              onClick={() => setActiveTab('events')}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3.5 text-sm font-bold text-white shadow-md shadow-indigo-100 transition duration-200 hover:bg-indigo-700"
             >
               <Plus size={18} strokeWidth={3} />
