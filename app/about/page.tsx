@@ -4,9 +4,7 @@ import { BentoCard } from '@/app/components/BentoCard';
 import { Button } from '@/app/components/Button';
 import Link from 'next/link';
 import {
-  Search,
   Users,
-  Rocket,
   UserCog,
   CalendarDays,
   LineChart,
@@ -63,7 +61,6 @@ export default function AboutPage() {
           <BentoCard className="group flex min-h-[400px] flex-col justify-between p-8 transition-all hover:shadow-xl md:col-span-8">
             <div className="flex items-start justify-between">
               <div>
-                <Search className="mb-4 h-10 w-10 text-[#4F46E5]" />
                 <h3 className="font-display mb-2 text-2xl font-bold text-gray-900">
                   Discover Your Passion
                 </h3>
@@ -114,9 +111,8 @@ export default function AboutPage() {
             </div>
           </BentoCard>
 
-          <BentoCard className="group flex flex-col items-center gap-8 p-8 transition-all hover:shadow-xl md:col-span-12 md:flex-row">
+          <BentoCard className="group flex flex-col items-center gap-8 p-8 transition-all md:col-span-12 md:flex-row">
             <div className="flex-1">
-              <Rocket className="mb-4 h-10 w-10 text-violet-600" />
               <h3 className="font-display mb-2 text-2xl font-bold text-gray-900">
                 Lead the Way
               </h3>
@@ -162,8 +158,8 @@ export default function AboutPage() {
             </BentoCard>
 
             <BentoCard className="group h-full p-8 transition-all hover:bg-white/90 md:col-span-4">
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 transition-transform group-hover:scale-110">
-                <CalendarDays className="h-7 w-7 text-[#10B981]" />
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 transition-transform group-hover:scale-110">
+                <CalendarDays className="h-7 w-7 text-[#4F46E5]" />
               </div>
               <h3 className="font-display mb-3 text-xl font-bold text-gray-900">
                 Track Events
@@ -175,8 +171,8 @@ export default function AboutPage() {
             </BentoCard>
 
             <BentoCard className="group h-full p-8 transition-all hover:bg-white/90 md:col-span-4">
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-50 transition-transform group-hover:scale-110">
-                <LineChart className="h-7 w-7 text-violet-600" />
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 transition-transform group-hover:scale-110">
+                <LineChart className="h-7 w-7 text-[#4F46E5]" />
               </div>
               <h3 className="font-display mb-3 text-xl font-bold text-gray-900">
                 Analytics
@@ -253,8 +249,8 @@ export default function AboutPage() {
           </BentoCard>
 
           <BentoCard className="group flex flex-col items-center p-10 text-center transition-transform duration-300 hover:-translate-y-2">
-            <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 transition-colors duration-300 group-hover:bg-[#10B981]">
-              <Handshake className="h-10 w-10 text-[#10B981] transition-colors duration-300 group-hover:text-white" />
+            <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-indigo-50 transition-colors duration-300 group-hover:bg-[#4F46E5]">
+              <Handshake className="h-10 w-10 text-[#4F46E5] transition-colors duration-300 group-hover:text-white" />
             </div>
             <h3 className="font-display mb-4 text-xl font-bold text-gray-900">
               Collaboration
@@ -266,8 +262,8 @@ export default function AboutPage() {
           </BentoCard>
 
           <BentoCard className="group flex flex-col items-center p-10 text-center transition-transform duration-300 hover:-translate-y-2">
-            <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-violet-50 transition-colors duration-300 group-hover:bg-violet-600">
-              <HeartHandshake className="h-10 w-10 text-violet-600 transition-colors duration-300 group-hover:text-white" />
+            <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-indigo-50 transition-colors duration-300 group-hover:bg-[#4F46E5]">
+              <HeartHandshake className="h-10 w-10 text-[#4F46E5] transition-colors duration-300 group-hover:text-white" />
             </div>
             <h3 className="font-display mb-4 text-xl font-bold text-gray-900">
               Community
