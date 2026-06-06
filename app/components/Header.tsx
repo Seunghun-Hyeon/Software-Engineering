@@ -14,6 +14,7 @@ export function Header({}: { activeLabel?: string }) {
   const [hydrated, setHydrated] = useState(false);
 
   // Determine active states for navigation links based on current path
+  const isHomeActive = pathname === '/';
   const isClubsActive = pathname.startsWith('/clubs');
   const isEventsActive = pathname.startsWith('/events');
   const isAboutActive = pathname.startsWith('/about');
@@ -47,6 +48,17 @@ export function Header({}: { activeLabel?: string }) {
           Handong ClubHub
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
+          <Link
+            href="/"
+            className={cn(
+              'border-b-2 pb-1 text-sm transition-all duration-200 hover:text-[#4F46E5]',
+              isHomeActive
+                ? 'border-[#4F46E5] font-bold text-[#4F46E5]'
+                : 'border-transparent font-medium text-gray-700'
+            )}
+          >
+            Home
+          </Link>
           <Link
             href="/clubs"
             className={cn(
