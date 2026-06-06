@@ -88,36 +88,13 @@ export default function SignupPage() {
 
       {/* Main Glassmorphic Container */}
       <main className="relative z-10 w-full max-w-[480px] pt-12">
-        {/* Header (HGU logo & Title) */}
-        <div className="mb-8 flex flex-col items-center text-center">
-          <div className="relative mb-3 flex h-16 w-16 items-center justify-center rounded-full border border-white/50 bg-white/80 p-2 shadow-[0_8px_20px_rgba(0,0,0,0.03)] backdrop-blur-sm">
-            <Image
-              src="/handongunilogo.png"
-              alt="HGU Logo"
-              width={56}
-              height={56}
-              className="object-contain"
-              priority
-            />
-          </div>
-          <div className="font-sans text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase">
-            Handong Global University
-          </div>
-          <h1 className="font-display mt-1 text-4xl font-extrabold tracking-tight text-[#4F46E5]">
-            CLUBHUB
-          </h1>
-          <p className="mt-2 max-w-xs font-sans text-sm text-gray-500">
-            Connect, discover, and lead in university student life
-          </p>
-        </div>
-
         {/* Auth Bento Card */}
         <BentoCard>
           <div className="mb-6 text-center">
             <h2 className="font-display text-xl font-bold text-gray-800">
               Register
             </h2>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 mb-8 text-xs text-gray-500">
               Create an account to join the community
             </p>
           </div>
