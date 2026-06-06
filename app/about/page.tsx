@@ -75,7 +75,7 @@ export default function AboutPage() {
             </div>
             <div className="relative mt-6 h-48 w-full overflow-hidden rounded-2xl">
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9Xx2VIujZ988fbKF9lMc6qzcxuveIPS_Tv1wco2bQF3TNYmE7wMP5hywKiEAqQh9jGRDGWKfS8br4gHowHjzhfhI5YVQVLkCwhVfEiGMuN99rr3ZJ1vHc3TBgGo743mgrSERhN9_siQb1lILyow1dpRmQj7HVh9j5eq-iCh8xPXexF4ouuHi0xXlsrowZUs_cHbmb8bGr5FqWxWbGL_0_z-dwW3AKDT2aUuGSfBGXXU_6S-1gbwFIF5P0Ovs7cki-T_yRF9UzulM"
+                src="/football2.jpg"
                 alt="University club fair"
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -126,9 +126,9 @@ export default function AboutPage() {
                 effectively and leave a lasting legacy.
               </p>
             </div>
-            <div className="h-40 w-full flex-1 overflow-hidden rounded-2xl md:h-64">
+            <div className="relative h-40 w-full flex-1 overflow-hidden rounded-2xl md:h-64">
               <Image
-                src="/football.jpg"
+                src="/lead2.jpg"
                 alt="Student leader presenting"
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
