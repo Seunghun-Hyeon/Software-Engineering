@@ -17,7 +17,6 @@ export function Header({}: { activeLabel?: string }) {
   const isHomeActive = pathname === '/';
   const isClubsActive = pathname.startsWith('/clubs');
   const isEventsActive = pathname.startsWith('/events');
-  const isAboutActive = pathname.startsWith('/about');
 
   useEffect(() => {
     const unsubFinishHydration = useAuthStore.persist.onFinishHydration(() => {
@@ -80,17 +79,6 @@ export function Header({}: { activeLabel?: string }) {
             )}
           >
             Events
-          </Link>
-          <Link
-            href="/about"
-            className={cn(
-              'border-b-2 pb-1 text-sm transition-all duration-200 hover:text-[#4F46E5]',
-              isAboutActive
-                ? 'border-[#4F46E5] font-bold text-[#4F46E5]'
-                : 'border-transparent font-medium text-gray-700'
-            )}
-          >
-            About
           </Link>
         </nav>
         <div className="flex items-center gap-4">
