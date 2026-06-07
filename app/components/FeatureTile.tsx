@@ -53,12 +53,12 @@ export const FeatureTile = React.forwardRef<HTMLDivElement, FeatureTileProps>(
         </div>
 
         {/* Feature Title */}
-        <h3 className="font-display text-sm font-bold text-gray-900">
+        <h3 className="font-display text-base font-bold text-gray-900">
           {title}
         </h3>
 
         {/* Feature Description */}
-        <p className="mt-2 font-sans text-xs leading-relaxed text-gray-400">
+        <p className="mt-2 font-sans text-sm leading-relaxed text-gray-500">
           {description}
         </p>
       </BentoCard>
