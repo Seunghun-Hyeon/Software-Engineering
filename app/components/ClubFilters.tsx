@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import api from '@/lib/axios';
 
 interface ClubFiltersProps {
   onSearchChange?: (query: string) => void;
@@ -27,6 +28,28 @@ export function ClubFilters({
   );
   const [localSearch, setLocalSearch] = useState(searchParam || '');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [categories, setCategories] = useState<string[]>(['All']);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Connected to /api/categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoading(true);
+        const response = await api.get('/api/categories');
+        const data = response.data;
+        if (Array.isArray(data)) {
+          const names = data.map((cat: { name: string }) => cat.name);
+          setCategories(['All', ...names]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Advanced filter states
   const [isCurrentlyRecruiting, setIsCurrentlyRecruiting] = useState(
@@ -162,8 +185,12 @@ export function ClubFilters({
         {/* Quick Filters & More Button */}
         <div className="flex w-full items-center justify-between gap-4 md:w-auto md:justify-end">
           <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
-            {['All', 'Sports', 'Christian Groups', 'Academic', 'Computer'].map(
-              (cat) => {
+            {isLoading ? (
+              <span className="animate-pulse px-4 text-sm font-semibold text-gray-400">
+                Loading categories...
+              </span>
+            ) : (
+              categories.map((cat) => {
                 const isActive = selectedCategories.includes(cat);
                 return (
                   <button
@@ -180,7 +207,7 @@ export function ClubFilters({
                     {cat}
                   </button>
                 );
-              }
+              })
             )}
           </div>
 
@@ -254,25 +281,31 @@ export function ClubFilters({
                 More Categories
               </label>
               <div className="flex flex-wrap gap-2">
-                {['Performing Arts', 'Exhibition Arts', 'Social Service'].map(
-                  (cat) => {
-                    const isActive = selectedCategories.includes(cat);
-                    return (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => handleDropdownCategoryClick(cat)}
-                        className={cn(
-                          'cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                          isActive
-                            ? 'border-[#4F46E5] bg-[#4F46E5] text-white shadow-[0_2px_8px_rgba(79,70,229,0.3)]'
-                            : 'border-transparent bg-[#F3F4F6] text-gray-700 hover:bg-gray-200'
-                        )}
-                      >
-                        {cat}
-                      </button>
-                    );
-                  }
+                {isLoading ? (
+                  <span className="animate-pulse text-xs font-semibold text-gray-400">
+                    Loading...
+                  </span>
+                ) : (
+                  categories
+                    .filter((cat) => cat !== 'All')
+                    .map((cat) => {
+                      const isActive = selectedCategories.includes(cat);
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => handleDropdownCategoryClick(cat)}
+                          className={cn(
+                            'cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+                            isActive
+                              ? 'border-[#4F46E5] bg-[#4F46E5] text-white shadow-[0_2px_8px_rgba(79,70,229,0.3)]'
+                              : 'border-transparent bg-[#F3F4F6] text-gray-700 hover:bg-gray-200'
+                          )}
+                        >
+                          {cat}
+                        </button>
+                      );
+                    })
                 )}
               </div>
             </div>
