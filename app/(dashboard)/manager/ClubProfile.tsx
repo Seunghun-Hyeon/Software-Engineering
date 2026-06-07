@@ -118,8 +118,8 @@ export default function ApplicationsTab() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F8FAFC] font-sans text-slate-900 antialiased">
-      <main className="flex-1 overflow-y-auto p-8">
+    <div className="w-full font-sans text-slate-900 antialiased">
+      <div className="w-full">
         {/* 상단 타이틀 섹션 */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -310,7 +310,7 @@ export default function ApplicationsTab() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* 모달 팝업 레이어 */}
       {isModalOpen && (

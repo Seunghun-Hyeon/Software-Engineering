@@ -182,7 +182,7 @@ export function ExploreInterestsSection({
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#4F46E5] border-t-transparent"></div>
         </div>
       ) : error ? (
-        <div className="flex h-32 items-center justify-center rounded-none border-2 border-black bg-rose-50 p-6 text-sm font-bold text-red-600 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div className="flex h-32 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50/50 p-6 text-sm font-semibold text-rose-600 shadow-sm backdrop-blur-md">
           {error}
         </div>
       ) : (

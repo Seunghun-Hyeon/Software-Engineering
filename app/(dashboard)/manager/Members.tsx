@@ -124,10 +124,10 @@ export default function Members() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F8FAFC] font-sans text-slate-900 antialiased">
-      <div className="flex flex-1">
+    <div className="w-full font-sans text-slate-900 antialiased">
+      <div className="w-full">
         {/* 우측 메인 콘텐츠 영역 (Member Management) */}
-        <main className="flex-1 overflow-y-auto p-10">
+        <div className="w-full">
           {/* 타이틀 및 상단 우측 액션 바 컨트롤 */}
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -255,7 +255,7 @@ export default function Members() {
               </table>
             </div>
           </div>
-        </main>
+        </div>
       </div>
 
       {/* 신규 멤버 추가 팝업 모달 */}

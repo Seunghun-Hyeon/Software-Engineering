@@ -134,7 +134,7 @@ export default function SupportPage() {
             Elevate your student organization today
           </h2>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/signup">
+            <Link href="/become-manager">
               <Button className="rounded-full bg-[#4F46E5] px-8 py-4 text-base font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all duration-300 hover:bg-indigo-600">
                 Register your club
               </Button>

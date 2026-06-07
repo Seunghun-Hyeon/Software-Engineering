@@ -12,23 +12,23 @@ You are an expert full-stack Next.js developer. Your goal is to write clean, mod
 - **Icons & Animation:** Lucide-react, Framer-motion.
 - **Utility:** `clsx` and `tailwind-merge` (for dynamic class merging).
 
-## 2. Design System: Futurist / Pixel-Bento
+## 2. Design System: Modern Glassmorphism & Soft Bento
 
-- **Layouts:** Use CSS Grid extensively to create distinct "Bento Box" compartments.
-- **Borders & Shadows:** Apply thick solid borders (`border-2 border-black`) and harsh, unblurred drop shadows (`shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`) to all cards, buttons, and containers.
-- **Corner Radii:** Keep corners sharp. Use `rounded-none` or a maximum of `rounded-sm` (0px to 4px).
+- **Layouts:** Use CSS Grid extensively to create distinct "Soft Bento" compartments.
+- **Borders & Shadows:** Avoid solid borders. Use translucent glass layers (`backdrop-blur-md bg-white/70`) and soft diffused shadows (like `shadow-[0px_10px_30px_rgba(0,0,0,0.05)]`) instead of harsh shadows.
+- **Corner Radii:** Embrace extreme roundedness. Use large radii (`rounded-2xl` or `rounded-[24px]`) for bento cards, and pill-shapes (`rounded-full`) for interactive elements like buttons and chips. Sharp 90-degree angles are strictly forbidden.
 - **Colors:**
-  - Background: Subtle light-gray or grid-paper texture.
-  - Primary: Deep indigo / purple-blue.
-  - Secondary/Accents: High-contrast neon green or bright orange (for active states and glowing status dots).
-- **Typography:** Bold geometric sans-serif for headers, clean sans-serif for body, and a monospace/pixel font for small tags and system statuses.
+  - Background: Pure white or subtle cool-gray (`#F9FAFB`).
+  - Primary: Deep indigo (`#4F46E5`) for primary actions and branding.
+  - Secondary/Accents: High-contrast dark neon green (`#10B981`) for active states and glow effects.
+- **Typography:** Poppins for expressive headings and Inter for utilitarian body text, labels, and small tags.
 
 ## 3. Architectural & Coding Rules
 
 - **Server vs. Client:** Default to React Server Components (RSC). Only add the `'use client'` directive at the top of the file when explicitly required (e.g., when using `useState`, `useEffect`, `onClick`, or `Zustand` hooks).
 - **TypeScript Strictness:** Never use `any`. Always explicitly define `interface` or `type` for component props and API payloads. Centralize global types in a `@/types` folder.
 - **Routing:** Never use `react-router-dom`. Rely exclusively on the Next.js App Router directory structure (`/app`).
-- **Component Modularity:** Extract highly repetitive UI elements (like a Bento Card or a Neo-Brutalist Button) into the `/components` folder to keep page files clean.
+- **Component Modularity:** Extract highly repetitive UI elements (like a Bento Card or a Pill Button) into the `/components` folder to keep page files clean.
 - **Tailwind Best Practices:** Always use the `cn()` utility function (combining `clsx` and `twMerge`) when passing custom `className` props to reusable components to prevent style conflicts.
 
 ## 4. Git & Workflow Enforcement
