@@ -135,12 +135,15 @@ export default function EventsTab() {
     setIsLoading(true);
 
     try {
+      // Convert local datetime-local format to ISO 8601 string format
+      const formattedDate = new Date(eventDate).toISOString();
+
       // Connected to POST /api/events/
       const response = await api.post('/events/', {
         club_id: clubId,
         title,
         description,
-        event_date: eventDate,
+        event_date: formattedDate,
         poster_url:
           posterUrl ||
           'https://images.unsplash.com/photo-1540575467063-178a50c2df87',
@@ -159,10 +162,42 @@ export default function EventsTab() {
       console.error('Failed to publish event:', err);
       let friendlyMessage = 'Unknown network error';
       if (axios.isAxiosError(err)) {
-        friendlyMessage =
-          err.response?.data?.error ||
-          err.response?.data?.message ||
-          err.message;
+        const data = err.response?.data;
+        if (data) {
+          if (typeof data.error === 'string') {
+            friendlyMessage = data.error;
+          } else if (data.error && typeof data.error === 'object') {
+            const fieldErrors = data.error.fieldErrors;
+            if (fieldErrors && typeof fieldErrors === 'object') {
+              const messages = Object.entries(fieldErrors).map(
+                ([field, msgs]) => {
+                  const fieldName = field.replace('_', ' ');
+                  const msgStr = Array.isArray(msgs)
+                    ? msgs.join(', ')
+                    : String(msgs);
+                  return `${fieldName}: ${msgStr}`;
+                }
+              );
+              if (messages.length > 0) {
+                friendlyMessage = messages.join('; ');
+              } else if (data.error.message) {
+                friendlyMessage = String(data.error.message);
+              } else {
+                friendlyMessage = JSON.stringify(data.error);
+              }
+            } else if (data.error.message) {
+              friendlyMessage = String(data.error.message);
+            } else {
+              friendlyMessage = JSON.stringify(data.error);
+            }
+          } else if (typeof data.message === 'string') {
+            friendlyMessage = data.message;
+          } else {
+            friendlyMessage = JSON.stringify(data);
+          }
+        } else {
+          friendlyMessage = err.message;
+        }
       } else if (err instanceof Error) {
         friendlyMessage = err.message;
       }

@@ -375,10 +375,42 @@ export default function SettingsTab() {
           console.error('Failed to load settings data:', err);
           let specificMessage = 'Unknown error';
           if (axios.isAxiosError(err)) {
-            specificMessage =
-              err.response?.data?.error ||
-              err.response?.data?.message ||
-              err.message;
+            const data = err.response?.data;
+            if (data) {
+              if (typeof data.error === 'string') {
+                specificMessage = data.error;
+              } else if (data.error && typeof data.error === 'object') {
+                const fieldErrors = data.error.fieldErrors;
+                if (fieldErrors && typeof fieldErrors === 'object') {
+                  const messages = Object.entries(fieldErrors).map(
+                    ([field, msgs]) => {
+                      const fieldName = field.replace('_', ' ');
+                      const msgStr = Array.isArray(msgs)
+                        ? msgs.join(', ')
+                        : String(msgs);
+                      return `${fieldName}: ${msgStr}`;
+                    }
+                  );
+                  if (messages.length > 0) {
+                    specificMessage = messages.join('; ');
+                  } else if (data.error.message) {
+                    specificMessage = String(data.error.message);
+                  } else {
+                    specificMessage = JSON.stringify(data.error);
+                  }
+                } else if (data.error.message) {
+                  specificMessage = String(data.error.message);
+                } else {
+                  specificMessage = JSON.stringify(data.error);
+                }
+              } else if (typeof data.message === 'string') {
+                specificMessage = data.message;
+              } else {
+                specificMessage = JSON.stringify(data);
+              }
+            } else {
+              specificMessage = err.message;
+            }
           } else if (err instanceof Error) {
             specificMessage = err.message;
           }
@@ -409,6 +441,12 @@ export default function SettingsTab() {
         (cat) => cat.name === clubInfo.category
       );
       const categoryIdToSend = selectedCat ? selectedCat.id : null;
+
+      if (!categoryIdToSend) {
+        setErrorMsg('Please select a valid club category.');
+        setIsLoading(false);
+        return;
+      }
 
       // Connected to PATCH /api/clubs/:id
       await api.patch(`/clubs/${clubId}`, {
@@ -443,10 +481,42 @@ export default function SettingsTab() {
       console.error('Failed to update club profile details:', err);
       let specificMessage = 'Unknown error';
       if (axios.isAxiosError(err)) {
-        specificMessage =
-          err.response?.data?.error ||
-          err.response?.data?.message ||
-          err.message;
+        const data = err.response?.data;
+        if (data) {
+          if (typeof data.error === 'string') {
+            specificMessage = data.error;
+          } else if (data.error && typeof data.error === 'object') {
+            const fieldErrors = data.error.fieldErrors;
+            if (fieldErrors && typeof fieldErrors === 'object') {
+              const messages = Object.entries(fieldErrors).map(
+                ([field, msgs]) => {
+                  const fieldName = field.replace('_', ' ');
+                  const msgStr = Array.isArray(msgs)
+                    ? msgs.join(', ')
+                    : String(msgs);
+                  return `${fieldName}: ${msgStr}`;
+                }
+              );
+              if (messages.length > 0) {
+                specificMessage = messages.join('; ');
+              } else if (data.error.message) {
+                specificMessage = String(data.error.message);
+              } else {
+                specificMessage = JSON.stringify(data.error);
+              }
+            } else if (data.error.message) {
+              specificMessage = String(data.error.message);
+            } else {
+              specificMessage = JSON.stringify(data.error);
+            }
+          } else if (typeof data.message === 'string') {
+            specificMessage = data.message;
+          } else {
+            specificMessage = JSON.stringify(data);
+          }
+        } else {
+          specificMessage = err.message;
+        }
       } else if (err instanceof Error) {
         specificMessage = err.message;
       }
