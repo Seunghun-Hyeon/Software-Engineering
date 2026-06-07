@@ -141,7 +141,7 @@ export default function SupportPage() {
             </Link>
             <Link href="/clubs">
               <Button className="rounded-full border border-gray-200 bg-white px-8 py-4 text-base font-semibold text-gray-900 shadow-sm transition-all duration-300 hover:bg-gray-50">
-                Browse directory
+                Browse clubs
               </Button>
             </Link>
           </div>
