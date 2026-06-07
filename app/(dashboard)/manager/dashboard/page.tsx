@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import Link from 'next/link';
 // Lucide 아이콘 라이브러리 사용 (없으시다면 npm i lucide-react 설치 혹은 svg로 대체 가능)
 import {
   User,
@@ -11,8 +12,11 @@ import {
   Plus,
   Menu,
   X,
+  ArrowRightLeft,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/useAuthStore';
 
 // Components
 import ClubProfileTab from '../ClubProfile';
@@ -31,6 +35,21 @@ function DashboardContent() {
   const tabParam = (searchParams?.get('tab') || '') as Tab;
   const [activeTab, setActiveTab] = useState<Tab>(tabParam || 'club-profile');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const userName = useAuthStore((state) => state.userName);
+  const isExecutive = useAuthStore((state) => state.isExecutive);
+  const setActiveRole = useAuthStore((state) => state.setActiveRole);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+
+  const handleSignOut = () => {
+    clearAuth();
+    router.push('/');
+  };
+
+  const handleSwitchToStudent = () => {
+    setActiveRole('student');
+    router.push('/');
+  };
 
   useEffect(() => {
     const tab = searchParams?.get('tab');
@@ -83,32 +102,7 @@ function DashboardContent() {
   ] as const;
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-[#F8FAFC] font-sans text-slate-900 antialiased">
-      {/* 1. 상단 글로벌 네비게이션 바 (Handong ClubHub) */}
-      <header className="z-10 flex h-16 w-full shrink-0 items-center justify-between border-b border-slate-200 bg-white px-8">
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-black tracking-tight text-indigo-600">
-            Handong ClubHub
-          </span>
-        </div>
-        <div className="flex items-center gap-6 text-sm font-medium text-slate-600">
-          <a href="#" className="transition hover:text-indigo-600">
-            Clubs
-          </a>
-          <a href="#" className="transition hover:text-indigo-600">
-            Events
-          </a>
-          <a href="#" className="transition hover:text-indigo-600">
-            About
-          </a>
-          <div className="h-4 w-px bg-slate-200" />
-          <span className="font-semibold text-slate-700">My Profile</span>
-          <button className="rounded-full border border-slate-200 px-4 py-1.5 text-slate-700 transition hover:bg-slate-50">
-            Sign Out
-          </button>
-        </div>
-      </header>
-
+    <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC] font-sans text-slate-900 antialiased">
       {/* 하단 메인 레이아웃 (사이드바 + 콘텐츠) */}
       <div className="relative flex w-full flex-1 overflow-hidden">
         {/* Backdrop for mobile */}
@@ -129,6 +123,13 @@ function DashboardContent() {
         >
           {/* 상단: 프로필 & 메뉴 그룹 */}
           <div className="space-y-6">
+            {/* Logo/Branding inside sidebar */}
+            <div className="hidden px-4 py-2 md:block">
+              <span className="text-xl font-black tracking-tight text-indigo-600">
+                Handong ClubHub
+              </span>
+            </div>
+
             {/* Mobile Close Trigger Header */}
             <div className="flex items-center justify-between md:hidden">
               <span className="rounded-full bg-[#4F46E5]/10 px-3 py-1 font-sans text-xs font-bold tracking-wider text-[#4F46E5] uppercase">
@@ -149,7 +150,9 @@ function DashboardContent() {
                 <User size={20} />
               </div>
               <div>
-                <h2 className="text-sm font-bold text-slate-800">Club Admin</h2>
+                <h2 className="max-w-[140px] truncate text-sm font-bold text-slate-800">
+                  {userName || 'Club Admin'}
+                </h2>
                 <p className="text-xs font-medium text-slate-400">
                   Executive Suite
                 </p>
@@ -182,15 +185,36 @@ function DashboardContent() {
             </nav>
           </div>
 
-          {/* 하단: + Create Event 버튼 */}
-          <div className="pt-4">
+          {/* 하단: Actions & Buttons */}
+          <div className="space-y-4 border-t border-slate-100 pt-4">
+            {/* Create Event 버튼 */}
             <button
-              onClick={() => handleTabChange('events')} // 클릭 시 이벤트 탭으로 이동 등 커스텀 가능
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3.5 text-sm font-bold text-white shadow-md shadow-indigo-100 transition duration-200 hover:bg-indigo-700"
+              onClick={() => handleTabChange('events')}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-md shadow-indigo-100 transition duration-200 hover:bg-indigo-700"
             >
               <Plus size={18} strokeWidth={3} />
               Create Event
             </button>
+
+            {/* Account Actions */}
+            <div className="space-y-1">
+              {isExecutive && (
+                <button
+                  onClick={handleSwitchToStudent}
+                  className="flex w-full items-center gap-3 rounded-xl bg-indigo-50/50 px-4 py-2.5 text-left text-xs font-bold text-indigo-600 transition-colors hover:bg-indigo-50"
+                >
+                  <ArrowRightLeft size={16} />
+                  Switch to Student Account
+                </button>
+              )}
+              <button
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-xs font-semibold text-red-600 transition-all duration-200 hover:bg-red-50"
+              >
+                <LogOut size={16} />
+                Sign Out
+              </button>
+            </div>
           </div>
         </aside>
 

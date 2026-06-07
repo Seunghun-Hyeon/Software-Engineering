@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Poppins, Inter } from 'next/font/google';
 import './globals.css';
-import { Footer } from './components/Footer';
-import { Header } from './components/Header';
+import { LayoutWrapper } from './components/LayoutWrapper';
 
 // Initialize core fonts according to brand design rules: Poppins for headings, Inter for body
 const geistSans = Geist({
@@ -45,9 +44,7 @@ export default function RootLayout({
     >
       {/* Root body element with min-height and flex column configuration */}
       <body className="flex min-h-full flex-col">
-        <Header />
-        <main className="grow">{children}</main>
-        <Footer />
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );
