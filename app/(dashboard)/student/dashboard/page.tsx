@@ -132,12 +132,12 @@ export default function StudentDashboard() {
         {profile && <WelcomeSection profile={profile} />}
 
         {/* Tab Controls Bar */}
-        <div className="flex max-w-md rounded-[18px] border border-white/40 bg-white/50 p-1.5 shadow-[0_4px_25px_rgba(0,0,0,0.02)] backdrop-blur-md">
+        <div className="hide-scrollbar flex w-fit max-w-full overflow-x-auto rounded-[18px] border border-white/40 bg-white/50 p-1.5 shadow-[0_4px_25px_rgba(0,0,0,0.02)] backdrop-blur-md">
           <button
             type="button"
             onClick={() => setActiveTab('saved_events')}
             className={cn(
-              'flex-1 rounded-[14px] px-5 py-2.5 text-sm font-bold transition-all duration-300 focus:outline-none',
+              'rounded-[14px] px-5 py-2.5 text-sm font-bold whitespace-nowrap transition-all duration-300 focus:outline-none',
               activeTab === 'saved_events'
                 ? 'bg-[#4F46E5] text-white shadow-md'
                 : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'
@@ -149,7 +149,7 @@ export default function StudentDashboard() {
             type="button"
             onClick={() => setActiveTab('favourite_clubs')}
             className={cn(
-              'flex-1 rounded-[14px] px-5 py-2.5 text-sm font-bold transition-all duration-300 focus:outline-none',
+              'rounded-[14px] px-5 py-2.5 text-sm font-bold whitespace-nowrap transition-all duration-300 focus:outline-none',
               activeTab === 'favourite_clubs'
                 ? 'bg-[#4F46E5] text-white shadow-md'
                 : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'
@@ -161,7 +161,7 @@ export default function StudentDashboard() {
             type="button"
             onClick={() => setActiveTab('applications')}
             className={cn(
-              'flex-1 rounded-[14px] px-5 py-2.5 text-sm font-bold transition-all duration-300 focus:outline-none',
+              'rounded-[14px] px-5 py-2.5 text-sm font-bold whitespace-nowrap transition-all duration-300 focus:outline-none',
               activeTab === 'applications'
                 ? 'bg-[#4F46E5] text-white shadow-md'
                 : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'

@@ -19,6 +19,7 @@ interface AuthState {
   token: string | null; // Current session JSON Web Token
   role: Role; // Authenticated user role profile
   userName: string | null; // Authenticated user's name
+  major: string | null; // Authenticated user's major
   isExecutive: boolean; // Flag tracking whether user is an executive
   isLoading: boolean; // Flag tracking network flight status
   activeRole: 'student' | 'executive' | null; // Currently active user role profile view
@@ -28,6 +29,7 @@ interface AuthState {
     token: string,
     role: Role,
     userName?: string | null,
+    major?: string | null,
     isExecutive?: boolean
   ) => void; // Directly updates session details
   clearAuth: () => void; // Reset store parameters (logout action)
@@ -37,7 +39,8 @@ interface AuthState {
     email: string,
     password: string,
     firstName?: string,
-    lastName?: string
+    lastName?: string,
+    major?: string
   ) => Promise<Role>; // Registers a new user account profile
   toggleFavouriteClub: (clubId: string) => void; // Toggles favourite status of a club
   toggleSavedEvent: (eventId: string) => void; // Toggles saved status of an event
@@ -52,6 +55,7 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       role: null,
       userName: null,
+      major: null,
       isExecutive: false,
       isLoading: false,
       activeRole: null,
@@ -61,13 +65,19 @@ export const useAuthStore = create<AuthState>()(
       // ----------------------------------------------------
       // Sync Store Actions
       // ----------------------------------------------------
-      setAuth: (token, role, userName = null, isExecutive = false) =>
-        set({ token, role, userName, isExecutive }),
+      setAuth: (
+        token,
+        role,
+        userName = null,
+        major = null,
+        isExecutive = false
+      ) => set({ token, role, userName, major, isExecutive }),
       clearAuth: () =>
         set({
           token: null,
           role: null,
           userName: null,
+          major: null,
           isExecutive: false,
           activeRole: null,
           favouriteClubIds: [],
@@ -133,6 +143,7 @@ export const useAuthStore = create<AuthState>()(
             token,
             role: 'student',
             userName,
+            major: null,
             isExecutive,
             isLoading: false,
             activeRole: 'student',
@@ -165,7 +176,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      register: async (email, password, firstName, lastName) => {
+      register: async (email, password, firstName, lastName, major) => {
         set({ isLoading: true });
 
         // Validate registration fields to use them in simulated logic
@@ -196,6 +207,7 @@ export const useAuthStore = create<AuthState>()(
             token: response.data.token || null,
             role,
             userName,
+            major: major || null,
             isExecutive,
             isLoading: false,
             activeRole: 'student',
@@ -235,6 +247,7 @@ export const useAuthStore = create<AuthState>()(
         token: state.token,
         role: state.role,
         userName: state.userName,
+        major: state.major,
         isExecutive: state.isExecutive,
         activeRole: state.activeRole,
         favouriteClubIds: state.favouriteClubIds,
