@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventCard } from '@/app/components/EventCard';
 import { Button } from '@/app/components/Button';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { Event } from '@/types/event';
 
@@ -94,15 +95,17 @@ export function UpcomingEventsSection({
                 transition={{ duration: 0.3 }}
                 className="flex flex-col"
               >
-                <EventCard
-                  event={event}
-                  onRemindClick={(id) =>
-                    console.log('Remind for HGU event:', id)
-                  }
-                  onTicketsClick={(id) =>
-                    console.log('Tickets for HGU event:', id)
-                  }
-                />
+                <Link href={`/events/${event.id}`} className="block h-full">
+                  <EventCard
+                    event={event}
+                    onRemindClick={(id) =>
+                      console.log('Remind for HGU event:', id)
+                    }
+                    onTicketsClick={(id) =>
+                      console.log('Tickets for HGU event:', id)
+                    }
+                  />
+                </Link>
               </motion.div>
             ))}
           </AnimatePresence>

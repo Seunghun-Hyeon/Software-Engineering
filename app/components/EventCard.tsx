@@ -33,12 +33,14 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
   ({ className, event, onRemindClick, onTicketsClick, ...props }, ref) => {
     // Custom click handlers that prevent event bubbling/parent card actions
     const handleRemind = (e: React.MouseEvent) => {
+      e.preventDefault();
       e.stopPropagation();
       // TODO: Replace with POST /api/events/:id/remind when backend is connected
       if (onRemindClick) onRemindClick(event.id);
     };
 
     const handleTickets = (e: React.MouseEvent) => {
+      e.preventDefault();
       e.stopPropagation();
       // TODO: Replace with POST /api/events/:id/tickets when backend is connected
       if (onTicketsClick) onTicketsClick(event.id);
