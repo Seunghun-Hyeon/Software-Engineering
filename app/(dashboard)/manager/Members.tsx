@@ -219,7 +219,13 @@ export default function Members() {
 
   // Add Member
   const handleAddMember = async () => {
-    if (!foundUser || !clubId) return;
+    if (!foundUser) return;
+    if (!clubId) {
+      setErrorMsg(
+        'No active club context found. Please ensure you are logged in as a club executive.'
+      );
+      return;
+    }
 
     // Prevent duplicate memberships
     const isDuplicate = members.some((m) => m.userId === foundUser.id);
@@ -504,7 +510,11 @@ export default function Members() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4 backdrop-blur-[4px]">
           <div className="animate-in fade-in-50 zoom-in-95 relative w-full max-w-md rounded-[24px] border border-white/30 bg-white/95 p-8 shadow-2xl backdrop-blur-xl duration-150">
             <button
-              onClick={() => setIsAddModalOpen(false)}
+              onClick={() => {
+                setIsAddModalOpen(false);
+                setErrorMsg(null);
+                setSuccessMsg(null);
+              }}
               className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100"
             >
               <X className="h-5 w-5" />
@@ -518,6 +528,20 @@ export default function Members() {
             <p className="mb-6 text-xs font-medium text-gray-400">
               Search a university account by email and configure their role.
             </p>
+
+            {errorMsg && (
+              <div className="mb-4 flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 p-3 text-xs font-medium text-red-600">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-red-500" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
+            {successMsg && (
+              <div className="mb-4 flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-medium text-emerald-600">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                <span>{successMsg}</span>
+              </div>
+            )}
 
             <div className="space-y-4">
               {/* Email lookup input */}
@@ -611,7 +635,11 @@ export default function Members() {
 
             <div className="mt-6 flex justify-end gap-3 border-t border-gray-100 pt-5">
               <button
-                onClick={() => setIsAddModalOpen(false)}
+                onClick={() => {
+                  setIsAddModalOpen(false);
+                  setErrorMsg(null);
+                  setSuccessMsg(null);
+                }}
                 className="rounded-xl px-5 py-2.5 text-xs font-bold text-gray-500 transition hover:bg-gray-50"
               >
                 Cancel
@@ -633,7 +661,11 @@ export default function Members() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4 backdrop-blur-[4px]">
           <div className="animate-in fade-in-50 zoom-in-95 relative w-full max-w-md rounded-[24px] border border-white/30 bg-white/95 p-8 shadow-2xl backdrop-blur-xl duration-150">
             <button
-              onClick={() => setIsEditModalOpen(false)}
+              onClick={() => {
+                setIsEditModalOpen(false);
+                setErrorMsg(null);
+                setSuccessMsg(null);
+              }}
               className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100"
             >
               <X className="h-5 w-5" />
@@ -647,6 +679,20 @@ export default function Members() {
             <p className="mb-6 text-xs font-medium text-gray-400">
               Update member role and joined date. User details are read-only.
             </p>
+
+            {errorMsg && (
+              <div className="mb-4 flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 p-3 text-xs font-medium text-red-600">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-red-500" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
+            {successMsg && (
+              <div className="mb-4 flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-medium text-emerald-600">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                <span>{successMsg}</span>
+              </div>
+            )}
 
             <div className="space-y-4">
               {/* Read-only User Details */}
@@ -708,7 +754,11 @@ export default function Members() {
 
             <div className="mt-6 flex justify-end gap-3 border-t border-gray-100 pt-5">
               <button
-                onClick={() => setIsEditModalOpen(false)}
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setErrorMsg(null);
+                  setSuccessMsg(null);
+                }}
                 className="rounded-xl px-5 py-2.5 text-xs font-bold text-gray-500 transition hover:bg-gray-50"
               >
                 Cancel

@@ -24,7 +24,10 @@ export default async function ClubProfilePage({
 
   let apiEndpoint = '';
   if (process.env.NEXT_PUBLIC_SERVER_URL) {
-    apiEndpoint = `${process.env.NEXT_PUBLIC_SERVER_URL}/clubs`;
+    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+    apiEndpoint = serverUrl.endsWith('/api')
+      ? `${serverUrl}/clubs`
+      : `${serverUrl}/api/clubs`;
   } else {
     const headersList = await headers();
     const host = headersList.get('host') || 'localhost:3000';

@@ -16,7 +16,10 @@ export default async function EventDetailPage({
 
   let apiEndpoint = '';
   if (process.env.NEXT_PUBLIC_SERVER_URL) {
-    apiEndpoint = `${process.env.NEXT_PUBLIC_SERVER_URL}/events`;
+    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+    apiEndpoint = serverUrl.endsWith('/api')
+      ? `${serverUrl}/events`
+      : `${serverUrl}/api/events`;
   } else {
     const headersList = await headers();
     const host = headersList.get('host') || 'localhost:3000';

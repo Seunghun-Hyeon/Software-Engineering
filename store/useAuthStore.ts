@@ -32,7 +32,8 @@ interface AuthState {
     role: Role,
     userName?: string | null,
     major?: string | null,
-    isExecutive?: boolean
+    isExecutive?: boolean,
+    userId?: string | null
   ) => void; // Directly updates session details
   clearAuth: () => void; // Reset store parameters (logout action)
   setActiveRole: (role: 'student' | 'executive') => void; // Set currently active role
@@ -74,8 +75,9 @@ export const useAuthStore = create<AuthState>()(
         role,
         userName = null,
         major = null,
-        isExecutive = false
-      ) => set({ token, role, userName, major, isExecutive }),
+        isExecutive = false,
+        userId = null
+      ) => set({ token, role, userName, major, isExecutive, userId }),
       clearAuth: () =>
         set({
           token: null,
@@ -115,7 +117,7 @@ export const useAuthStore = create<AuthState>()(
         }
 
         try {
-          const response = await api.post('/api/auth/login', {
+          const response = await api.post('/auth/login', {
             email,
             password,
           });
@@ -143,7 +145,7 @@ export const useAuthStore = create<AuthState>()(
           // Fetch all clubs from GET /api/clubs/ using api
           let isExecutive = false;
           try {
-            const clubsResponse = await api.get('/api/clubs/', {
+            const clubsResponse = await api.get('/clubs/', {
               headers: token ? { Authorization: `Bearer ${token}` } : undefined,
             });
             const clubs = clubsResponse.data;
@@ -168,6 +170,7 @@ export const useAuthStore = create<AuthState>()(
             isExecutive,
             isLoading: false,
             activeRole: 'student',
+            userId,
           });
           return 'student';
         } catch (err) {
@@ -209,7 +212,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           const fullName = `${firstName} ${lastName}`;
           const serializedName = major ? `${fullName} | ${major}` : fullName;
-          const response = await api.post('/api/auth/signup', {
+          const response = await api.post('/auth/signup', {
             email,
             password,
             name: serializedName,
@@ -221,6 +224,7 @@ export const useAuthStore = create<AuthState>()(
 
           const userName = fullName;
 
+          const userId = response.data.user?.id || null;
           set({
             token: response.data.token || null,
             role,
@@ -229,6 +233,7 @@ export const useAuthStore = create<AuthState>()(
             isExecutive,
             isLoading: false,
             activeRole: 'student',
+            userId,
           });
           return role;
         } catch (err) {

@@ -236,12 +236,12 @@ export default function SettingsTab() {
         setErrorMsg(null);
       });
 
-      const categoriesPromise = api.get('/api/categories').catch((err) => {
+      const categoriesPromise = api.get('/categories').catch((err) => {
         console.error('Failed to load categories:', err);
         return { data: [] }; // fallback to empty array if categories fetch fails
       });
 
-      const clubsPromise = api.get('/api/clubs/');
+      const clubsPromise = api.get('/clubs/');
 
       const supabase = createClient();
 
@@ -411,7 +411,7 @@ export default function SettingsTab() {
       const categoryIdToSend = selectedCat ? selectedCat.id : null;
 
       // Connected to PATCH /api/clubs/:id
-      await api.patch(`/api/clubs/${clubId}`, {
+      await api.patch(`/clubs/${clubId}`, {
         name: clubInfo.name,
         email: clubInfo.email,
         slogan: clubInfo.slogan,

@@ -36,7 +36,7 @@ export function ClubFilters({
     const fetchCategories = async () => {
       try {
         setIsLoading(true);
-        const response = await api.get('/api/categories');
+        const response = await api.get('/categories');
         const data = response.data;
         if (Array.isArray(data)) {
           const names = data.map((cat: { name: string }) => cat.name);

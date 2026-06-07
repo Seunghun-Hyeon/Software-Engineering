@@ -71,7 +71,7 @@ export default function EventsTab() {
         setErrorMsg(null);
       });
       api
-        .get('/api/clubs/')
+        .get('/clubs/')
         .then((res) => {
           const clubs = res.data;
           console.log('clubs:', clubs, 'userId:', userId);
@@ -91,7 +91,7 @@ export default function EventsTab() {
         })
         .then((myClubId) => {
           if (myClubId) {
-            return api.get('/api/events/').then((res) => {
+            return api.get('/events/').then((res) => {
               const allEvents = res.data;
               if (Array.isArray(allEvents)) {
                 const clubEvents = allEvents.filter(
@@ -136,7 +136,7 @@ export default function EventsTab() {
 
     try {
       // Connected to POST /api/events/
-      const response = await api.post('/api/events/', {
+      const response = await api.post('/events/', {
         club_id: clubId,
         title,
         description,

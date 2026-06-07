@@ -59,7 +59,7 @@ export default function Dashboard() {
           setTotalMembers(count || 0);
 
           // Get events count
-          const eventsResponse = await api.get('/api/events/');
+          const eventsResponse = await api.get('/events/');
           const allEvents = eventsResponse.data;
           if (Array.isArray(allEvents)) {
             const now = new Date();
