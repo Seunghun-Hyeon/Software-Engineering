@@ -28,8 +28,11 @@ export function ApplicationsTab({ applications }: ApplicationsTabProps) {
       key: 'under_review',
       description: 'Document screening',
     },
-    { label: 'Interview', key: 'interview', description: 'Interview meeting' },
-    { label: 'Result', key: 'result', description: 'Final selection' },
+    {
+      label: 'Accepted',
+      key: 'accepted',
+      description: 'Final selection',
+    },
   ];
 
   if (applications.length === 0) {
@@ -73,7 +76,7 @@ export function ApplicationsTab({ applications }: ApplicationsTabProps) {
                       Status:
                     </span>
                     <Badge
-                      variant={app.status === 'result' ? 'emerald' : 'indigo'}
+                      variant={app.status === 'accepted' ? 'emerald' : 'indigo'}
                     >
                       {stages[currentIndex]?.label || app.status}
                     </Badge>
@@ -96,7 +99,7 @@ export function ApplicationsTab({ applications }: ApplicationsTabProps) {
               </div>
 
               {/* Responsive Grid layout for desktop */}
-              <div className="relative z-10 hidden grid-cols-4 gap-4 md:grid">
+              <div className="relative z-10 hidden grid-cols-3 gap-4 md:grid">
                 {stages.map((stage, idx) => {
                   const isCompleted = idx < currentIndex;
                   const isCurrent = idx === currentIndex;

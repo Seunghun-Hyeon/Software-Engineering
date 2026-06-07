@@ -7,7 +7,9 @@ import { WelcomeSection } from '../WelcomeSection';
 import { SavedEventsTab } from '../SavedEventsTab';
 import { FavouriteClubsTab } from '../FavouriteClubsTab';
 import { ApplicationsTab } from '../ApplicationsTab';
+import { MyClubsTab } from '../MyClubsTab';
 import SettingsTab from '../SettingsTab';
+import { createClient } from '@/lib/supabase/client';
 import type {
   StudentProfile,
   SavedEvent,
@@ -41,18 +43,35 @@ interface BackendClub {
   } | null;
 }
 
+interface BackendApplication {
+  id: string | number;
+  club_id: string | number;
+  status?: string;
+  clubs?: {
+    id: string | number;
+    name: string;
+    logo_url?: string | null;
+  } | null;
+}
+
 import api from '@/lib/axios';
 
 export default function StudentDashboard() {
   // Retrieve the authenticated user's name and major from global Zustand auth store
-  const { userName, major } = useAuthStore();
+  const { userName, major, userId } = useAuthStore();
+  const supabase = createClient();
 
   const [activeTab, setActiveTab] = useState<
-    'saved_events' | 'favourite_clubs' | 'applications' | 'settings'
+    | 'saved_events'
+    | 'favourite_clubs'
+    | 'applications'
+    | 'my_clubs'
+    | 'settings'
   >('saved_events');
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
   const [favouriteClubs, setFavouriteClubs] = useState<FavouriteClub[]>([]);
+  const [memberClubs, setMemberClubs] = useState<FavouriteClub[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,30 +100,95 @@ export default function StudentDashboard() {
           console.error('Failed to fetch saved events:', err);
         }
 
-        // Fetch all clubs to populate favourites
-        // Connected to GET /api/clubs/
+        // Fetch all clubs
+        let allClubs: FavouriteClub[] = [];
         try {
-          const favouriteClubsResponse = await api.get('/clubs');
-          const mappedClubs: FavouriteClub[] = (
-            favouriteClubsResponse.data as BackendClub[]
-          ).map((item) => ({
+          const clubsResponse = await api.get('/clubs');
+          allClubs = (clubsResponse.data as BackendClub[]).map((item) => ({
             id: String(item.id),
             name: item.name,
             description: item.description,
             categories: item.categories || { name: 'Uncategorized' },
           }));
-          setFavouriteClubs(mappedClubs);
+          setFavouriteClubs(allClubs);
         } catch (err) {
           console.error('Failed to fetch clubs:', err);
+        }
+
+        // Fetch club memberships from Supabase if userId is present and is a valid UUID
+        const memberClubIds: string[] = [];
+        const isUuid = (val: string | null | undefined): boolean => {
+          if (!val) return false;
+          const uuidRegex =
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          return uuidRegex.test(val);
+        };
+
+        if (userId && isUuid(userId)) {
+          try {
+            const { data: memberRows, error: memberErr } = await supabase
+              .from('club_members')
+              .select('club_id')
+              .eq('user_id', userId);
+
+            if (!memberErr && memberRows) {
+              memberRows.forEach((row) => {
+                memberClubIds.push(String(row.club_id));
+              });
+            }
+          } catch (err) {
+            console.error(
+              'Failed to fetch club memberships from Supabase:',
+              err
+            );
+          }
         }
 
         // Fetch applications
         try {
           const applicationsResponse = await api.get('/applications');
-          setApplications(applicationsResponse.data);
+          const rawApps = applicationsResponse.data;
+          if (Array.isArray(rawApps)) {
+            const mappedApps = rawApps.map((item: BackendApplication) => {
+              let status: 'submitted' | 'under_review' | 'accepted' =
+                'submitted';
+              const dbStatus = String(item.status || '').toLowerCase();
+              if (dbStatus === 'accepted') {
+                status = 'accepted';
+              } else if (
+                dbStatus === 'pending' ||
+                dbStatus === 'under_review'
+              ) {
+                status = 'under_review';
+              } else {
+                status = 'submitted';
+              }
+
+              // Also collect club ID if accepted
+              if (dbStatus === 'accepted') {
+                memberClubIds.push(String(item.club_id));
+              }
+
+              return {
+                id: String(item.id),
+                clubName: item.clubs?.name || 'Unknown Club',
+                status,
+              };
+            });
+            setApplications(mappedApps);
+          }
         } catch (err) {
           console.error('Failed to fetch applications:', err);
         }
+
+        // Deduplicate member club IDs
+        const uniqueMemberClubIds = Array.from(new Set(memberClubIds));
+
+        // Filter allClubs to get student joined clubs
+        const studentJoinedClubs = allClubs.filter((club) =>
+          uniqueMemberClubIds.includes(club.id)
+        );
+        setMemberClubs(studentJoinedClubs);
 
         // Setup student profile details dynamically
         setProfile({
@@ -123,7 +207,7 @@ export default function StudentDashboard() {
     };
 
     fetchDashboardData();
-  }, [userName, major]);
+  }, [userName, major, userId, supabase]);
 
   return (
     <div className="relative min-h-screen w-full bg-[#F9FAFB] font-sans selection:bg-[#4F46E5]/20">
@@ -171,6 +255,18 @@ export default function StudentDashboard() {
           </button>
           <button
             type="button"
+            onClick={() => setActiveTab('my_clubs')}
+            className={cn(
+              'rounded-[14px] px-5 py-2.5 text-sm font-bold whitespace-nowrap transition-all duration-300 focus:outline-none',
+              activeTab === 'my_clubs'
+                ? 'bg-[#4F46E5] text-white shadow-md'
+                : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'
+            )}
+          >
+            My Clubs
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveTab('settings')}
             className={cn(
               'rounded-[14px] px-5 py-2.5 text-sm font-bold whitespace-nowrap transition-all duration-300 focus:outline-none',
@@ -203,6 +299,7 @@ export default function StudentDashboard() {
             {activeTab === 'applications' && (
               <ApplicationsTab applications={applications} />
             )}
+            {activeTab === 'my_clubs' && <MyClubsTab clubs={memberClubs} />}
             {activeTab === 'settings' && <SettingsTab />}
           </div>
         )}
