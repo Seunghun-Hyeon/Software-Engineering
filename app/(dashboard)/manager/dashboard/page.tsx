@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 // Lucide 아이콘 라이브러리 사용 (없으시다면 npm i lucide-react 설치 혹은 svg로 대체 가능)
 import {
   User,
@@ -18,14 +18,24 @@ import RecruitmentTab from '../Recruitment';
 import EventsTab from '../Events';
 import SettingsTab from '../Settings';
 
-type Tab = 'clubProfile' | 'members' | 'recruitment' | 'events' | 'settings';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function ManagerDashboard() {
-  const [activeTab, setActiveTab] = useState<Tab>('clubProfile');
+type Tab = 'club-profile' | 'members' | 'recruitment' | 'events' | 'settings';
+
+function DashboardContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = (searchParams?.get('tab') || '') as Tab;
+  const [activeTab, setActiveTab] = useState<Tab>(tabParam || 'club-profile');
+
+  const handleTabChange = (tabId: Tab) => {
+    setActiveTab(tabId);
+    router.push(`/manager/dashboard?tab=${tabId}`);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'clubProfile':
+      case 'club-profile':
         return <ClubProfileTab />;
       case 'members':
         return <MembersTab />;
@@ -42,7 +52,7 @@ export default function ManagerDashboard() {
 
   // 메뉴 아이템 구조화
   const menuItems = [
-    { id: 'clubProfile', label: 'Club Profile', icon: User },
+    { id: 'club-profile', label: 'Club Profile', icon: User },
     { id: 'members', label: 'Members', icon: Users },
     { id: 'recruitment', label: 'Recruitment', icon: ClipboardList },
     { id: 'events', label: 'Events', icon: Calendar },
@@ -78,7 +88,7 @@ export default function ManagerDashboard() {
 
       {/* 하단 메인 레이아웃 (사이드바 + 콘텐츠) */}
       <div className="flex w-full flex-1 overflow-hidden">
-        {/* 2. 왼쪽 고정 사이드바 */}
+        {/* 2.  왼쪽 고정 사이드바 */}
         <aside className="flex h-full w-64 shrink-0 flex-col justify-between border-r border-slate-100 bg-[#F8FAFC] p-4">
           {/* 상단: 프로필 & 메뉴 그룹 */}
           <div className="space-y-6">
@@ -103,7 +113,7 @@ export default function ManagerDashboard() {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => setActiveTab(item.id)}
+                    onClick={() => handleTabChange(item.id)}
                     className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
                       isActive
                         ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100'
@@ -124,7 +134,7 @@ export default function ManagerDashboard() {
           {/* 하단: + Create Event 버튼 */}
           <div className="pt-4">
             <button
-              onClick={() => setActiveTab('events')} // 클릭 시 이벤트 탭으로 이동 등 커스텀 가능
+              onClick={() => handleTabChange('events')} // 클릭 시 이벤트 탭으로 이동 등 커스텀 가능
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3.5 text-sm font-bold text-white shadow-md shadow-indigo-100 transition duration-200 hover:bg-indigo-700"
             >
               <Plus size={18} strokeWidth={3} />
@@ -141,5 +151,19 @@ export default function ManagerDashboard() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function ManagerDashboard() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center bg-[#F8FAFC] font-sans font-bold text-slate-500">
+          Loading dashboard...
+        </div>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   );
 }
