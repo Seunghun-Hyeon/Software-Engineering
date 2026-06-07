@@ -110,7 +110,7 @@ export const useAuthStore = create<AuthState>()(
         }
 
         try {
-          const response = await api.post('/api/auth/login', {
+          const response = await api.post('/auth/login', {
             email,
             password,
           });
@@ -122,7 +122,7 @@ export const useAuthStore = create<AuthState>()(
           // Fetch all clubs from GET /api/clubs/ using api
           let isExecutive = false;
           try {
-            const clubsResponse = await api.get('/api/clubs/', {
+            const clubsResponse = await api.get('/clubs/', {
               headers: token ? { Authorization: `Bearer ${token}` } : undefined,
             });
             const clubs = clubsResponse.data;
@@ -187,9 +187,9 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           // TODO: Replace this simulated signup delay with an actual POST request to the backend:
-          // const response = await axios.post('/api/auth/signup', { email, password, firstName, lastName });
+          // const response = await axios.post('/auth/signup', { email, password, firstName, lastName });
           const fullName = `${firstName} ${lastName}`;
-          const response = await api.post('/api/auth/signup', {
+          const response = await api.post('/auth/signup', {
             email,
             password,
             name: fullName,
@@ -197,7 +197,7 @@ export const useAuthStore = create<AuthState>()(
           });
 
           // TODO: Replace with actual role and isExecutive value from backend API response
-          // const response = await axios.post('/api/auth/signup', { email, password, firstName, lastName });
+          // const response = await axios.post('/auth/signup', { email, password, firstName, lastName });
           const role: Role = 'student';
           const isExecutive = false;
 
