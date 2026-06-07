@@ -12,11 +12,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, AlertCircle, Sparkles } from 'lucide-react';
 import { BentoCard as Card } from '@/app/components/BentoCard';
@@ -26,7 +24,7 @@ import { Button } from '@/app/components/Button';
 export default function LoginPage() {
   const router = useRouter();
   // Fetch authentication state and actions from the global Zustand store
-  const { login, isLoading, isExecutive, setActiveRole } = useAuthStore();
+  const { login, isLoading, setActiveRole } = useAuthStore();
 
   // Form State parameters
   const [email, setEmail] = useState('');
@@ -35,6 +33,9 @@ export default function LoginPage() {
   // UI status feedback messages (errors & successes)
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Track whether the role selection UI should be visible
+  const [showRoleSelection, setShowRoleSelection] = useState(false);
 
   // Email format validation helper (checks for presence of local character values and domain tags)
   const isValidEmail = (emailStr: string) => {
@@ -64,9 +65,14 @@ export default function LoginPage() {
     try {
       // Execute the API handler simulation from the auth store
       await login(email, password);
-      setSuccessMessage('Successfully signed in! Redirecting...');
 
-      router.push('/');
+      const isExec = useAuthStore.getState().isExecutive;
+      if (isExec) {
+        setShowRoleSelection(true);
+      } else {
+        setSuccessMessage('Successfully signed in! Redirecting...');
+        router.push('/');
+      }
     } catch (err) {
       const message =
         err instanceof Error
@@ -75,6 +81,81 @@ export default function LoginPage() {
       setErrorMessage(message);
     }
   };
+
+  if (showRoleSelection) {
+    return (
+      <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F9FAFB] px-4 py-12 font-sans selection:bg-[#4F46E5]/20">
+        {/* Premium background decorative blur shapes */}
+        <div className="pointer-events-none absolute top-[-10%] left-[-10%] h-[500px] w-[500px] rounded-full bg-indigo-200/40 blur-[120px]" />
+        <div className="pointer-events-none absolute right-[-10%] bottom-[-10%] h-[500px] w-[500px] rounded-full bg-emerald-100/40 blur-[120px]" />
+        <div className="pointer-events-none absolute top-[30%] right-[20%] h-[300px] w-[300px] rounded-full bg-violet-100/50 blur-[120px]" />
+
+        {/* Main Glassmorphic layout container wrapper */}
+        <main className="relative z-10 w-full max-w-[720px] px-4">
+          <div className="mb-10 text-center">
+            <h2 className="font-display text-3xl font-extrabold tracking-tight text-gray-800">
+              Welcome Back
+            </h2>
+            <p className="mt-2 text-sm text-gray-500">
+              Please choose which account workspace you want to access
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card className="flex h-full flex-col justify-between transition-all duration-300 hover:shadow-[0px_20px_40px_rgba(79,70,229,0.1)]">
+              <div className="flex-grow">
+                <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+                  Student
+                </span>
+                <h3 className="font-display mt-3 text-xl font-bold text-gray-800">
+                  Student Account
+                </h3>
+                <p className="mt-2 text-xs leading-relaxed text-gray-500">
+                  Browse clubs, save events, track applications
+                </p>
+              </div>
+              <div className="mt-6">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setActiveRole('student');
+                    router.push('/');
+                  }}
+                >
+                  Continue
+                </Button>
+              </div>
+            </Card>
+
+            <Card className="flex h-full flex-col justify-between transition-all duration-300 hover:shadow-[0px_20px_40px_rgba(79,70,229,0.1)]">
+              <div className="flex-grow">
+                <span className="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700">
+                  Executive
+                </span>
+                <h3 className="font-display mt-3 text-xl font-bold text-gray-800">
+                  Executive Account
+                </h3>
+                <p className="mt-2 text-xs leading-relaxed text-gray-500">
+                  Manage your club, review applications
+                </p>
+              </div>
+              <div className="mt-6">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setActiveRole('executive');
+                    router.push('/manager/dashboard');
+                  }}
+                >
+                  Continue
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F9FAFB] px-4 py-12 font-sans selection:bg-[#4F46E5]/20">
