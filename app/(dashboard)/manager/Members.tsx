@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-// 사용하지 않는 아이콘들을 삭제하고 실제 사용하는 아이콘만 남겼습니다.
-import { Search, UserPlus, X } from 'lucide-react';
+import { Search, UserPlus, X, Edit2, Trash2, Check } from 'lucide-react';
 
 interface Member {
   id: string;
@@ -26,6 +25,10 @@ export default function Members() {
     major: '',
     role: 'Member',
   });
+
+  // 인라인 편집을 위한 상태 추가
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ name: '', major: '', role: '' });
 
   // 초기 멤버 데이터 세팅
   const [members, setMembers] = useState<Member[]>([
@@ -77,7 +80,40 @@ export default function Members() {
 
   // 회원 삭제 기능
   const handleRemove = (id: string) => {
-    setMembers(members.filter((member) => member.id !== id));
+    if (confirm('Are you sure you want to remove this member?')) {
+      setMembers(members.filter((member) => member.id !== id));
+    }
+  };
+
+  // 회원 인라인 편집 시작 기능
+  const startEdit = (member: Member) => {
+    setEditingId(member.id);
+    setEditForm({ name: member.name, major: member.major, role: member.role });
+  };
+
+  // 회원 인라인 편집 저장 기능
+  const saveEdit = (id: string) => {
+    const roleColors: Record<string, string> = {
+      'Club President': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+      Treasurer: 'bg-blue-50 text-blue-600 border-blue-100',
+      Committee: 'bg-purple-50 text-purple-600 border-purple-100',
+      Member: 'bg-slate-50 text-slate-600 border-slate-200',
+    };
+
+    setMembers(
+      members.map((m) =>
+        m.id === id
+          ? {
+              ...m,
+              name: editForm.name,
+              major: editForm.major,
+              role: editForm.role,
+              roleColor: roleColors[editForm.role] || roleColors['Member'],
+            }
+          : m
+      )
+    );
+    setEditingId(null);
   };
 
   // 회원 추가 기능
@@ -126,7 +162,6 @@ export default function Members() {
   return (
     <div className="flex min-h-screen flex-col bg-[#F8FAFC] font-sans text-slate-900 antialiased">
       <div className="flex flex-1">
-        {/* 우측 메인 콘텐츠 영역 (Member Management) */}
         <main className="flex-1 overflow-y-auto p-10">
           {/* 타이틀 및 상단 우측 액션 바 컨트롤 */}
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -139,7 +174,6 @@ export default function Members() {
               </p>
             </div>
 
-            {/* 우측 정렬 버튼 그룹 (Add Member + Search) */}
             <div className="flex items-center gap-3 self-end md:self-center">
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -171,86 +205,156 @@ export default function Members() {
                   <tr className="border-b border-gray-100 bg-slate-50/50 text-[11px] font-bold tracking-wider text-gray-400 uppercase">
                     <th className="w-[30%] px-6 py-4">MEMBER NAME</th>
                     <th className="w-[25%] px-6 py-4">MAJOR</th>
-                    <th className="w-[20%] px-6 py-4">ROLE</th>
-                    <th className="w-[15%] px-6 py-4">JOIN DATE</th>
-                    <th className="w-[10%] px-6 py-4 text-right">ACTIONS</th>
+                    <th className="w-[20%] px-6 py-4">ROLE POSITION</th>
+                    <th className="w-[15%] px-6 py-4">JOINED DATE</th>
+                    <th className="w-[10%] px-6 py-4 text-center">ACTIONS</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {filteredMembers.length > 0 ? (
-                    filteredMembers.map((member) => (
+                <tbody className="divide-y divide-gray-50 text-xs font-semibold">
+                  {filteredMembers.map((member) => {
+                    const isEditing = editingId === member.id;
+                    return (
                       <tr
                         key={member.id}
-                        className="group transition-colors hover:bg-gray-50/40"
+                        className="transition-colors hover:bg-gray-50/40"
                       >
-                        {/* 멤버 이름 & 이메일 섹션 */}
-                        <td className="px-6 py-4">
+                        {/* 이름 열 */}
+                        <td className="px-6 py-4.5">
                           <div className="flex items-center gap-3">
                             <div
                               className={cn(
-                                'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/5 text-xs font-bold shadow-inner',
+                                'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold',
                                 member.avatarColor
                               )}
                             >
                               {member.initials}
                             </div>
-                            <div>
-                              <div className="text-sm font-bold tracking-tight text-gray-800">
-                                {member.name}
-                              </div>
-                              <div className="mt-0.5 text-xs font-medium text-gray-400">
-                                {member.email}
-                              </div>
+                            <div className="flex flex-col">
+                              {isEditing ? (
+                                <input
+                                  type="text"
+                                  value={editForm.name}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm,
+                                      name: e.target.value,
+                                    })
+                                  }
+                                  className="rounded border border-gray-200 px-2 py-1 text-xs outline-none focus:border-indigo-500"
+                                />
+                              ) : (
+                                <>
+                                  <span className="font-bold text-gray-900">
+                                    {member.name}
+                                  </span>
+                                  <span className="text-[10px] font-medium text-gray-400">
+                                    {member.email}
+                                  </span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </td>
 
-                        {/* 학과 전공 */}
-                        <td className="px-6 py-4 text-sm font-medium text-gray-500">
-                          {member.major}
+                        {/* 전공 열 */}
+                        <td className="px-6 py-4.5 text-gray-600">
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={editForm.major}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  major: e.target.value,
+                                })
+                              }
+                              className="rounded border border-gray-200 px-2 py-1 text-xs outline-none focus:border-indigo-500"
+                            />
+                          ) : (
+                            member.major
+                          )}
                         </td>
 
-                        {/* 역할 직책 뱃지 */}
-                        <td className="px-6 py-4">
-                          <span
-                            className={cn(
-                              'inline-flex items-center rounded-md border px-2.5 py-1 text-[11px] font-bold',
-                              member.roleColor
-                            )}
-                          >
-                            {member.role}
-                          </span>
+                        {/* 역할 열 */}
+                        <td className="px-6 py-4.5">
+                          {isEditing ? (
+                            <select
+                              value={editForm.role}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  role: e.target.value,
+                                })
+                              }
+                              className="rounded border border-gray-200 bg-white px-2 py-1 text-xs outline-none focus:border-indigo-500"
+                            >
+                              <option value="Member">Member</option>
+                              <option value="Committee">Committee</option>
+                              <option value="Treasurer">Treasurer</option>
+                              <option value="Club President">
+                                Club President
+                              </option>
+                            </select>
+                          ) : (
+                            <span
+                              className={cn(
+                                'inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-extrabold tracking-wide uppercase',
+                                member.roleColor
+                              )}
+                            >
+                              {member.role}
+                            </span>
+                          )}
                         </td>
 
-                        {/* 가입 일자 */}
-                        <td className="px-6 py-4 text-xs font-semibold tracking-wide text-gray-400">
+                        {/* 가입일 열 */}
+                        <td className="px-6 py-4.5 font-medium text-gray-400">
                           {member.joinDate}
                         </td>
 
-                        {/* 관리 액션 버튼 */}
-                        <td className="space-x-3 px-6 py-4 text-right text-xs font-bold">
-                          <button className="text-indigo-600 transition-colors hover:text-indigo-900">
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleRemove(member.id)}
-                            className="text-rose-500 transition-colors hover:text-rose-800"
-                          >
-                            Remove
-                          </button>
+                        {/* 액션 제어 버튼 기능 바인딩 */}
+                        <td className="px-6 py-4.5 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            {isEditing ? (
+                              <>
+                                <button
+                                  onClick={() => saveEdit(member.id)}
+                                  className="rounded p-1 text-emerald-600 hover:bg-emerald-50"
+                                  title="Save Changes"
+                                >
+                                  <Check size={14} />
+                                </button>
+                                <button
+                                  onClick={() => setEditingId(null)}
+                                  className="rounded p-1 text-gray-400 hover:bg-gray-100"
+                                  title="Cancel"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => startEdit(member)}
+                                  className="rounded-lg p-1.5 text-gray-400 transition hover:bg-indigo-50 hover:text-indigo-600"
+                                  title="Edit Member"
+                                >
+                                  <Edit2 size={13} />
+                                </button>
+                                <button
+                                  onClick={() => handleRemove(member.id)}
+                                  className="rounded-lg p-1.5 text-gray-400 transition hover:bg-rose-50 hover:text-rose-600"
+                                  title="Remove Member"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="bg-white py-12 text-center text-sm font-medium text-gray-400"
-                      >
-                        No matching members found.
-                      </td>
-                    </tr>
-                  )}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -258,7 +362,7 @@ export default function Members() {
         </main>
       </div>
 
-      {/* 신규 멤버 추가 팝업 모달 */}
+      {/* 새 멤버 추가 모달 */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4 backdrop-blur-[4px]">
           <div className="animate-in fade-in-50 zoom-in-95 relative w-full max-w-md rounded-3xl border border-gray-100 bg-white p-8 shadow-2xl duration-150">
@@ -274,11 +378,7 @@ export default function Members() {
             <h2 className="text-lg font-bold tracking-tight text-gray-900">
               Add New Member
             </h2>
-            <p className="mb-6 text-xs font-medium text-gray-400">
-              Register a new active member to your roster.
-            </p>
-
-            <div className="space-y-4">
+            <div className="mt-4 space-y-4">
               <div>
                 <label className="mb-1.5 block text-[10px] font-bold tracking-wider text-gray-400 uppercase">
                   Full Name
@@ -289,8 +389,8 @@ export default function Members() {
                   onChange={(e) =>
                     setNewMember({ ...newMember, name: e.target.value })
                   }
-                  className="w-full rounded-xl border border-gray-200 bg-[#FAFAFA] px-4 py-2.5 text-xs font-medium transition outline-none focus:border-[#4F46E5] focus:bg-white"
-                  placeholder="e.g. John Doe"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold"
+                  placeholder="John Doe"
                 />
               </div>
               <div>
@@ -303,13 +403,13 @@ export default function Members() {
                   onChange={(e) =>
                     setNewMember({ ...newMember, email: e.target.value })
                   }
-                  className="w-full rounded-xl border border-gray-200 bg-[#FAFAFA] px-4 py-2.5 text-xs font-medium transition outline-none focus:border-[#4F46E5] focus:bg-white"
-                  placeholder="e.g. john@school.edu"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold"
+                  placeholder="john@school.edu"
                 />
               </div>
               <div>
                 <label className="mb-1.5 block text-[10px] font-bold tracking-wider text-gray-400 uppercase">
-                  Major
+                  Major Department
                 </label>
                 <input
                   type="text"
@@ -317,8 +417,8 @@ export default function Members() {
                   onChange={(e) =>
                     setNewMember({ ...newMember, major: e.target.value })
                   }
-                  className="w-full rounded-xl border border-gray-200 bg-[#FAFAFA] px-4 py-2.5 text-xs font-medium transition outline-none focus:border-[#4F46E5] focus:bg-white"
-                  placeholder="e.g. Visual Design"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold"
+                  placeholder="Computer Science"
                 />
               </div>
               <div>
@@ -339,7 +439,6 @@ export default function Members() {
                 </select>
               </div>
             </div>
-
             <div className="mt-6 flex justify-end gap-3 border-t border-gray-100 pt-5">
               <button
                 onClick={() => setIsModalOpen(false)}
