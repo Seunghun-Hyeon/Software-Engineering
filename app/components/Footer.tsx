@@ -105,14 +105,7 @@ export function Footer() {
                   FAQ
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/guidelines"
-                  className="hover:text-primary transition-colors"
-                >
-                  Club Guidelines
-                </Link>
-              </li>
+
               <li>
                 <Link
                   href="/support"

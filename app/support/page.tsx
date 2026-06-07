@@ -140,11 +140,8 @@ export default function SupportPage() {
               </Button>
             </Link>
             <Link href="/clubs">
-              <Button
-                variant="outline"
-                className="rounded-full border border-gray-200 bg-white px-8 py-4 text-base font-semibold text-gray-900 shadow-sm transition-all duration-300 hover:bg-gray-50"
-              >
-                Browse directory
+              <Button className="rounded-full border border-gray-200 bg-white px-8 py-4 text-base font-semibold text-gray-900 shadow-sm transition-all duration-300 hover:bg-gray-50">
+                Browse clubs
               </Button>
             </Link>
           </div>

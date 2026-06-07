@@ -106,13 +106,34 @@ export const useAuthStore = create<AuthState>()(
           });
 
           const token = response.data.session?.access_token || null;
+          const userId = response.data.user.id;
           const userName = null; // TODO: Backend needs to return user name in login response
+
+          // Fetch all clubs from GET /api/clubs/ using api
+          let isExecutive = false;
+          try {
+            const clubsResponse = await api.get('/api/clubs/', {
+              headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+            });
+            const clubs = clubsResponse.data;
+            if (Array.isArray(clubs)) {
+              isExecutive = clubs.some(
+                (club: { exec_user_id: string }) => club.exec_user_id === userId
+              );
+            }
+          } catch (clubErr) {
+            const axiosErr = clubErr as AxiosErrorLike;
+            console.error(
+              'Failed to check executive status:',
+              axiosErr.message || axiosErr
+            );
+          }
 
           set({
             token,
             role: 'student',
             userName,
-            isExecutive: false,
+            isExecutive,
             isLoading: false,
             activeRole: 'student',
           });
@@ -222,3 +243,15 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+// Add axios interceptor to automatically send Bearer token
+api.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
+  if (token) {
+    if (!config.headers) {
+      config.headers = {} as typeof config.headers;
+    }
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});

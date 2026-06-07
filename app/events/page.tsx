@@ -60,7 +60,9 @@ export default function EventsPage() {
         </header>
 
         {/* Shared Filters */}
-        <EventFilters />
+        <div className="relative z-10">
+          <EventFilters />
+        </div>
 
         {isLoading ? (
           <div className="flex h-64 items-center justify-center">
