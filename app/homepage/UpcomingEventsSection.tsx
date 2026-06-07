@@ -31,10 +31,10 @@ export function UpcomingEventsSection({
     <section className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
       <div className="mb-10 flex flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left">
         <div>
-          <h2 className="font-display text-2.5xl font-black tracking-tight text-gray-900 sm:text-3xl">
+          <h2 className="font-display text-2xl font-black tracking-tight text-gray-900 sm:text-3xl">
             Upcoming Events
           </h2>
-          <p className="mt-1 font-sans text-sm text-gray-500">
+          <p className="mt-1 font-sans text-base text-gray-500">
             Keep track of the official dates for concerts, festivals, and more.
           </p>
         </div>
@@ -46,7 +46,7 @@ export function UpcomingEventsSection({
               setVisibleEventsCount(3);
             }}
             className={cn(
-              'cursor-pointer rounded-full border-0 px-5 py-2 text-xs font-extrabold transition-all duration-300 outline-none',
+              'cursor-pointer rounded-full border-0 px-5 py-2 text-sm font-extrabold transition-all duration-300 outline-none',
               activeEventTab === 'this-week'
                 ? 'bg-[#4F46E5] text-white shadow-md'
                 : 'text-gray-500 hover:text-[#4F46E5]'
@@ -60,7 +60,7 @@ export function UpcomingEventsSection({
               setVisibleEventsCount(3);
             }}
             className={cn(
-              'cursor-pointer rounded-full border-0 px-5 py-2 text-xs font-extrabold transition-all duration-300 outline-none',
+              'cursor-pointer rounded-full border-0 px-5 py-2 text-sm font-extrabold transition-all duration-300 outline-none',
               activeEventTab === 'next-month'
                 ? 'bg-[#4F46E5] text-white shadow-md'
                 : 'text-gray-500 hover:text-[#4F46E5]'
@@ -113,7 +113,7 @@ export function UpcomingEventsSection({
         <div className="mt-12 flex justify-center select-none">
           <Button
             onClick={() => setVisibleEventsCount((prev) => prev + 3)}
-            className="w-auto border border-gray-200 bg-transparent px-8 py-3.5 text-xs font-bold text-gray-700 shadow-none hover:bg-gray-50 hover:shadow-none"
+            className="w-auto border border-gray-200 bg-transparent px-8 py-3.5 text-sm font-bold text-gray-700 shadow-none hover:bg-gray-50 hover:shadow-none"
           >
             Load More Events
           </Button>

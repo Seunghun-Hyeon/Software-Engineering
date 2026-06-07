@@ -10,25 +10,25 @@ export function FeaturesSection() {
           <h2 className="font-display text-3xl leading-tight font-black tracking-tight text-gray-900 sm:text-4xl">
             Tired of missing out?
           </h2>
-          <p className="mt-4 font-sans text-sm leading-relaxed text-gray-500">
+          <p className="mt-4 font-sans text-base leading-relaxed text-gray-500">
             ClubHub brings the campus to you. One place to find events and join
             the clubs you love without checking twenty different group chats.
           </p>
 
           <div className="mt-8 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#10B981]/30 bg-[#10B981]/15 shadow-sm">
-                <span className="text-xs font-black text-[#10B981]">✓</span>
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#4F46E5]/30 bg-[#4F46E5]/15 shadow-sm">
+                <span className="text-xs font-black text-[#4F46E5]">✓</span>
               </div>
-              <span className="font-sans text-sm font-bold text-gray-800">
+              <span className="font-sans text-base font-bold text-gray-800">
                 Verified Organizations
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#10B981]/30 bg-[#10B981]/15 shadow-sm">
-                <span className="text-xs font-black text-[#10B981]">✓</span>
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#4F46E5]/30 bg-[#4F46E5]/15 shadow-sm">
+                <span className="text-xs font-black text-[#4F46E5]">✓</span>
               </div>
-              <span className="font-sans text-sm font-bold text-gray-800">
+              <span className="font-sans text-base font-bold text-gray-800">
                 Real-time Updates
               </span>
             </div>
@@ -42,28 +42,28 @@ export function FeaturesSection() {
               description:
                 'Get notified immediately when your favorite HGU squads announce tryouts or general body meetings.',
               icon: Bell,
-              colorClass: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+              colorClass: 'text-[#4F46E5] bg-[#4F46E5]/10 border-[#4F46E5]/20',
             },
             {
               title: 'Easy Applications',
               description:
                 'Submit standardized applications to multiple clubs directly within our central applicant store.',
               icon: FileText,
-              colorClass: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+              colorClass: 'text-[#4F46E5] bg-[#4F46E5]/10 border-[#4F46E5]/20',
             },
             {
               title: 'Smart Scheduling',
               description:
                 'Sync events seamlessly into Google Calendar, ensuring zero academic conflicts with major exams.',
               icon: Clock,
-              colorClass: 'text-amber-500 bg-amber-50 border-amber-100',
+              colorClass: 'text-[#4F46E5] bg-[#4F46E5]/10 border-[#4F46E5]/20',
             },
             {
               title: 'Member Community',
               description:
                 'Engage with fellow student leads, developers, designers, and performers in dedicated public boards.',
               icon: Users,
-              colorClass: 'text-rose-500 bg-rose-50 border-rose-100',
+              colorClass: 'text-[#4F46E5] bg-[#4F46E5]/10 border-[#4F46E5]/20',
             },
           ].map((feat, idx) => (
             <FeatureTile

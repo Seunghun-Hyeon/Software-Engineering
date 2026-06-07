@@ -158,16 +158,16 @@ export function ExploreInterestsSection(_props: ExploreInterestsSectionProps) {
     <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
       <div className="mb-10 flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:items-end sm:text-left">
         <div>
-          <h2 className="font-display text-2.5xl font-black tracking-tight text-gray-900 sm:text-3xl">
+          <h2 className="font-display text-2xl font-black tracking-tight text-gray-900 sm:text-3xl">
             Explore Interests
           </h2>
-          <p className="mt-1.5 font-sans text-sm text-gray-500">
+          <p className="mt-1.5 font-sans text-base text-gray-500">
             Find the community that fits your vibe
           </p>
         </div>
         <Link
           href="/clubs"
-          className="group inline-flex items-center gap-1.5 font-sans text-sm font-bold text-[#4F46E5] transition-all hover:text-[#4F46E5]"
+          className="group inline-flex items-center gap-1.5 font-sans text-base font-bold text-[#4F46E5] transition-all hover:text-[#4F46E5]"
         >
           <span>View All</span>
           <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />

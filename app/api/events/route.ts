@@ -1,16 +1,24 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  try {
+    const serverUrl =
+      process.env.NEXT_PUBLIC_SERVER_URL ||
+      'https://handong-club-hub-backend.onrender.com/api';
+    const response = await fetch(`${serverUrl}/events`);
 
-  const { data: events, error } = await supabase.from('events').select('*');
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: `Failed to fetch events: ${response.statusText}` },
+        { status: response.status }
+      );
+    }
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const events = await response.json();
+    return NextResponse.json(events);
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error occurred';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
-
-  return NextResponse.json(events);
 }
