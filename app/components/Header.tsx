@@ -41,7 +41,7 @@ export function Header(props: { activeLabel?: string }) {
   return (
     <Suspense
       fallback={
-        <header className="fixed top-0 right-0 left-0 z-[150] h-16 border-b border-white/20 bg-white/70" />
+        <header className="fixed top-0 right-0 left-0 z-150 h-16 border-b border-white/20 bg-white/70" />
       }
     >
       <HeaderContent {...props} />
@@ -117,7 +117,7 @@ function HeaderContent({}: { activeLabel?: string }) {
     pathname.startsWith('/manager/dashboard') && tab === 'events';
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-[150] border-b border-white/20 bg-white/70 backdrop-blur-[20px]">
+    <header className="fixed top-0 right-0 left-0 z-150 border-b border-white/20 bg-white/70 backdrop-blur-[20px]">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-4 lg:px-8">
         <Link
           href={
@@ -214,7 +214,7 @@ function HeaderContent({}: { activeLabel?: string }) {
         <div className="hidden items-center gap-4 md:flex">
           {!hydrated ? (
             <div className="h-9 w-[150px]" aria-hidden="true" />
-          ) : !token ? (
+          ) : !token && !activeRole ? (
             <>
               <Link
                 href="/login"
@@ -233,38 +233,8 @@ function HeaderContent({}: { activeLabel?: string }) {
                 Sign Up
               </Link>
             </>
-          ) : activeRole === 'student' && !isExecutive ? (
+          ) : activeRole === 'student' ? (
             <>
-              <Link
-                href="/student/dashboard"
-                className={cn(
-                  'cursor-pointer rounded-full bg-[#4F46E5] px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(79,70,229,0.15)] transition-all duration-300 hover:bg-[#4338CA]'
-                )}
-              >
-                My Profile
-              </Link>
-              <button
-                onClick={handleSignOut}
-                className={cn(
-                  'cursor-pointer rounded-full border border-gray-200 bg-white/30 px-4 py-2 text-sm font-semibold text-gray-700 transition-all duration-300 hover:bg-white/80'
-                )}
-              >
-                Sign Out
-              </button>
-            </>
-          ) : activeRole === 'student' && isExecutive ? (
-            <>
-              <button
-                onClick={() => {
-                  setActiveRole('executive');
-                  router.push('/manager/dashboard');
-                }}
-                className={cn(
-                  'cursor-pointer rounded-full border border-[#4F46E5] bg-transparent px-4 py-2 text-sm font-semibold text-[#4F46E5] transition-all duration-300 hover:bg-[#4F46E5]/10'
-                )}
-              >
-                Switch to Executive
-              </button>
               <Link
                 href="/student/dashboard"
                 className={cn(
@@ -285,17 +255,6 @@ function HeaderContent({}: { activeLabel?: string }) {
           ) : (
             // activeRole === 'executive'
             <>
-              <button
-                onClick={() => {
-                  setActiveRole('student');
-                  router.push('/');
-                }}
-                className={cn(
-                  'cursor-pointer rounded-full border border-[#4F46E5] bg-transparent px-4 py-2 text-sm font-semibold text-[#4F46E5] transition-all duration-300 hover:bg-[#4F46E5]/10'
-                )}
-              >
-                Switch to Student
-              </button>
               <Link
                 href="/manager/dashboard"
                 className={cn(
@@ -334,7 +293,7 @@ function HeaderContent({}: { activeLabel?: string }) {
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div className="absolute top-16 right-0 left-0 border-t border-white/20 bg-white/85 px-6 pt-4 pb-8 shadow-xl backdrop-blur-[20px] md:hidden">
+        <div className="absolute top-16 right-0 left-0 z-200 border-t border-white/20 bg-white/85 px-6 pt-4 pb-8 shadow-xl backdrop-blur-[20px] md:hidden">
           <nav className="flex flex-col gap-4">
             {activeRole === 'executive' ? (
               <>
@@ -408,7 +367,7 @@ function HeaderContent({}: { activeLabel?: string }) {
             <div className="mt-4 flex flex-col gap-3 border-t border-gray-100 pt-4">
               {!hydrated ? (
                 <div className="h-9 w-full animate-pulse rounded-full bg-gray-200" />
-              ) : !token ? (
+              ) : !token && !activeRole ? (
                 <>
                   <Link
                     href="/login"
@@ -425,37 +384,8 @@ function HeaderContent({}: { activeLabel?: string }) {
                     Sign Up
                   </Link>
                 </>
-              ) : activeRole === 'student' && !isExecutive ? (
+              ) : activeRole === 'student' ? (
                 <>
-                  <Link
-                    href="/student/dashboard"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="rounded-full bg-[#4F46E5] py-2.5 text-center text-sm font-semibold text-white shadow-md hover:bg-[#4338CA]"
-                  >
-                    My Profile
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      handleSignOut();
-                    }}
-                    className="rounded-full border border-gray-200 bg-white py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : activeRole === 'student' && isExecutive ? (
-                <>
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setActiveRole('executive');
-                      router.push('/manager/dashboard');
-                    }}
-                    className="rounded-full border border-[#4F46E5] bg-transparent py-2.5 text-center text-sm font-semibold text-[#4F46E5] hover:bg-[#4F46E5]/10"
-                  >
-                    Switch to Executive
-                  </button>
                   <Link
                     href="/student/dashboard"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -476,16 +406,6 @@ function HeaderContent({}: { activeLabel?: string }) {
               ) : (
                 // activeRole === 'executive'
                 <>
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setActiveRole('student');
-                      router.push('/');
-                    }}
-                    className="rounded-full border border-[#4F46E5] bg-transparent py-2.5 text-center text-sm font-semibold text-[#4F46E5] hover:bg-[#4F46E5]/10"
-                  >
-                    Switch to Student
-                  </button>
                   <Link
                     href="/manager/dashboard"
                     onClick={() => setIsMobileMenuOpen(false)}

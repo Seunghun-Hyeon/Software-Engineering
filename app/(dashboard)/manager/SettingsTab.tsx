@@ -20,6 +20,8 @@ import {
 import api from '@/lib/axios';
 import axios from 'axios';
 import { useAuthStore } from '@/store/useAuthStore';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -135,13 +137,17 @@ function getUserIdFromToken(token: string | null): string | null {
 export default function SettingsTab() {
   const token = useAuthStore((state) => state.token);
   const userId = getUserIdFromToken(token);
+  const router = useRouter();
 
   const [activeSubTab, setActiveSubTab] = useState<'profile' | 'danger'>(
     'profile'
   );
   const [clubId, setClubId] = useState<string | null>(null);
   const [isRecruiting, setIsRecruiting] = useState(true);
-  const [selectedMember, setSelectedMember] = useState('Maria Alvarez');
+  const [dbUsers, setDbUsers] = useState<
+    { id: string; name: string | null; email: string; role: string | null }[]
+  >([]);
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -237,8 +243,10 @@ export default function SettingsTab() {
 
       const clubsPromise = api.get('/api/clubs/');
 
+      const supabase = createClient();
+
       Promise.all([categoriesPromise, clubsPromise])
-        .then(([categoriesRes, clubsRes]) => {
+        .then(async ([categoriesRes, clubsRes]) => {
           const fetchedCategories = categoriesRes.data;
           if (Array.isArray(fetchedCategories)) {
             setCategories(fetchedCategories);
@@ -253,6 +261,46 @@ export default function SettingsTab() {
             );
             if (myClub) {
               setClubId(myClub.id);
+
+              // Restrict candidate list to members of the current club
+              const { data: membersData, error: membersError } = await supabase
+                .from('club_members')
+                .select('user_id, users(id, name, email, role)')
+                .eq('club_id', myClub.id);
+
+              if (membersError) {
+                console.error(
+                  'Failed to load club members for settings:',
+                  membersError
+                );
+              } else if (Array.isArray(membersData)) {
+                // Extract unique users, filter out current owner
+                const candidateUsers = (
+                  membersData as unknown as {
+                    users: {
+                      id: string;
+                      name: string | null;
+                      email: string;
+                      role: string | null;
+                    } | null;
+                  }[]
+                )
+                  .map((m) => m.users)
+                  .filter(
+                    (
+                      u
+                    ): u is {
+                      id: string;
+                      name: string | null;
+                      email: string;
+                      role: string | null;
+                    } => u !== null && u.id !== userId
+                  );
+                setDbUsers(candidateUsers);
+                if (candidateUsers.length > 0) {
+                  setSelectedUserId(candidateUsers[0].id);
+                }
+              }
 
               // Match the club's category_id with the correct category name
               let matchedCategoryName = '';
@@ -408,8 +456,204 @@ export default function SettingsTab() {
     }
   };
 
-  const handleTransferOwnership = () => {
-    alert(`Ownership has been successfully transferred to ${selectedMember}.`);
+  const handleTransferOwnership = async () => {
+    if (!userId) {
+      setErrorMsg('User session expired. Please log in again.');
+      return;
+    }
+    if (!clubId) {
+      setErrorMsg('No club is associated with this administrator account.');
+      return;
+    }
+    if (!selectedUserId) {
+      setErrorMsg('Please select a member to transfer ownership to.');
+      return;
+    }
+
+    const selectedUserObj = dbUsers.find((u) => u.id === selectedUserId);
+    const targetName = selectedUserObj
+      ? selectedUserObj.name || selectedUserObj.email
+      : 'the selected member';
+
+    const confirmTransfer = window.confirm(
+      `WARNING: You are about to transfer ownership of this club to ${targetName}.\n\n` +
+        `Once completed:\n` +
+        `1. You will lose all manager access to this club.\n` +
+        `2. ${targetName} will become the new club leader.\n` +
+        `3. You will be redirected to the student experience.\n\n` +
+        `Are you sure you want to proceed?`
+    );
+
+    if (!confirmTransfer) return;
+
+    setIsLoading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const supabase = createClient();
+
+    try {
+      // 1. Update club's exec_user_id to the new leader in clubs table
+      const { error: clubUpdateError } = await supabase
+        .from('clubs')
+        .update({ exec_user_id: selectedUserId })
+        .eq('id', clubId);
+
+      if (clubUpdateError) {
+        throw new Error(
+          `Failed to update club owner: ${clubUpdateError.message}`
+        );
+      }
+
+      // 2. Grant executive/manager role to the new leader in users table
+      const { error: newLeaderUpdateError } = await supabase
+        .from('users')
+        .update({ role: 'executive' })
+        .eq('id', selectedUserId);
+
+      if (newLeaderUpdateError) {
+        console.error(
+          'Failed to update new leader role:',
+          newLeaderUpdateError
+        );
+      }
+
+      // 2b. Update the selected member's role to 'Leader' in the club_members table
+      const { data: newMemberRow, error: newMemberCheckError } = await supabase
+        .from('club_members')
+        .select('id')
+        .eq('club_id', clubId)
+        .eq('user_id', selectedUserId)
+        .maybeSingle();
+
+      if (newMemberCheckError) {
+        console.error(
+          'Failed to query new leader club membership:',
+          newMemberCheckError
+        );
+      }
+
+      if (newMemberRow) {
+        const { error: newLeaderRoleError } = await supabase
+          .from('club_members')
+          .update({ role: 'Leader' })
+          .eq('id', newMemberRow.id);
+        if (newLeaderRoleError) {
+          console.error(
+            'Failed to update new leader role in club_members:',
+            newLeaderRoleError
+          );
+        }
+      } else {
+        const { error: newLeaderInsertError } = await supabase
+          .from('club_members')
+          .insert({
+            club_id: clubId,
+            user_id: selectedUserId,
+            role: 'Leader',
+            joined_at: new Date().toISOString(),
+          });
+        if (newLeaderInsertError) {
+          console.error(
+            'Failed to insert new leader to club_members:',
+            newLeaderInsertError
+          );
+        }
+      }
+
+      // 2c. Update or insert the former leader's role to 'Regular Member' in the club_members table
+      const { data: formerMemberRow, error: formerMemberCheckError } =
+        await supabase
+          .from('club_members')
+          .select('id')
+          .eq('club_id', clubId)
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      if (formerMemberCheckError) {
+        console.error(
+          'Failed to query former leader club membership:',
+          formerMemberCheckError
+        );
+      }
+
+      if (formerMemberRow) {
+        const { error: formerLeaderRoleError } = await supabase
+          .from('club_members')
+          .update({ role: 'Regular Member' })
+          .eq('id', formerMemberRow.id);
+        if (formerLeaderRoleError) {
+          console.error(
+            'Failed to update former leader role to Regular Member:',
+            formerLeaderRoleError
+          );
+        }
+      } else {
+        const { error: formerLeaderInsertError } = await supabase
+          .from('club_members')
+          .insert({
+            club_id: clubId,
+            user_id: userId,
+            role: 'Regular Member',
+            joined_at: new Date().toISOString(),
+          });
+        if (formerLeaderInsertError) {
+          console.error(
+            'Failed to insert former leader to club_members:',
+            formerLeaderInsertError
+          );
+        }
+      }
+
+      // 3. Check if the former leader still has other clubs under management
+      const { data: otherClubs, error: otherClubsError } = await supabase
+        .from('clubs')
+        .select('id')
+        .eq('exec_user_id', userId);
+
+      if (otherClubsError) {
+        console.error(
+          'Failed to check other clubs for former leader:',
+          otherClubsError
+        );
+      }
+
+      const stillExecutive = !!(otherClubs && otherClubs.length > 0);
+
+      // 4. Downgrade former leader's role to student if they manage no other clubs
+      if (!stillExecutive) {
+        const { error: formerLeaderUpdateError } = await supabase
+          .from('users')
+          .update({ role: 'student' })
+          .eq('id', userId);
+
+        if (formerLeaderUpdateError) {
+          console.error(
+            'Failed to downgrade former leader role:',
+            formerLeaderUpdateError
+          );
+        }
+      }
+
+      // 5. Update local Zustand state
+      useAuthStore.setState({
+        isExecutive: stillExecutive,
+        role: stillExecutive ? 'executive' : 'student',
+        activeRole: 'student',
+      });
+
+      alert(`Ownership has been successfully transferred to ${targetName}.`);
+
+      // 6. Redirect to the student experience
+      router.push('/');
+    } catch (err) {
+      console.error('Transfer ownership failed:', err);
+      const msg =
+        err instanceof Error ? err.message : 'Unknown error during transfer';
+      setErrorMsg(`Transfer ownership failed: ${msg}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Article Action Triggers
@@ -1720,13 +1964,16 @@ export default function SettingsTab() {
                   SELECT MEMBER
                 </label>
                 <select
-                  value={selectedMember}
-                  onChange={(e) => setSelectedMember(e.target.value)}
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
                   className="w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition outline-none focus:border-indigo-500"
                 >
-                  <option value="Maria Alvarez">Maria Alvarez</option>
-                  <option value="John Doe">John Doe</option>
-                  <option value="Kim Handong">Kim Handong</option>
+                  <option value="">Select a member</option>
+                  {dbUsers.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name || 'No Name'} ({u.email})
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

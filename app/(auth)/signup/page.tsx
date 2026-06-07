@@ -21,6 +21,7 @@ export default function SignupPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [major, setMajor] = useState('');
 
   // UI States
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -49,6 +50,14 @@ export default function SignupPage() {
       setErrorMessage('Please enter a valid email address.');
       return;
     }
+    if (!email.endsWith('@handong.ac.kr')) {
+      setErrorMessage('Only Handong University email addresses are allowed.');
+      return;
+    }
+    if (!major) {
+      setErrorMessage('Please enter your declared major.');
+      return;
+    }
     if (!password) {
       setErrorMessage('Please create a password.');
       return;
@@ -63,12 +72,12 @@ export default function SignupPage() {
     }
 
     try {
-      await register(email, password, firstName, lastName);
+      await register(email, password, firstName, lastName, major);
       setSuccessMessage('Registration successful! Redirecting...');
 
-      // After successful signup, redirect directly to student dashboard (/student/dashboard)
+      // After successful signup, redirect to / (the root landing page)
       setTimeout(() => {
-        router.push('/student/dashboard');
+        router.push('/');
       }, 1000);
     } catch (err) {
       const message =
@@ -162,6 +171,18 @@ export default function SignupPage() {
               placeholder="e.g. user@handong.ac.kr"
               disabled={isLoading}
               icon={<Mail className="h-4 w-4" />}
+            />
+
+            {/* Major Field */}
+            <Input
+              id="reg-major"
+              type="text"
+              label="Declared Major"
+              value={major}
+              onChange={(e) => setMajor(e.target.value)}
+              placeholder="e.g. Computer Science"
+              disabled={isLoading}
+              icon={<Sparkles className="h-4 w-4" />}
             />
 
             {/* Password Field */}
