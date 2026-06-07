@@ -137,9 +137,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F8FAFC] font-sans text-slate-900 antialiased">
-      <main className="flex-1 overflow-y-auto p-4 md:p-10">
-        {/* Header Intro */}
+    <div className="w-full font-sans text-slate-900 antialiased">
+      <div className="w-full">
+        {/* 타이틀 인트로 헤더 */}
         <div className="mb-8">
           <h1 className="font-display text-2xl font-bold tracking-tight text-gray-900">
             Executive Dashboard
@@ -294,7 +294,7 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

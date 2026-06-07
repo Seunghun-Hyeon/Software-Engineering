@@ -101,7 +101,7 @@ function DashboardContent() {
   ] as const;
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC] font-sans text-slate-900 antialiased">
+    <div className="flex h-[100dvh] w-full overflow-hidden bg-[#F8FAFC] font-sans text-slate-900 antialiased">
       {/* 하단 메인 레이아웃 (사이드바 + 콘텐츠) */}
       <div className="relative flex w-full flex-1 overflow-hidden">
         {/* Backdrop for mobile */}
@@ -116,7 +116,7 @@ function DashboardContent() {
         {/* 2.  왼쪽 고정 사이드바 */}
         <aside
           className={cn(
-            'fixed inset-y-0 left-0 z-50 flex h-full w-64 shrink-0 flex-col justify-between rounded-r-[24px] border-r border-white/30 bg-white/80 p-4 pt-20 shadow-xl backdrop-blur-xl transition-transform duration-300 md:relative md:z-auto md:flex md:translate-x-0 md:rounded-none md:border-r md:border-slate-100 md:bg-[#F8FAFC] md:pt-4 md:shadow-none md:backdrop-blur-none',
+            'fixed inset-y-0 left-0 z-50 flex h-full w-64 shrink-0 flex-col justify-between rounded-r-[24px] border-r border-white/30 bg-white/80 p-4 pt-20 shadow-xl backdrop-blur-xl transition-transform duration-300 md:relative md:z-auto md:flex md:translate-x-0 md:rounded-none md:border-r md:border-slate-200 md:bg-white md:pt-4 md:shadow-none md:backdrop-blur-none',
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           )}
         >
@@ -218,7 +218,7 @@ function DashboardContent() {
         </aside>
 
         {/* 3. 오른쪽 메인 콘텐츠 영역 */}
-        <main className="h-full flex-1 overflow-y-auto bg-white p-4 sm:p-6 md:p-12">
+        <main className="h-full flex-1 overflow-y-auto bg-[#F8FAFC] p-4 sm:p-6 md:p-8 lg:p-10">
           {/* Mobile Sidebar Toggle Button Bar */}
           <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4 md:hidden">
             <button

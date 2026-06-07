@@ -19,21 +19,20 @@ interface AuthState {
   token: string | null; // Current session JSON Web Token
   role: Role; // Authenticated user role profile
   userName: string | null; // Authenticated user's name
+  major: string | null; // Authenticated user's major
   isExecutive: boolean; // Flag tracking whether user is an executive
   isLoading: boolean; // Flag tracking network flight status
   activeRole: 'student' | 'executive' | null; // Currently active user role profile view
   favouriteClubIds: string[]; // Favourited club IDs
   savedEventIds: string[]; // Saved event IDs
   userId: string | null; // Authenticated user ID
-  major: string | null; // Authenticated user's major
   updatedProfiles: Record<string, { userName: string; major: string }>; // Persistent profiles override
   setAuth: (
     token: string,
     role: Role,
     userName?: string | null,
-    isExecutive?: boolean,
-    userId?: string | null,
-    major?: string | null
+    major?: string | null,
+    isExecutive?: boolean
   ) => void; // Directly updates session details
   clearAuth: () => void; // Reset store parameters (logout action)
   setActiveRole: (role: 'student' | 'executive') => void; // Set currently active role
@@ -58,13 +57,13 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       role: null,
       userName: null,
+      major: null,
       isExecutive: false,
       isLoading: false,
       activeRole: null,
       favouriteClubIds: [],
       savedEventIds: [],
       userId: null,
-      major: null,
       updatedProfiles: {},
 
       // ----------------------------------------------------
@@ -74,21 +73,20 @@ export const useAuthStore = create<AuthState>()(
         token,
         role,
         userName = null,
-        isExecutive = false,
-        userId = null,
-        major = null
-      ) => set({ token, role, userName, isExecutive, userId, major }),
+        major = null,
+        isExecutive = false
+      ) => set({ token, role, userName, major, isExecutive }),
       clearAuth: () =>
         set({
           token: null,
           role: null,
           userName: null,
+          major: null,
           isExecutive: false,
           activeRole: null,
           favouriteClubIds: [],
           savedEventIds: [],
           userId: null,
-          major: null,
         }),
       setActiveRole: (role) => set({ activeRole: role }),
       toggleFavouriteClub: (clubId) =>
@@ -167,7 +165,6 @@ export const useAuthStore = create<AuthState>()(
             role: 'student',
             userName,
             major,
-            userId,
             isExecutive,
             isLoading: false,
             activeRole: 'student',
@@ -229,7 +226,6 @@ export const useAuthStore = create<AuthState>()(
             role,
             userName,
             major: major || null,
-            userId: response.data.user?.id || null,
             isExecutive,
             isLoading: false,
             activeRole: 'student',
@@ -269,12 +265,12 @@ export const useAuthStore = create<AuthState>()(
         token: state.token,
         role: state.role,
         userName: state.userName,
+        major: state.major,
         isExecutive: state.isExecutive,
         activeRole: state.activeRole,
         favouriteClubIds: state.favouriteClubIds,
         savedEventIds: state.savedEventIds,
         userId: state.userId,
-        major: state.major,
         updatedProfiles: state.updatedProfiles,
       }),
     }

@@ -882,8 +882,8 @@ export default function SettingsTab() {
     'rounded-full border border-gray-200 bg-white/30 hover:bg-white/80 transition px-4 py-2 text-xs font-bold text-gray-600 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5';
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F9FAFB] font-sans text-slate-900 antialiased">
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+    <div className="w-full font-sans text-slate-900 antialiased">
+      <div className="w-full">
         {/* Title and Top Header Actions */}
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -2014,7 +2014,7 @@ export default function SettingsTab() {
             </div>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }
