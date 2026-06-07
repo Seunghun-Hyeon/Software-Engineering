@@ -21,10 +21,7 @@ interface ExploreInterestsSectionProps {
   isLoadingCategories?: boolean;
 }
 
-export function ExploreInterestsSection({
-  categories: propCategories,
-  isLoadingCategories: propIsLoading,
-}: ExploreInterestsSectionProps) {
+export function ExploreInterestsSection(_props: ExploreInterestsSectionProps) {
   const [clubs, setClubs] = useState<BackendClub[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -182,7 +179,7 @@ export function ExploreInterestsSection({
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#4F46E5] border-t-transparent"></div>
         </div>
       ) : error ? (
-        <div className="flex h-32 items-center justify-center rounded-[24px] bg-white/70 p-6 text-sm font-bold text-red-600 shadow-[0_10px_30px_rgba(0,0,0,0.05)] ring-1 ring-white/50 backdrop-blur-md">
+        <div className="flex h-32 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50/50 p-6 text-sm font-semibold text-rose-600 shadow-sm backdrop-blur-md">
           {error}
         </div>
       ) : (

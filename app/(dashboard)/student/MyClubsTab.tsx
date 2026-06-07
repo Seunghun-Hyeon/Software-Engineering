@@ -73,7 +73,7 @@ export default function MyClubsTab() {
     };
 
     fetchMyClubs();
-  }, [userId]);
+  }, [userId, supabase]);
 
   const getRoleBadgeColor = (role: string) => {
     switch (role.toLowerCase()) {

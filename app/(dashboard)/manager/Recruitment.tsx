@@ -78,7 +78,7 @@ export default function Dashboard() {
     };
 
     fetchStats();
-  }, [userId]);
+  }, [userId, supabase]);
 
   // Load tasks from localStorage when clubId is resolved
   const [tasks, setTasks] = useState<Task[]>(() => []);

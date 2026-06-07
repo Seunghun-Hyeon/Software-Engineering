@@ -28,6 +28,14 @@ interface Member {
   roleColor: string;
 }
 
+const roleColors: Record<string, string> = {
+  Leader: 'bg-indigo-50 text-indigo-600 border-indigo-100',
+  Treasurer: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+  Committee: 'bg-purple-50 text-purple-600 border-purple-100',
+  'Regular Member': 'bg-slate-50 text-slate-600 border-slate-200',
+  Member: 'bg-slate-50 text-slate-600 border-slate-200',
+};
+
 export default function Members() {
   const supabase = createClient();
   const userId = useAuthStore((state) => state.userId);
@@ -61,14 +69,6 @@ export default function Members() {
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [editRole, setEditRole] = useState('Regular Member');
   const [editJoinDate, setEditJoinDate] = useState(todayStr);
-
-  const roleColors: Record<string, string> = {
-    Leader: 'bg-indigo-50 text-indigo-600 border-indigo-100',
-    Treasurer: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    Committee: 'bg-purple-50 text-purple-600 border-purple-100',
-    'Regular Member': 'bg-slate-50 text-slate-600 border-slate-200',
-    Member: 'bg-slate-50 text-slate-600 border-slate-200',
-  };
 
   const loadClubAndMembers = useCallback(async () => {
     if (!userId) return;
@@ -147,7 +147,7 @@ export default function Members() {
     } finally {
       setIsLoading(false);
     }
-  }, [userId, supabase, roleColors]);
+  }, [userId, supabase]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -400,10 +400,9 @@ export default function Members() {
               <table className="w-full border-collapse text-left">
                 <thead>
                   <tr className="border-b border-gray-100 bg-slate-50/50 text-[11px] font-bold tracking-wider text-gray-400 uppercase">
-                    <th className="w-[30%] px-6 py-4">MEMBER NAME</th>
-                    <th className="w-[25%] px-6 py-4">MAJOR</th>
-                    <th className="w-[20%] px-6 py-4">ROLE</th>
-                    <th className="w-[15%] px-6 py-4">JOIN DATE</th>
+                    <th className="w-[45%] px-6 py-4">MEMBER NAME</th>
+                    <th className="w-[25%] px-6 py-4">ROLE</th>
+                    <th className="w-[20%] px-6 py-4">JOIN DATE</th>
                     <th className="w-[10%] px-6 py-4 text-right">ACTIONS</th>
                   </tr>
                 </thead>
@@ -411,7 +410,7 @@ export default function Members() {
                   {isLoading ? (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={4}
                         className="py-12 text-center text-sm font-medium text-gray-400"
                       >
                         <div className="flex items-center justify-center gap-2">
@@ -441,11 +440,6 @@ export default function Members() {
                               </div>
                             </div>
                           </div>
-                        </td>
-
-                        {/* Major */}
-                        <td className="px-6 py-4 text-sm font-medium text-gray-500">
-                          {member.major}
                         </td>
 
                         {/* Role */}
@@ -562,20 +556,12 @@ export default function Members() {
                   </span>
 
                   <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
-                    <div>
+                    <div className="col-span-2">
                       <span className="block text-[10px] font-medium text-gray-400">
                         Name
                       </span>
                       <span className="font-bold text-gray-800">
                         {foundUser.name}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="block text-[10px] font-medium text-gray-400">
-                        Major
-                      </span>
-                      <span className="font-bold text-gray-800">
-                        {foundUser.major}
                       </span>
                     </div>
                     <div className="col-span-2">
@@ -670,20 +656,12 @@ export default function Members() {
                 </span>
 
                 <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
-                  <div>
+                  <div className="col-span-2">
                     <span className="block text-[10px] font-medium text-gray-400">
                       Name
                     </span>
                     <span className="font-bold text-gray-800">
                       {editingMember.name}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="block text-[10px] font-medium text-gray-400">
-                      Major
-                    </span>
-                    <span className="font-bold text-gray-800">
-                      {editingMember.major}
                     </span>
                   </div>
                   <div className="col-span-2">

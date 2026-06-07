@@ -12,14 +12,13 @@ import {
   CheckCircle2,
   Loader2,
   User,
-  GraduationCap,
 } from 'lucide-react';
 import { Input } from '@/app/components/Input';
 
 export default function SettingsTab() {
   const router = useRouter();
   const supabase = createClient();
-  const { userName, major, userId, clearAuth } = useAuthStore();
+  const { userName, userId, clearAuth } = useAuthStore();
 
   const parts = (userName || '').trim().split(' ');
   const initialFirst = parts[0] || '';
@@ -27,7 +26,6 @@ export default function SettingsTab() {
 
   const [firstName, setFirstName] = useState(initialFirst);
   const [lastName, setLastName] = useState(initialLast);
-  const [majorInput, setMajorInput] = useState(major || '');
 
   // UI status states
   const [isSaving, setIsSaving] = useState(false);
@@ -52,22 +50,16 @@ export default function SettingsTab() {
       setErrorMsg('Last Name is required.');
       return;
     }
-    if (!majorInput.trim()) {
-      setErrorMsg('Declared Major is required.');
-      return;
-    }
 
     setIsSaving(true);
     try {
       const combinedName = `${firstName.trim()} ${lastName.trim()}`;
-      // Serialize name and major as "Name | Major"
-      const serializedName = `${combinedName} | ${majorInput.trim()}`;
 
       // TODO: Connect to PATCH /api/users/profile when backend adds this endpoint
       if (userId) {
         const { error } = await supabase
           .from('users')
-          .update({ name: serializedName })
+          .update({ name: combinedName })
           .eq('id', userId);
 
         if (error) throw error;
@@ -77,11 +69,11 @@ export default function SettingsTab() {
       const currentProfiles = useAuthStore.getState().updatedProfiles || {};
       useAuthStore.setState({
         userName: combinedName,
-        major: majorInput.trim(),
+        major: null,
         updatedProfiles: {
           ...currentProfiles,
           ...(userId
-            ? { [userId]: { userName: combinedName, major: majorInput.trim() } }
+            ? { [userId]: { userName: combinedName, major: '' } }
             : {}),
         },
       });
@@ -172,17 +164,6 @@ export default function SettingsTab() {
               icon={<User className="h-3.5 w-3.5" />}
             />
           </div>
-
-          <Input
-            id="settings-major"
-            type="text"
-            label="Declared Major"
-            value={majorInput}
-            onChange={(e) => setMajorInput(e.target.value)}
-            placeholder="e.g. Computer Science"
-            disabled={isSaving}
-            icon={<GraduationCap className="h-4 w-4" />}
-          />
 
           <div className="pt-2">
             <button

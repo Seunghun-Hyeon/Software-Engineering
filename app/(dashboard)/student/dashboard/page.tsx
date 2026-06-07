@@ -7,7 +7,6 @@ import { WelcomeSection } from '../WelcomeSection';
 import { SavedEventsTab } from '../SavedEventsTab';
 import { FavouriteClubsTab } from '../FavouriteClubsTab';
 import { ApplicationsTab } from '../ApplicationsTab';
-import MyClubsTab from '../MyClubsTab';
 import SettingsTab from '../SettingsTab';
 import type {
   StudentProfile,
@@ -48,13 +47,8 @@ export default function StudentDashboard() {
   // Retrieve the authenticated user's name and major from global Zustand auth store
   const { userName, major } = useAuthStore();
 
-  // Establish state parameters for dynamic views
   const [activeTab, setActiveTab] = useState<
-    | 'saved_events'
-    | 'favourite_clubs'
-    | 'applications'
-    | 'my_clubs'
-    | 'settings'
+    'saved_events' | 'favourite_clubs' | 'applications' | 'settings'
   >('saved_events');
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
@@ -177,21 +171,9 @@ export default function StudentDashboard() {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('my_clubs')}
-            className={cn(
-              'min-w-[100px] flex-1 rounded-[14px] px-4 py-2.5 text-xs font-bold transition-all duration-300 focus:outline-none',
-              activeTab === 'my_clubs'
-                ? 'bg-[#4F46E5] text-white shadow-md'
-                : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'
-            )}
-          >
-            My Clubs
-          </button>
-          <button
-            type="button"
             onClick={() => setActiveTab('settings')}
             className={cn(
-              'min-w-[100px] flex-1 rounded-[14px] px-4 py-2.5 text-xs font-bold transition-all duration-300 focus:outline-none',
+              'rounded-[14px] px-5 py-2.5 text-sm font-bold whitespace-nowrap transition-all duration-300 focus:outline-none',
               activeTab === 'settings'
                 ? 'bg-[#4F46E5] text-white shadow-md'
                 : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'
@@ -221,7 +203,6 @@ export default function StudentDashboard() {
             {activeTab === 'applications' && (
               <ApplicationsTab applications={applications} />
             )}
-            {activeTab === 'my_clubs' && <MyClubsTab />}
             {activeTab === 'settings' && <SettingsTab />}
           </div>
         )}

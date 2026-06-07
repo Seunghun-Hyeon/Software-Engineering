@@ -47,7 +47,7 @@ export default function ApplyPage() {
       alert('Please sign in to apply for this club.');
       router.push('/login');
     }
-  }, [token]);
+  }, [token, router]);
 
   // Load club name and form schema
   useEffect(() => {
@@ -103,7 +103,7 @@ export default function ApplyPage() {
     };
 
     loadForm();
-  }, [clubId]);
+  }, [clubId, supabase]);
 
   // Initialize empty answers state
   useEffect(() => {
@@ -148,7 +148,7 @@ export default function ApplyPage() {
     setIsSubmitting(true);
     try {
       // TODO: Connected to POST /api/applications/
-      const response = await api.post('/applications/', {
+      await api.post('/applications/', {
         club_id: clubId,
         answers: answers,
       });

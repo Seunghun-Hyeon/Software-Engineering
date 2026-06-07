@@ -5,14 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Mail,
-  Lock,
-  User,
-  AlertCircle,
-  Sparkles,
-  GraduationCap,
-} from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, Sparkles } from 'lucide-react';
 import { BentoCard } from '@/app/components/BentoCard';
 import { Input } from '@/app/components/Input';
 import { Button } from '@/app/components/Button';
@@ -27,7 +20,6 @@ export default function SignupPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [major, setMajor] = useState('');
 
   // UI States
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -60,10 +52,6 @@ export default function SignupPage() {
       setErrorMessage('Only Handong University email addresses are allowed.');
       return;
     }
-    if (!major) {
-      setErrorMessage('Please enter your declared major.');
-      return;
-    }
     if (!password) {
       setErrorMessage('Please create a password.');
       return;
@@ -78,8 +66,7 @@ export default function SignupPage() {
     }
 
     try {
-      // TODO: Backend needs to store major in user profile
-      await register(email, password, firstName, lastName, major);
+      await register(email, password, firstName, lastName);
       setSuccessMessage('Registration successful! Redirecting...');
 
       // After successful signup, redirect to / (the root landing page)
@@ -167,18 +154,6 @@ export default function SignupPage() {
                 icon={<User className="h-3.5 w-3.5" />}
               />
             </div>
-
-            {/* Major Field */}
-            <Input
-              id="reg-major"
-              type="text"
-              label="Declared Major"
-              value={major}
-              onChange={(e) => setMajor(e.target.value)}
-              placeholder="e.g. Computer Science"
-              disabled={isLoading}
-              icon={<GraduationCap className="h-4 w-4" />}
-            />
 
             {/* Email Field */}
             <Input
