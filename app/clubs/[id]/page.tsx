@@ -12,6 +12,7 @@ interface ApiClub {
   description?: string;
   logoUrl?: string;
   coverImageUrl?: string;
+  is_recruiting?: boolean;
 }
 
 export default async function ClubProfilePage({
@@ -70,7 +71,7 @@ export default async function ClubProfilePage({
     shortDescription: foundClub.description || 'No description available.',
     logo: foundClub.logoUrl || '',
     heroImage: foundClub.coverImageUrl || '',
-    isAcceptingApplications: false, // Hide join CTA section in sidebar
+    isAcceptingApplications: foundClub.is_recruiting ?? false, // Dynamic check
 
     // Placeholders for fields the backend doesn't return yet
     mission: 'No mission statement provided.',

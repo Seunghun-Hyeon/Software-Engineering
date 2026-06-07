@@ -456,6 +456,7 @@ export default function SettingsTab() {
     }
   };
 
+  // TODO: Connect to PATCH /api/clubs/:id/transfer when backend adds this endpoint
   const handleTransferOwnership = async () => {
     if (!userId) {
       setErrorMsg('User session expired. Please log in again.');

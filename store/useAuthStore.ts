@@ -24,11 +24,16 @@ interface AuthState {
   activeRole: 'student' | 'executive' | null; // Currently active user role profile view
   favouriteClubIds: string[]; // Favourited club IDs
   savedEventIds: string[]; // Saved event IDs
+  userId: string | null; // Authenticated user ID
+  major: string | null; // Authenticated user's major
+  updatedProfiles: Record<string, { userName: string; major: string }>; // Persistent profiles override
   setAuth: (
     token: string,
     role: Role,
     userName?: string | null,
-    isExecutive?: boolean
+    isExecutive?: boolean,
+    userId?: string | null,
+    major?: string | null
   ) => void; // Directly updates session details
   clearAuth: () => void; // Reset store parameters (logout action)
   setActiveRole: (role: 'student' | 'executive') => void; // Set currently active role
@@ -37,7 +42,8 @@ interface AuthState {
     email: string,
     password: string,
     firstName?: string,
-    lastName?: string
+    lastName?: string,
+    major?: string
   ) => Promise<Role>; // Registers a new user account profile
   toggleFavouriteClub: (clubId: string) => void; // Toggles favourite status of a club
   toggleSavedEvent: (eventId: string) => void; // Toggles saved status of an event
@@ -57,12 +63,21 @@ export const useAuthStore = create<AuthState>()(
       activeRole: null,
       favouriteClubIds: [],
       savedEventIds: [],
+      userId: null,
+      major: null,
+      updatedProfiles: {},
 
       // ----------------------------------------------------
       // Sync Store Actions
       // ----------------------------------------------------
-      setAuth: (token, role, userName = null, isExecutive = false) =>
-        set({ token, role, userName, isExecutive }),
+      setAuth: (
+        token,
+        role,
+        userName = null,
+        isExecutive = false,
+        userId = null,
+        major = null
+      ) => set({ token, role, userName, isExecutive, userId, major }),
       clearAuth: () =>
         set({
           token: null,
@@ -72,6 +87,8 @@ export const useAuthStore = create<AuthState>()(
           activeRole: null,
           favouriteClubIds: [],
           savedEventIds: [],
+          userId: null,
+          major: null,
         }),
       setActiveRole: (role) => set({ activeRole: role }),
       toggleFavouriteClub: (clubId) =>
@@ -106,8 +123,24 @@ export const useAuthStore = create<AuthState>()(
           });
 
           const token = response.data.session?.access_token || null;
-          const userId = response.data.user.id;
-          const userName = null; // TODO: Backend needs to return user name in login response
+          const userId = response.data.user?.id || null;
+
+          const dbName = response.data.user?.name || '';
+          let userName = dbName;
+          let major = null;
+          if (dbName.includes('|')) {
+            const parts = dbName.split('|');
+            userName = parts[0].trim();
+            major = parts[1].trim();
+          }
+
+          // Override with locally persisted updated name/major if present
+          const persistedProfiles =
+            useAuthStore.getState().updatedProfiles || {};
+          if (userId && persistedProfiles[userId]) {
+            userName = persistedProfiles[userId].userName;
+            major = persistedProfiles[userId].major;
+          }
 
           // Fetch all clubs from GET /api/clubs/ using api
           let isExecutive = false;
@@ -133,6 +166,8 @@ export const useAuthStore = create<AuthState>()(
             token,
             role: 'student',
             userName,
+            major,
+            userId,
             isExecutive,
             isLoading: false,
             activeRole: 'student',
@@ -165,7 +200,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      register: async (email, password, firstName, lastName) => {
+      register: async (email, password, firstName, lastName, major) => {
         set({ isLoading: true });
 
         // Validate registration fields to use them in simulated logic
@@ -175,27 +210,26 @@ export const useAuthStore = create<AuthState>()(
         }
 
         try {
-          // TODO: Replace this simulated signup delay with an actual POST request to the backend:
-          // const response = await axios.post('/api/auth/signup', { email, password, firstName, lastName });
           const fullName = `${firstName} ${lastName}`;
+          const serializedName = major ? `${fullName} | ${major}` : fullName;
           const response = await api.post('/api/auth/signup', {
             email,
             password,
-            name: fullName,
+            name: serializedName,
             role: 'student',
           });
 
-          // TODO: Replace with actual role and isExecutive value from backend API response
-          // const response = await axios.post('/api/auth/signup', { email, password, firstName, lastName });
           const role: Role = 'student';
           const isExecutive = false;
 
-          const userName = response.data.userName || fullName;
+          const userName = fullName;
 
           set({
             token: response.data.token || null,
             role,
             userName,
+            major: major || null,
+            userId: response.data.user?.id || null,
             isExecutive,
             isLoading: false,
             activeRole: 'student',
@@ -239,6 +273,9 @@ export const useAuthStore = create<AuthState>()(
         activeRole: state.activeRole,
         favouriteClubIds: state.favouriteClubIds,
         savedEventIds: state.savedEventIds,
+        userId: state.userId,
+        major: state.major,
+        updatedProfiles: state.updatedProfiles,
       }),
     }
   )

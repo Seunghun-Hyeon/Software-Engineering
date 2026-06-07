@@ -7,6 +7,8 @@ import { WelcomeSection } from '../WelcomeSection';
 import { SavedEventsTab } from '../SavedEventsTab';
 import { FavouriteClubsTab } from '../FavouriteClubsTab';
 import { ApplicationsTab } from '../ApplicationsTab';
+import MyClubsTab from '../MyClubsTab';
+import SettingsTab from '../SettingsTab';
 import type {
   StudentProfile,
   SavedEvent,
@@ -48,7 +50,11 @@ export default function StudentDashboard() {
 
   // Establish state parameters for dynamic views
   const [activeTab, setActiveTab] = useState<
-    'saved_events' | 'favourite_clubs' | 'applications'
+    | 'saved_events'
+    | 'favourite_clubs'
+    | 'applications'
+    | 'my_clubs'
+    | 'settings'
   >('saved_events');
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
@@ -132,12 +138,12 @@ export default function StudentDashboard() {
         {profile && <WelcomeSection profile={profile} />}
 
         {/* Tab Controls Bar */}
-        <div className="flex max-w-md rounded-[18px] border border-white/40 bg-white/50 p-1.5 shadow-[0_4px_25px_rgba(0,0,0,0.02)] backdrop-blur-md">
+        <div className="flex max-w-2xl flex-wrap gap-1 rounded-[18px] border border-white/40 bg-white/50 p-1.5 shadow-[0_4px_25px_rgba(0,0,0,0.02)] backdrop-blur-md">
           <button
             type="button"
             onClick={() => setActiveTab('saved_events')}
             className={cn(
-              'flex-1 rounded-[14px] px-5 py-2.5 text-sm font-bold transition-all duration-300 focus:outline-none',
+              'min-w-[100px] flex-1 rounded-[14px] px-4 py-2.5 text-xs font-bold transition-all duration-300 focus:outline-none',
               activeTab === 'saved_events'
                 ? 'bg-[#4F46E5] text-white shadow-md'
                 : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'
@@ -149,7 +155,7 @@ export default function StudentDashboard() {
             type="button"
             onClick={() => setActiveTab('favourite_clubs')}
             className={cn(
-              'flex-1 rounded-[14px] px-5 py-2.5 text-sm font-bold transition-all duration-300 focus:outline-none',
+              'min-w-[100px] flex-1 rounded-[14px] px-4 py-2.5 text-xs font-bold transition-all duration-300 focus:outline-none',
               activeTab === 'favourite_clubs'
                 ? 'bg-[#4F46E5] text-white shadow-md'
                 : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'
@@ -161,13 +167,37 @@ export default function StudentDashboard() {
             type="button"
             onClick={() => setActiveTab('applications')}
             className={cn(
-              'flex-1 rounded-[14px] px-5 py-2.5 text-sm font-bold transition-all duration-300 focus:outline-none',
+              'min-w-[100px] flex-1 rounded-[14px] px-4 py-2.5 text-xs font-bold transition-all duration-300 focus:outline-none',
               activeTab === 'applications'
                 ? 'bg-[#4F46E5] text-white shadow-md'
                 : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'
             )}
           >
-            My Applications
+            Applications
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('my_clubs')}
+            className={cn(
+              'min-w-[100px] flex-1 rounded-[14px] px-4 py-2.5 text-xs font-bold transition-all duration-300 focus:outline-none',
+              activeTab === 'my_clubs'
+                ? 'bg-[#4F46E5] text-white shadow-md'
+                : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'
+            )}
+          >
+            My Clubs
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('settings')}
+            className={cn(
+              'min-w-[100px] flex-1 rounded-[14px] px-4 py-2.5 text-xs font-bold transition-all duration-300 focus:outline-none',
+              activeTab === 'settings'
+                ? 'bg-[#4F46E5] text-white shadow-md'
+                : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'
+            )}
+          >
+            Settings
           </button>
         </div>
 
@@ -191,6 +221,8 @@ export default function StudentDashboard() {
             {activeTab === 'applications' && (
               <ApplicationsTab applications={applications} />
             )}
+            {activeTab === 'my_clubs' && <MyClubsTab />}
+            {activeTab === 'settings' && <SettingsTab />}
           </div>
         )}
       </main>

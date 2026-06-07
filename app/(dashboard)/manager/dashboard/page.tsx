@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import Link from 'next/link';
 // Lucide 아이콘 라이브러리 사용 (없으시다면 npm i lucide-react 설치 혹은 svg로 대체 가능)
 import {
   User,
@@ -94,7 +93,7 @@ function DashboardContent() {
 
   // 메뉴 아이템 구조화 (사이드바 UI 렌더링 순서는 그대로 유지)
   const menuItems = [
-    { id: 'club-profile', label: 'Club Profile', icon: User },
+    { id: 'club-profile', label: 'Dashboard', icon: User },
     { id: 'members', label: 'Members', icon: Users },
     { id: 'recruitment', label: 'Recruitment', icon: ClipboardList },
     { id: 'events', label: 'Events', icon: Calendar },

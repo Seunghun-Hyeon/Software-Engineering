@@ -1,12 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, AlertCircle, Sparkles } from 'lucide-react';
+import {
+  Mail,
+  Lock,
+  User,
+  AlertCircle,
+  Sparkles,
+  GraduationCap,
+} from 'lucide-react';
 import { BentoCard } from '@/app/components/BentoCard';
 import { Input } from '@/app/components/Input';
 import { Button } from '@/app/components/Button';
@@ -72,6 +78,7 @@ export default function SignupPage() {
     }
 
     try {
+      // TODO: Backend needs to store major in user profile
       await register(email, password, firstName, lastName, major);
       setSuccessMessage('Registration successful! Redirecting...');
 
@@ -161,6 +168,18 @@ export default function SignupPage() {
               />
             </div>
 
+            {/* Major Field */}
+            <Input
+              id="reg-major"
+              type="text"
+              label="Declared Major"
+              value={major}
+              onChange={(e) => setMajor(e.target.value)}
+              placeholder="e.g. Computer Science"
+              disabled={isLoading}
+              icon={<GraduationCap className="h-4 w-4" />}
+            />
+
             {/* Email Field */}
             <Input
               id="reg-email"
@@ -171,18 +190,6 @@ export default function SignupPage() {
               placeholder="e.g. user@handong.ac.kr"
               disabled={isLoading}
               icon={<Mail className="h-4 w-4" />}
-            />
-
-            {/* Major Field */}
-            <Input
-              id="reg-major"
-              type="text"
-              label="Declared Major"
-              value={major}
-              onChange={(e) => setMajor(e.target.value)}
-              placeholder="e.g. Computer Science"
-              disabled={isLoading}
-              icon={<Sparkles className="h-4 w-4" />}
             />
 
             {/* Password Field */}
