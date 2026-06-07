@@ -2,40 +2,10 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/lib/utils';
-import api from '@/lib/axios';
 import { Menu, X, User, ChevronDown } from 'lucide-react';
-
-function getUserIdFromToken(token: string | null): string | null {
-  if (!token || typeof window === 'undefined') return null;
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-    const base64Url = parts[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      window
-        .atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    const payload = JSON.parse(jsonPayload);
-    return payload.sub || null;
-  } catch (e) {
-    console.error('Failed to decode token:', e);
-    return null;
-  }
-}
-
-interface HeaderClub {
-  id: string;
-  name: string;
-  exec_user_id: string;
-  categories: { name: string } | null;
-}
 
 export function Header(props: { activeLabel?: string }) {
   return (
@@ -52,18 +22,14 @@ export function Header(props: { activeLabel?: string }) {
 function HeaderContent({}: { activeLabel?: string }) {
   const router = useRouter();
   const pathname = usePathname() || '';
-  const searchParams = useSearchParams();
-  const tab = searchParams?.get('tab') || '';
 
   const token = useAuthStore((state) => state.token);
   const activeRole = useAuthStore((state) => state.activeRole);
   const isExecutive = useAuthStore((state) => state.isExecutive);
   const userName = useAuthStore((state) => state.userName);
-  const setActiveRole = useAuthStore((state) => state.setActiveRole);
   const clearAuth = useAuthStore((state) => state.clearAuth);
 
   const [hydrated, setHydrated] = useState(false);
-  const [clubId, setClubId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
@@ -84,8 +50,6 @@ function HeaderContent({}: { activeLabel?: string }) {
   const isEventsActive = pathname.startsWith('/events');
   const isAboutActive = pathname.startsWith('/about');
 
-  const userId = getUserIdFromToken(token);
-
   useEffect(() => {
     const unsubFinishHydration = useAuthStore.persist.onFinishHydration(() => {
       setHydrated(true);
@@ -100,35 +64,10 @@ function HeaderContent({}: { activeLabel?: string }) {
     return () => unsubFinishHydration();
   }, []);
 
-  useEffect(() => {
-    if (token && activeRole === 'executive' && userId) {
-      api
-        .get('/api/clubs/')
-        .then((res) => {
-          const clubs = res.data;
-          if (Array.isArray(clubs)) {
-            const myClub = clubs.find(
-              (c: HeaderClub) => c.exec_user_id === userId
-            );
-            if (myClub) {
-              setClubId(myClub.id);
-            }
-          }
-        })
-        .catch((err) => {
-          console.error('Failed to fetch executive club in Header:', err);
-        });
-    }
-  }, [token, activeRole, userId]);
-
   const handleSignOut = () => {
     clearAuth();
     router.push('/');
   };
-
-  const isClubDetailActive = clubId ? pathname === `/clubs/${clubId}` : false;
-  const isExecEventsActive =
-    pathname.startsWith('/manager/dashboard') && tab === 'events';
 
   return (
     <header className="fixed top-0 right-0 left-0 z-150 border-b border-white/20 bg-white/70 backdrop-blur-[20px]">
