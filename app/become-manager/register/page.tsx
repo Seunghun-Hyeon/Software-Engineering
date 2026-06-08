@@ -373,7 +373,10 @@ export default function ManagerRegistrationPage() {
               {step === 3 && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-500">
                   <h2 className="font-display border-b-2 border-gray-100 pb-3 text-2xl font-bold text-gray-900">
-                    Verification Documents
+                    Verification Documents{' '}
+                    <span className="text-sm font-normal text-gray-500">
+                      (Optional)
+                    </span>
                   </h2>
                   <p className="text-sm text-gray-600">
                     Please upload your official faculty advisor approval letter.
