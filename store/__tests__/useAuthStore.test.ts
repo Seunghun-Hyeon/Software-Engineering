@@ -105,7 +105,7 @@ describe('useAuthStore', () => {
       expect(role).toBe('student');
       expect(useAuthStore.getState().token).toBe('mock-token');
       expect(useAuthStore.getState().isLoading).toBe(false);
-      expect(api.post).toHaveBeenCalledWith('/api/auth/login', {
+      expect(api.post).toHaveBeenCalledWith('/auth/login', {
         email: 'test@test.com',
         password: 'password123',
       });

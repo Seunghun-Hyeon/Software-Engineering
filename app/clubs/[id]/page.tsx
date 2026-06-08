@@ -37,13 +37,12 @@ export default async function ClubProfilePage({
   // TODO: Replace with GET /api/clubs/:id when backend adds this endpoint
   let foundClub: ApiClub | null = null;
   try {
-    const res = await fetch(apiEndpoint);
+    const res = await fetch(`${apiEndpoint}/${id}`);
     if (res.ok) {
-      const clubs: ApiClub[] = await res.json();
-      foundClub = clubs.find((c) => String(c.id) === id) || null;
+      foundClub = await res.json();
     }
   } catch (err) {
-    console.error('Failed to fetch clubs from backend:', err);
+    console.error(`Failed to fetch club ${id} from backend:`, err);
   }
 
   if (!foundClub) {
