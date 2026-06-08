@@ -121,32 +121,6 @@ function HeaderContent({}: { activeLabel?: string }) {
               >
                 About
               </Link>
-              {token && (activeRole === 'club_executive' || isExecutive) && (
-                <Link
-                  href="/manager/dashboard"
-                  className={cn(
-                    'border-b-2 pb-1 text-sm transition-all duration-200 hover:text-[#4F46E5]',
-                    pathname.startsWith('/manager/dashboard')
-                      ? 'border-[#4F46E5] font-bold text-[#4F46E5]'
-                      : 'border-transparent font-medium text-gray-700'
-                  )}
-                >
-                  Dashboard
-                </Link>
-              )}
-              {token && !(activeRole === 'club_executive' || isExecutive) && (
-                <Link
-                  href="/student/dashboard"
-                  className={cn(
-                    'border-b-2 pb-1 text-sm transition-all duration-200 hover:text-[#4F46E5]',
-                    pathname.startsWith('/student/dashboard')
-                      ? 'border-[#4F46E5] font-bold text-[#4F46E5]'
-                      : 'border-transparent font-medium text-gray-700'
-                  )}
-                >
-                  Dashboard
-                </Link>
-              )}
             </>
           )}
         </nav>
@@ -157,6 +131,14 @@ function HeaderContent({}: { activeLabel?: string }) {
             <div className="h-9 w-[150px]" aria-hidden="true" />
           ) : !token && !activeRole ? (
             <>
+              <Link
+                href="/become-manager"
+                className={cn(
+                  'text-sm font-semibold text-gray-700 transition-colors hover:text-[#4F46E5]'
+                )}
+              >
+                For Clubs
+              </Link>
               <Link
                 href="/login"
                 className={cn(
@@ -176,7 +158,7 @@ function HeaderContent({}: { activeLabel?: string }) {
             </>
           ) : (
             <>
-              {!(activeRole === 'club_executive' || isExecutive) && (
+              {activeRole !== 'club_executive' && (
                 <Link
                   href="/become-manager"
                   className={cn(
@@ -291,34 +273,6 @@ function HeaderContent({}: { activeLabel?: string }) {
               >
                 About
               </Link>
-              {token && (activeRole === 'club_executive' || isExecutive) && (
-                <Link
-                  href="/manager/dashboard"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={cn(
-                    'text-sm font-semibold transition-colors hover:text-[#4F46E5]',
-                    pathname.startsWith('/manager/dashboard')
-                      ? 'text-[#4F46E5]'
-                      : 'text-gray-700'
-                  )}
-                >
-                  Dashboard
-                </Link>
-              )}
-              {token && !(activeRole === 'club_executive' || isExecutive) && (
-                <Link
-                  href="/student/dashboard"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={cn(
-                    'text-sm font-semibold transition-colors hover:text-[#4F46E5]',
-                    pathname.startsWith('/student/dashboard')
-                      ? 'text-[#4F46E5]'
-                      : 'text-gray-700'
-                  )}
-                >
-                  Dashboard
-                </Link>
-              )}
             </>
 
             {/* Action Buttons inside Mobile Dropdown */}
@@ -327,6 +281,13 @@ function HeaderContent({}: { activeLabel?: string }) {
                 <div className="h-9 w-full animate-pulse rounded-full bg-gray-200" />
               ) : !token && !activeRole ? (
                 <>
+                  <Link
+                    href="/become-manager"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="py-2 text-center text-sm font-semibold text-gray-700 hover:text-[#4F46E5]"
+                  >
+                    For Clubs
+                  </Link>
                   <Link
                     href="/login"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -351,7 +312,7 @@ function HeaderContent({}: { activeLabel?: string }) {
                   >
                     View Profile
                   </Link>
-                  {!(activeRole === 'club_executive' || isExecutive) && (
+                  {activeRole !== 'club_executive' && (
                     <Link
                       href="/become-manager"
                       onClick={() => setIsMobileMenuOpen(false)}

@@ -138,6 +138,8 @@ export default function EventsTab() {
 
     setIsLoading(true);
 
+    const posterValue = posterPreview || posterUrl || null;
+
     try {
       // Convert local datetime-local format to ISO 8601 string format
       const formattedDate = new Date(eventDate).toISOString();

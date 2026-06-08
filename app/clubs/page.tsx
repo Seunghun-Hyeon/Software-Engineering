@@ -133,7 +133,7 @@ function ClubsDirectoryContent() {
             Club Finder
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-gray-600">
-            Explore and join over 100+ active student organizations. Find your
+            Explore and join over 10+ active student organizations. Find your
             community, build new skills, and make lasting connections.
           </p>
         </div>
