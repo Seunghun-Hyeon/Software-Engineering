@@ -50,7 +50,7 @@ export function ClubContent({ clubData }: { clubData: ClubDataProps }) {
           {activeTab === 'info' && <InfoTab clubData={clubData} />}
           {activeTab === 'news' && <NewsTab clubData={clubData} />}
           {activeTab === 'events' && <EventsTab clubId={String(clubData.id)} />}
-          {activeTab === 'gallery' && <GalleryTab />}
+          {activeTab === 'gallery' && <GalleryTab clubId={String(clubData.id)} />}
         </div>
 
         {/* Right Sidebar Column (Span 4) */}
