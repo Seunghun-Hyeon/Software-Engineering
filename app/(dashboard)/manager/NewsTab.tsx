@@ -10,9 +10,11 @@ import {
   List,
   Loader2,
   Calendar,
+  AlertCircle,
 } from 'lucide-react';
 import api from '@/lib/axios';
 import { useAuthStore } from '@/store/useAuthStore';
+import { getApiErrorMessage } from '@/lib/apiError';
 
 interface Article {
   id: string;
@@ -33,6 +35,8 @@ export default function NewsTab() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [clubId, setClubId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const userId = useAuthStore((state) => state.userId);
 
@@ -52,7 +56,7 @@ export default function NewsTab() {
           setArticles(newsRes.data);
         }
       } catch (error) {
-        console.error('Error fetching news:', error);
+        setError(getApiErrorMessage(error));
       } finally {
         setIsLoading(false);
       }
@@ -89,14 +93,14 @@ export default function NewsTab() {
       await api.delete(`/clubs/${clubId}/news/${id}`);
       setArticles((prev) => prev.filter((a) => a.id !== id));
     } catch (error) {
-      console.error('Error deleting article:', error);
-      alert('Failed to delete article.');
+      setError(getApiErrorMessage(error));
     }
   };
 
   const handleSaveArticle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newArticle.title || !newArticle.date || !clubId) return;
+    setFormError(null);
 
     try {
       if (editingArticleId) {
@@ -126,8 +130,7 @@ export default function NewsTab() {
         content: '',
       });
     } catch (error) {
-      console.error('Error saving article:', error);
-      alert('Failed to save article. Please try again.');
+      setFormError(getApiErrorMessage(error));
     }
   };
 
@@ -142,6 +145,13 @@ export default function NewsTab() {
           informed.
         </p>
       </div>
+
+      {error && (
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="flex h-40 items-center justify-center">
@@ -266,6 +276,13 @@ export default function NewsTab() {
                   className={cn(inputClass, 'resize-none')}
                 />
               </div>
+
+              {formError && (
+                <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
 
               <div className="flex justify-end gap-3 pt-2">
                 <button

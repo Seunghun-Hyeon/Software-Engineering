@@ -9,8 +9,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import api from '@/lib/axios';
+import { getApiErrorMessage } from '@/lib/apiError';
 
 interface GalleryItem {
   id?: string;
@@ -29,6 +31,7 @@ export default function GalleryTab() {
   const [newVideoUrl, setNewVideoUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isLoadingGallery, setIsLoadingGallery] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Modal State
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
@@ -38,8 +41,8 @@ export default function GalleryTab() {
       try {
         const response = await api.get('/api/gallery');
         setGallery(response.data);
-      } catch (error) {
-        console.error('Failed to fetch gallery', error);
+      } catch (err) {
+        setError(getApiErrorMessage(err));
       } finally {
         setIsLoadingGallery(false);
       }
@@ -56,8 +59,8 @@ export default function GalleryTab() {
       });
       setGallery((prev) => [response.data, ...prev]);
       setNewPhotoUrl('');
-    } catch {
-      alert('Failed to add photo URL');
+    } catch (err) {
+      setError(getApiErrorMessage(err));
     }
   };
 
@@ -70,8 +73,8 @@ export default function GalleryTab() {
       });
       setGallery((prev) => [response.data, ...prev]);
       setNewVideoUrl('');
-    } catch {
-      alert('Failed to add video URL');
+    } catch (err) {
+      setError(getApiErrorMessage(err));
     }
   };
 
@@ -82,8 +85,8 @@ export default function GalleryTab() {
       try {
         await api.delete(`/api/gallery?id=${item.id}`);
         setGallery((prev) => prev.filter((_, i) => i !== index));
-      } catch {
-        alert('Failed to delete media');
+      } catch (err) {
+        setError(getApiErrorMessage(err));
       }
     } else {
       setGallery((prev) => prev.filter((_, i) => i !== index));
@@ -117,10 +120,8 @@ export default function GalleryTab() {
         });
         setGallery((prev) => [galleryResponse.data, ...prev]);
       }
-    } catch (error) {
-      console.error('Upload error:', error);
-      const err = error as { response?: { data?: { error?: string } } };
-      alert(err.response?.data?.error || 'Failed to upload file');
+    } catch (err) {
+      setError(getApiErrorMessage(err));
     } finally {
       setIsUploading(false);
       e.target.value = '';
@@ -174,6 +175,13 @@ export default function GalleryTab() {
           activities.
         </p>
       </div>
+
+      {error && (
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       <div className="rounded-[24px] border border-white/30 bg-white/70 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md">
         {/* Upload Section */}
