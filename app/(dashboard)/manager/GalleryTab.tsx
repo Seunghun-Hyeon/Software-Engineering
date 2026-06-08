@@ -8,9 +8,12 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from 'lucide-react';
+import api from '@/lib/axios';
 
 interface GalleryItem {
+  id?: string;
   type: 'photo' | 'video';
   url: string;
 }
@@ -21,62 +24,108 @@ const primaryBtnClass =
   'cursor-pointer rounded-full bg-[#4F46E5] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#4338CA] disabled:cursor-not-allowed disabled:bg-gray-300';
 
 export default function GalleryTab() {
-  const [gallery, setGallery] = useState<GalleryItem[]>([
-    { type: 'photo', url: '/concert1.jpg' },
-    { type: 'photo', url: '/concert2.jpg' },
-  ]);
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
   const [newVideoUrl, setNewVideoUrl] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [isLoadingGallery, setIsLoadingGallery] = useState(true);
 
   // Modal State
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
-  const handleAddPhotoUrl = () => {
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const response = await api.get('/api/gallery');
+        setGallery(response.data);
+      } catch (error) {
+        console.error('Failed to fetch gallery', error);
+      } finally {
+        setIsLoadingGallery(false);
+      }
+    };
+    fetchGallery();
+  }, []);
+
+  const handleAddPhotoUrl = async () => {
     if (!newPhotoUrl) return;
-    setGallery((prev) => [{ type: 'photo', url: newPhotoUrl }, ...prev]);
-    setNewPhotoUrl('');
-  };
-
-  const handleAddVideoUrl = () => {
-    if (!newVideoUrl) return;
-    setGallery((prev) => [{ type: 'video', url: newVideoUrl }, ...prev]);
-    setNewVideoUrl('');
-  };
-
-  const handleDeleteGalleryItem = (index: number) => {
-    if (!window.confirm('Are you sure you want to delete this media?')) return;
-    setGallery((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setGallery((prev) => [
-            { type: 'photo', url: reader.result as string },
-            ...prev,
-          ]);
-        }
-      };
-      reader.readAsDataURL(file);
+    try {
+      const response = await api.post('/api/gallery', {
+        type: 'photo',
+        url: newPhotoUrl,
+      });
+      setGallery((prev) => [response.data, ...prev]);
+      setNewPhotoUrl('');
+    } catch {
+      alert('Failed to add photo URL');
     }
   };
 
-  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddVideoUrl = async () => {
+    if (!newVideoUrl) return;
+    try {
+      const response = await api.post('/api/gallery', {
+        type: 'video',
+        url: newVideoUrl,
+      });
+      setGallery((prev) => [response.data, ...prev]);
+      setNewVideoUrl('');
+    } catch {
+      alert('Failed to add video URL');
+    }
+  };
+
+  const handleDeleteGalleryItem = async (index: number) => {
+    if (!window.confirm('Are you sure you want to delete this media?')) return;
+    const item = gallery[index];
+    if (item.id) {
+      try {
+        await api.delete(`/api/gallery?id=${item.id}`);
+        setGallery((prev) => prev.filter((_, i) => i !== index));
+      } catch {
+        alert('Failed to delete media');
+      }
+    } else {
+      setGallery((prev) => prev.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleFileUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    expectedType: 'photo' | 'video'
+  ) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setGallery((prev) => [
-            { type: 'video', url: reader.result as string },
-            ...prev,
-          ]);
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    if (expectedType === 'video' && file.size > 100 * 1024 * 1024) {
+      alert('Video size must be less than 100MB');
+      e.target.value = '';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      setIsUploading(true);
+      const response = await api.post('/api/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (response.data.success) {
+        const galleryResponse = await api.post('/api/gallery', {
+          type: expectedType,
+          url: response.data.url,
+        });
+        setGallery((prev) => [galleryResponse.data, ...prev]);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      const err = error as { response?: { data?: { error?: string } } };
+      alert(err.response?.data?.error || 'Failed to upload file');
+    } finally {
+      setIsUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -153,13 +202,20 @@ export default function GalleryTab() {
               </button>
             </div>
 
-            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 bg-white/20 p-2.5 text-xs font-semibold text-gray-500 transition hover:bg-gray-50">
-              <ImageIcon size={14} />
-              Choose Local Photo File
+            <label
+              className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 bg-white/20 p-2.5 text-xs font-semibold text-gray-500 transition ${isUploading ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-50'}`}
+            >
+              {isUploading ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <ImageIcon size={14} />
+              )}
+              {isUploading ? 'Uploading...' : 'Choose Local Photo File'}
               <input
                 type="file"
                 accept="image/*"
-                onChange={handlePhotoUpload}
+                disabled={isUploading}
+                onChange={(e) => handleFileUpload(e, 'photo')}
                 className="hidden"
               />
             </label>
@@ -187,13 +243,20 @@ export default function GalleryTab() {
               </button>
             </div>
 
-            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 bg-white/20 p-2.5 text-xs font-semibold text-gray-500 transition hover:bg-gray-50">
-              <Video size={14} />
-              Choose Local Video File
+            <label
+              className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 bg-white/20 p-2.5 text-xs font-semibold text-gray-500 transition ${isUploading ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-50'}`}
+            >
+              {isUploading ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Video size={14} />
+              )}
+              {isUploading ? 'Uploading...' : 'Choose Local Video File'}
               <input
                 type="file"
                 accept="video/*"
-                onChange={handleVideoUpload}
+                disabled={isUploading}
+                onChange={(e) => handleFileUpload(e, 'video')}
                 className="hidden"
               />
             </label>
@@ -202,47 +265,15 @@ export default function GalleryTab() {
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {gallery.map((item, idx) => (
-            <div
-              key={idx}
-              className="group relative aspect-square cursor-pointer overflow-hidden rounded-[20px] border border-gray-100 bg-gray-50 shadow-sm transition hover:shadow-md"
-              onClick={() => setPreviewIndex(idx)}
-            >
-              {item.type === 'photo' ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.url}
-                  alt={`Gallery item ${idx}`}
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      'https://placehold.co/400x400?text=Image+Not+Found';
-                  }}
-                />
-              ) : (
-                <div className="flex h-full w-full flex-col items-center justify-center bg-slate-800 text-xs font-bold text-white transition group-hover:bg-slate-900">
-                  <Video size={24} className="mb-2 text-gray-400" />
-                  VIDEO
-                </div>
-              )}
-
-              {/* Delete Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteGalleryItem(idx);
-                  }}
-                  className="rounded-full bg-red-600 p-3 text-white shadow-lg transition hover:scale-110 hover:bg-red-700"
-                  title="Delete media"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
+          {isLoadingGallery ? (
+            <div className="col-span-full py-12 text-center text-gray-500">
+              <Loader2
+                size={32}
+                className="mx-auto mb-4 animate-spin text-[#4F46E5]"
+              />
+              <p className="text-sm font-medium">Loading gallery...</p>
             </div>
-          ))}
-          {gallery.length === 0 && (
+          ) : gallery.length === 0 ? (
             <div className="col-span-full py-12 text-center">
               <div className="mx-auto mb-4 inline-flex items-center justify-center rounded-full bg-gray-50 p-4">
                 <ImageIcon size={32} className="text-gray-300" />
@@ -251,6 +282,47 @@ export default function GalleryTab() {
                 No gallery items added yet. Add URLs above to showcase media.
               </p>
             </div>
+          ) : (
+            gallery.map((item, idx) => (
+              <div
+                key={item.id || idx}
+                className="group relative aspect-square cursor-pointer overflow-hidden rounded-[20px] border border-gray-100 bg-gray-50 shadow-sm transition hover:shadow-md"
+                onClick={() => setPreviewIndex(idx)}
+              >
+                {item.type === 'photo' ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.url}
+                    alt={`Gallery item ${idx}`}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        'https://placehold.co/400x400?text=Image+Not+Found';
+                    }}
+                  />
+                ) : (
+                  <div className="flex h-full w-full flex-col items-center justify-center bg-slate-800 text-xs font-bold text-white transition group-hover:bg-slate-900">
+                    <Video size={24} className="mb-2 text-gray-400" />
+                    VIDEO
+                  </div>
+                )}
+
+                {/* Delete Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteGalleryItem(idx);
+                    }}
+                    className="rounded-full bg-red-600 p-3 text-white shadow-lg transition hover:scale-110 hover:bg-red-700"
+                    title="Delete media"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>
