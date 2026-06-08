@@ -10,16 +10,18 @@ import { cn } from '@/lib/utils';
 export interface EventProps {
   id: string; // Unique database identifier for the event
   title: string; // Name of the event (e.g., "ZZ Street")
-  host: string; // Name of the hosting club (e.g., "Zizzy")
-  date: string; // Formatted date string (e.g., "May 27, 2026")
-  time: string; // Formatted time string (e.g., "6:30 PM")
-  location: string; // Campus location venue description
+  host?: string; // Name of the hosting club (e.g., "Zizzy")
+  date?: string; // Formatted date string (e.g., "May 27, 2026")
+  time?: string; // Formatted time string (e.g., "6:30 PM")
+  location?: string; // Campus location venue description
   description: string; // Paragraph describing the event scope
-  image: string; // Path or URL to the thumbnail/cover image
-  requiresTickets: boolean; // True if ticket bookings are mandatory
-  categoryBadge: string; // Main category category label (e.g. "MUSIC", "SPORTS")
-  styleType: 'image-top' | 'text-only' | 'photo-bg'; // Visual layout template selector
-  tabPeriod: 'this-week' | 'next-month'; // Category filter grouping
+  image?: string; // Path or URL to the thumbnail/cover image
+  requiresTickets?: boolean; // True if ticket bookings are mandatory
+  categoryBadge?: string; // Main category category label (e.g. "MUSIC", "SPORTS")
+  styleType?: 'image-top' | 'text-only' | 'photo-bg'; // Visual layout template selector
+  tabPeriod?: 'this-week' | 'next-month'; // Category filter grouping
+  event_date?: string;
+  poster_url?: string | null;
 }
 
 // Props contract for the EventCard component wrapper
@@ -30,7 +32,36 @@ export interface EventCardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
-  ({ className, event, onRemindClick, onTicketsClick, ...props }, ref) => {
+  (
+    { className, event: rawEvent, onRemindClick, onTicketsClick, ...props },
+    ref
+  ) => {
+    const event = {
+      id: rawEvent.id,
+      title: rawEvent.title,
+      description: rawEvent.description,
+      host: rawEvent.host || 'Club Hub',
+      date:
+        rawEvent.date ||
+        (rawEvent.event_date
+          ? new Date(rawEvent.event_date).toLocaleDateString()
+          : 'TBD'),
+      time:
+        rawEvent.time ||
+        (rawEvent.event_date
+          ? new Date(rawEvent.event_date).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : 'TBD'),
+      location: rawEvent.location || 'TBD',
+      image: rawEvent.image || rawEvent.poster_url || '/handongbackground.jpg',
+      requiresTickets: rawEvent.requiresTickets || false,
+      categoryBadge: rawEvent.categoryBadge || 'EVENT',
+      styleType: rawEvent.styleType || 'image-top',
+      tabPeriod: rawEvent.tabPeriod || 'this-week',
+    };
+
     // Custom click handlers that prevent event bubbling/parent card actions
     const handleRemind = (e: React.MouseEvent) => {
       e.preventDefault();

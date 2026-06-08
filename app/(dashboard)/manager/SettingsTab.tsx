@@ -672,18 +672,10 @@ export default function SettingsTab() {
     setIsLoading(true);
     try {
       const payload: { cover_image_url?: string; logo_url?: string } = {};
-      if (
-        clubInfo.cover_image_url &&
-        (clubInfo.cover_image_url.startsWith('http://') ||
-          clubInfo.cover_image_url.startsWith('https://'))
-      ) {
+      if (clubInfo.cover_image_url && isValidUrl(clubInfo.cover_image_url)) {
         payload.cover_image_url = clubInfo.cover_image_url.trim();
       }
-      if (
-        clubInfo.logo_url &&
-        (clubInfo.logo_url.startsWith('http://') ||
-          clubInfo.logo_url.startsWith('https://'))
-      ) {
+      if (clubInfo.logo_url && isValidUrl(clubInfo.logo_url)) {
         payload.logo_url = clubInfo.logo_url.trim();
       }
 
@@ -697,6 +689,86 @@ export default function SettingsTab() {
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCoverImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIsLoading(true);
+      setErrorMsg(null);
+      setSuccessMsg(null);
+      try {
+        // Connected to POST /api/upload
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        const returnedUrl =
+          response.data?.url ||
+          response.data?.secure_url ||
+          response.data?.fileUrl ||
+          response.data;
+        if (returnedUrl && typeof returnedUrl === 'string') {
+          setClubInfo((prev) => ({
+            ...prev,
+            cover_image_url: returnedUrl,
+          }));
+          setSuccessMsg('Cover image uploaded successfully');
+        } else {
+          throw new Error(
+            'Invalid response format: No image URL returned from upload endpoint.'
+          );
+        }
+      } catch (err) {
+        console.error('Failed to upload cover image:', err);
+        setErrorMsg(
+          `Failed to upload cover image: ${getFriendlyErrorMessage(err)}`
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIsLoading(true);
+      setErrorMsg(null);
+      setSuccessMsg(null);
+      try {
+        // Connected to POST /api/upload
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        const returnedUrl =
+          response.data?.url ||
+          response.data?.secure_url ||
+          response.data?.fileUrl ||
+          response.data;
+        if (returnedUrl && typeof returnedUrl === 'string') {
+          setClubInfo((prev) => ({
+            ...prev,
+            logo_url: returnedUrl,
+          }));
+          setSuccessMsg('Logo uploaded successfully');
+        } else {
+          throw new Error(
+            'Invalid response format: No image URL returned from upload endpoint.'
+          );
+        }
+      } catch (err) {
+        console.error('Failed to upload logo:', err);
+        setErrorMsg(`Failed to upload logo: ${getFriendlyErrorMessage(err)}`);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -1596,20 +1668,32 @@ export default function SettingsTab() {
                   {/* URL Text Inputs with Previews Below */}
                   <div className="mb-4 w-full space-y-4 text-left">
                     <div>
-                      <label className={labelClass}>Cover Image URL</label>
+                      <label className={labelClass}>Cover Image File</label>
                       <input
-                        type="text"
-                        value={clubInfo.cover_image_url}
-                        onChange={(e) =>
-                          setClubInfo({
-                            ...clubInfo,
-                            cover_image_url: e.target.value,
-                          })
-                        }
-                        placeholder="https://example.com/cover.jpg"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleCoverImageUpload}
                         className={inputClass}
                         disabled={isLoading}
                       />
+                      <div className="mt-2">
+                        <label className="mb-1 block text-[10px] font-bold text-gray-400 uppercase">
+                          Or paste an image URL
+                        </label>
+                        <input
+                          type="text"
+                          value={clubInfo.cover_image_url || ''}
+                          onChange={(e) =>
+                            setClubInfo((prev) => ({
+                              ...prev,
+                              cover_image_url: e.target.value,
+                            }))
+                          }
+                          placeholder="https://example.com/cover.jpg"
+                          className={inputClass}
+                          disabled={isLoading}
+                        />
+                      </div>
                       <div className="relative mt-2 flex h-24 w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200/50 bg-slate-100 text-gray-300">
                         {isValidUrl(clubInfo.cover_image_url) ? (
                           <img
@@ -1624,23 +1708,34 @@ export default function SettingsTab() {
                         )}
                       </div>
                     </div>
-                    {/* TODO: Add file upload support when backend adds image storage endpoint */}
 
                     <div>
-                      <label className={labelClass}>Logo URL</label>
+                      <label className={labelClass}>Logo File</label>
                       <input
-                        type="text"
-                        value={clubInfo.logo_url}
-                        onChange={(e) =>
-                          setClubInfo({
-                            ...clubInfo,
-                            logo_url: e.target.value,
-                          })
-                        }
-                        placeholder="https://example.com/logo.jpg"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
                         className={inputClass}
                         disabled={isLoading}
                       />
+                      <div className="mt-2">
+                        <label className="mb-1 block text-[10px] font-bold text-gray-400 uppercase">
+                          Or paste an image URL
+                        </label>
+                        <input
+                          type="text"
+                          value={clubInfo.logo_url || ''}
+                          onChange={(e) =>
+                            setClubInfo((prev) => ({
+                              ...prev,
+                              logo_url: e.target.value,
+                            }))
+                          }
+                          placeholder="https://example.com/logo.png"
+                          className={inputClass}
+                          disabled={isLoading}
+                        />
+                      </div>
                       <div className="mt-2 flex justify-center">
                         <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-indigo-100/60 bg-indigo-50 text-xl font-bold text-[#4F46E5] shadow-inner">
                           {isValidUrl(clubInfo.logo_url) ? (
