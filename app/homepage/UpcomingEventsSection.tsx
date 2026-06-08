@@ -14,12 +14,10 @@ interface UpcomingEventsSectionProps {
 }
 
 export function UpcomingEventsSection({
-  events: propEvents,
-  isLoadingEvents: propIsLoading,
+  events = [],
+  isLoadingEvents = false,
 }: UpcomingEventsSectionProps) {
   // TODO: Connect to GET /api/events when backend adds this endpoint
-  const events: Event[] = [];
-  const isLoadingEvents = false;
 
   const [activeEventTab, setActiveEventTab] = useState<
     'this-week' | 'next-month'
@@ -97,7 +95,9 @@ export function UpcomingEventsSection({
               >
                 <Link href={`/events/${event.id}`} className="block h-full">
                   <EventCard
-                    event={event}
+                    event={
+                      event as unknown as import('@/app/components/EventCard').EventProps
+                    }
                     onRemindClick={(id) =>
                       console.log('Remind for HGU event:', id)
                     }
