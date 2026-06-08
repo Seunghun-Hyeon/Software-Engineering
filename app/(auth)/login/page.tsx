@@ -65,9 +65,9 @@ export default function LoginPage() {
 
       const isExec = useAuthStore.getState().isExecutive;
       if (isExec) {
-        setActiveRole('executive');
+        setActiveRole('club_executive');
         setSuccessMessage('Successfully signed in! Redirecting...');
-        router.push('/manager/dashboard');
+        router.push('/');
       } else {
         setSuccessMessage('Successfully signed in! Redirecting...');
         router.push('/');
