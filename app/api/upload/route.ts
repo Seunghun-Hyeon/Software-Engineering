@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
+import { createBrowserClient } from '@supabase/ssr';
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+);
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,9 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const isVideo = file.type.startsWith('video/');
-
-    // Set a limit for video size up to 100MB
-    const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB
+    const MAX_VIDEO_SIZE = 100 * 1024 * 1024;
     if (isVideo && file.size > MAX_VIDEO_SIZE) {
       return NextResponse.json(
         { error: 'Video size must be less than 100MB' },
@@ -25,31 +27,32 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create unique filename
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const filename = `${uniqueSuffix}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+    const ext = file.name.split('.').pop();
+    const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
 
-    // Ensure upload directory exists
-    const uploadDir = join(process.cwd(), 'public', 'uploads');
-    try {
-      await mkdir(uploadDir, { recursive: true });
-    } catch {}
+    const { data, error } = await supabase.storage
+      .from('club_gallery')
+      .upload(filename, buffer, {
+        contentType: file.type,
+        upsert: false,
+      });
 
-    const filepath = join(uploadDir, filename);
-    await writeFile(filepath, buffer);
+    if (error) {
+      console.error('Supabase storage upload error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
-    const url = `/uploads/${filename}`;
+    const { data: publicUrlData } = supabase.storage
+      .from('club_gallery')
+      .getPublicUrl(data.path);
 
     return NextResponse.json({
       success: true,
-      url,
+      url: publicUrlData.publicUrl,
       type: isVideo ? 'video' : 'photo',
     });
   } catch (error) {
     console.error('Upload error:', error);
-    return NextResponse.json(
-      { error: 'Failed to upload file' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
   }
 }
