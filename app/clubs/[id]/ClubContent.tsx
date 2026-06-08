@@ -45,7 +45,7 @@ export function ClubContent({ clubData }: { clubData: ClubDataProps }) {
         {/* Left Column (Span 8) */}
         <div className="flex flex-col gap-10 lg:col-span-8">
           {activeTab === 'overview' && (
-            <OverviewTab setActiveTab={setActiveTab} />
+            <OverviewTab clubId={String(clubData.id)} setActiveTab={setActiveTab} />
           )}
           {activeTab === 'info' && <InfoTab clubData={clubData} />}
           {activeTab === 'news' && <NewsTab clubId={String(clubData.id)} />}
