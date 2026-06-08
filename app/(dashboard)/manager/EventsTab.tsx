@@ -151,7 +151,7 @@ export default function EventsTab() {
           description,
           event_date: formattedDate,
           location,
-          poster_url: posterValue,
+          poster_url: posterUrl,
         });
         newEvent = response.data;
         setEvents((prev) =>
@@ -166,7 +166,7 @@ export default function EventsTab() {
           description,
           event_date: formattedDate,
           location,
-          poster_url: posterValue,
+          poster_url: posterUrl,
         });
         newEvent = response.data;
         setEvents((prev) => [newEvent, ...prev]);
