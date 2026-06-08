@@ -1,33 +1,134 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BentoCard } from '@/app/components/BentoCard';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import { CheckCircle2, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
+import api from '@/lib/axios';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function ManagerRegistrationPage() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Form State
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [studentId, setStudentId] = useState('');
+  const [clubName, setClubName] = useState('');
+  const [clubCategory, setClubCategory] = useState('');
+  const [clubDescription, setClubDescription] = useState('');
+  const [clubDocument, setClubDocument] = useState<File | null>(null);
+
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    []
+  );
+
+  const token = useAuthStore((state) => state.token);
+  const userName = useAuthStore((state) => state.userName);
+
+  useEffect(() => {
+    // Prefill Name
+    if (userName && !firstName && !lastName) {
+      const parts = userName.split(' ');
+      if (parts.length >= 2) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setFirstName(parts[0]);
+        setLastName(parts.slice(1).join(' '));
+      } else {
+        setFirstName(userName);
+      }
+    }
+
+    // Prefill Email from JWT
+    if (token && !email) {
+      try {
+        const payloadBase64 = token.split('.')[1];
+        if (payloadBase64) {
+          const payloadString = atob(
+            payloadBase64.replace(/-/g, '+').replace(/_/g, '/')
+          );
+          const payload = JSON.parse(payloadString);
+          if (payload.email) {
+            setEmail(payload.email);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to parse token for email prefill', err);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, userName]);
+
+  useEffect(() => {
+    api
+      .get('/categories')
+      .then((res) => {
+        setCategories(res.data || []);
+      })
+      .catch((err) => {
+        console.error('Failed to load categories', err);
+      });
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
+
     if (step < 3) {
       setStep(step + 1);
       return;
     }
 
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const formData = new FormData();
+      formData.append('firstName', firstName);
+      formData.append('lastName', lastName);
+      formData.append('email', email);
+      formData.append('studentId', studentId);
+      formData.append('clubName', clubName);
+      formData.append('clubCategory', clubCategory);
+      formData.append('clubDescription', clubDescription);
+      if (clubDocument) {
+        formData.append('clubDocument', clubDocument);
+      }
+
+      await api.post('/clubs/register', formData, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+
+      // Update global store
+      const store = useAuthStore.getState();
+      if (store.token) {
+        store.setAuth(
+          store.token,
+          'club_executive',
+          store.userName,
+          store.major,
+          true,
+          store.userId
+        );
+        store.setActiveRole('club_executive');
+      }
+
       setIsSuccess(true);
-    }, 1500);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      console.error('Registration failed:', err);
+      setErrorMsg(
+        err.response?.data?.error || 'Registration failed. Please try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const nextStep = () => setStep((prev) => Math.min(prev + 1, 3));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
   if (isSuccess) {
@@ -139,6 +240,8 @@ export default function ManagerRegistrationPage() {
                         id="firstName"
                         placeholder="Jane"
                         required
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
                         className="w-full rounded-2xl border-transparent bg-gray-50 px-4 py-3 transition-all focus:ring-2 focus:ring-indigo-600 focus:outline-none"
                       />
                     </div>
@@ -153,6 +256,8 @@ export default function ManagerRegistrationPage() {
                         id="lastName"
                         placeholder="Doe"
                         required
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
                         className="w-full rounded-2xl border-transparent bg-gray-50 px-4 py-3 transition-all focus:ring-2 focus:ring-indigo-600 focus:outline-none"
                       />
                     </div>
@@ -170,6 +275,8 @@ export default function ManagerRegistrationPage() {
                       type="email"
                       placeholder="jane.doe@university.edu"
                       required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="w-full rounded-2xl border-transparent bg-gray-50 px-4 py-3 transition-all focus:ring-2 focus:ring-indigo-600 focus:outline-none"
                     />
                   </div>
@@ -183,8 +290,10 @@ export default function ManagerRegistrationPage() {
                     </label>
                     <Input
                       id="studentId"
-                      placeholder="12345678"
+                      placeholder="22000000"
                       required
+                      value={studentId}
+                      onChange={(e) => setStudentId(e.target.value)}
                       className="w-full rounded-2xl border-transparent bg-gray-50 px-4 py-3 transition-all focus:ring-2 focus:ring-indigo-600 focus:outline-none"
                     />
                   </div>
@@ -209,6 +318,8 @@ export default function ManagerRegistrationPage() {
                       id="clubName"
                       placeholder="e.g., Debate Society"
                       required
+                      value={clubName}
+                      onChange={(e) => setClubName(e.target.value)}
                       className="w-full rounded-2xl border-transparent bg-gray-50 px-4 py-3 transition-all focus:ring-2 focus:ring-indigo-600 focus:outline-none"
                     />
                   </div>
@@ -223,16 +334,18 @@ export default function ManagerRegistrationPage() {
                     <select
                       id="clubCategory"
                       required
-                      defaultValue=""
+                      value={clubCategory}
+                      onChange={(e) => setClubCategory(e.target.value)}
                       className="w-full rounded-2xl border-transparent bg-gray-50 px-4 py-3 text-gray-900 transition-all focus:ring-2 focus:ring-indigo-600 focus:outline-none"
                     >
                       <option value="" disabled>
                         Select a category
                       </option>
-                      <option value="academic">Academic</option>
-                      <option value="cultural">Cultural</option>
-                      <option value="recreational">Recreational</option>
-                      <option value="professional">Professional</option>
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -248,6 +361,8 @@ export default function ManagerRegistrationPage() {
                       placeholder="What is the mission of your club?"
                       rows={4}
                       required
+                      value={clubDescription}
+                      onChange={(e) => setClubDescription(e.target.value)}
                       className="w-full resize-none rounded-2xl border-transparent bg-gray-50 px-4 py-3 text-gray-900 transition-all focus:ring-2 focus:ring-indigo-600 focus:outline-none"
                     ></textarea>
                   </div>
@@ -264,17 +379,38 @@ export default function ManagerRegistrationPage() {
                     Please upload your official faculty advisor approval letter.
                   </p>
 
-                  <div className="group flex cursor-pointer flex-col items-center justify-center rounded-[24px] border-2 border-dashed border-indigo-200 bg-indigo-50/50 p-10 transition-colors hover:border-indigo-400 hover:bg-indigo-50">
-                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm transition-transform group-hover:scale-110">
-                      <UploadCloud className="h-8 w-8 text-indigo-600" />
+                  <label className="group flex cursor-pointer flex-col items-center justify-center rounded-[24px] border-2 border-dashed border-indigo-200 bg-indigo-50/50 p-10 transition-colors hover:border-indigo-400 hover:bg-indigo-50">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <UploadCloud className="mb-3 h-10 w-10 text-gray-400" />
+                      <p className="mb-2 px-4 text-center text-sm text-gray-500">
+                        {clubDocument ? (
+                          <span className="font-semibold text-[#4F46E5]">
+                            {clubDocument.name}
+                          </span>
+                        ) : (
+                          <>
+                            <span className="font-semibold">
+                              Click to upload
+                            </span>{' '}
+                            or drag and drop
+                          </>
+                        )}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PDF, DOCX up to 10MB
+                      </p>
                     </div>
-                    <span className="mb-1 text-sm font-bold text-indigo-700">
-                      Click to upload or drag and drop
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      PDF, JPG, or PNG (max. 10MB)
-                    </span>
-                  </div>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.docx"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setClubDocument(e.target.files[0]);
+                        }
+                      }}
+                    />
+                  </label>
                 </div>
               )}
             </div>
@@ -301,6 +437,11 @@ export default function ManagerRegistrationPage() {
                     : 'Submit Registration'}
               </Button>
             </div>
+            {errorMsg && (
+              <p className="mt-4 text-center text-sm font-semibold text-red-500">
+                {errorMsg}
+              </p>
+            )}
           </form>
         </BentoCard>
       </main>

@@ -143,10 +143,7 @@ export default function EventsTab() {
       const formattedDate = new Date(eventDate).toISOString();
 
       // Connected to POST /api/events/
-      // TODO: Upload image to backend storage when endpoint is available. Send poster_url as null for now if file is selected
-      const posterValue = posterFile ? null : posterUrl || null;
-
-      let newEvent;
+      let newEvent: EventData;
       if (editingEventId) {
         // Update existing event
         const response = await api.patch(`/events/${editingEventId}`, {

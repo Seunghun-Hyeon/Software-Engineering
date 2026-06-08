@@ -13,6 +13,8 @@ import {
   X,
   ArrowRightLeft,
   LogOut,
+  Newspaper,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -23,10 +25,19 @@ import MembersTab from '../Members';
 import RecruitmentTab from '../Recruitment';
 import EventsTab from '../EventsTab';
 import SettingsTab from '../SettingsTab';
+import NewsTab from '../NewsTab';
+import GalleryTab from '../GalleryTab';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-type Tab = 'club-profile' | 'members' | 'recruitment' | 'events' | 'settings';
+type Tab =
+  | 'club-profile'
+  | 'members'
+  | 'recruitment'
+  | 'events'
+  | 'news'
+  | 'gallery'
+  | 'settings';
 
 function DashboardContent() {
   const router = useRouter();
@@ -83,6 +94,10 @@ function DashboardContent() {
         return <ClubProfileTab />;
       case 'events':
         return <EventsTab />;
+      case 'news':
+        return <NewsTab />;
+      case 'gallery':
+        return <GalleryTab />;
       case 'settings':
         return <SettingsTab />;
       default:
@@ -97,6 +112,8 @@ function DashboardContent() {
     { id: 'members', label: 'Members', icon: Users },
     { id: 'recruitment', label: 'Recruitment', icon: ClipboardList },
     { id: 'events', label: 'Events', icon: Calendar },
+    { id: 'news', label: 'News', icon: Newspaper },
+    { id: 'gallery', label: 'Gallery', icon: ImageIcon },
     { id: 'settings', label: 'Settings', icon: Settings },
   ] as const;
 

@@ -253,6 +253,7 @@ export const useAuthStore = create<AuthState>()(
             const status = axiosErr.response.status;
             if (status === 400) {
               friendlyMessage =
+                (axiosErr.response.data as { error?: string })?.error ||
                 'Invalid registration details. Please check the form data.';
             } else if (status === 401) {
               friendlyMessage =
@@ -289,15 +290,3 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
-
-// Add axios interceptor to automatically send Bearer token
-api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
-  if (token) {
-    if (!config.headers) {
-      config.headers = {} as typeof config.headers;
-    }
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});

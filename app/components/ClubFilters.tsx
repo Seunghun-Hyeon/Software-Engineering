@@ -20,8 +20,6 @@ export function ClubFilters({
   const categoryParam = searchParams.get('category');
   const searchParam = searchParams.get('search');
   const statusParam = searchParams.get('status');
-  const meetingTimeParam = searchParams.get('meetingTime');
-  const commitmentParam = searchParams.get('commitment');
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     categoryParam ? categoryParam.split(',') : ['All']
@@ -54,12 +52,6 @@ export function ClubFilters({
   // Advanced filter states
   const [isCurrentlyRecruiting, setIsCurrentlyRecruiting] = useState(
     statusParam === 'Currently Recruiting'
-  );
-  const [selectedMeetingTimes, setSelectedMeetingTimes] = useState<string[]>(
-    meetingTimeParam ? meetingTimeParam.split(',') : []
-  );
-  const [selectedCommitments, setSelectedCommitments] = useState<string[]>(
-    commitmentParam ? commitmentParam.split(',') : []
   );
 
   const handleMainCategoryClick = (cat: string) => {
@@ -99,22 +91,6 @@ export function ClubFilters({
     setSelectedCategories(nextCategories);
   };
 
-  const handleMeetingTimeToggle = (time: string) => {
-    if (selectedMeetingTimes.includes(time)) {
-      setSelectedMeetingTimes(selectedMeetingTimes.filter((t) => t !== time));
-    } else {
-      setSelectedMeetingTimes([...selectedMeetingTimes, time]);
-    }
-  };
-
-  const handleCommitmentToggle = (level: string) => {
-    if (selectedCommitments.includes(level)) {
-      setSelectedCommitments(selectedCommitments.filter((l) => l !== level));
-    } else {
-      setSelectedCommitments([...selectedCommitments, level]);
-    }
-  };
-
   const handleApplyFilters = () => {
     const params = new URLSearchParams(window.location.search);
 
@@ -130,20 +106,6 @@ export function ClubFilters({
       params.set('status', 'Currently Recruiting');
     } else {
       params.delete('status');
-    }
-
-    // Sync meetingTime
-    if (selectedMeetingTimes.length > 0) {
-      params.set('meetingTime', selectedMeetingTimes.join(','));
-    } else {
-      params.delete('meetingTime');
-    }
-
-    // Sync commitment
-    if (selectedCommitments.length > 0) {
-      params.set('commitment', selectedCommitments.join(','));
-    } else {
-      params.delete('commitment');
     }
 
     // Synchronously update search query string in history so parent picks it up
@@ -309,61 +271,6 @@ export function ClubFilters({
                 )}
               </div>
             </div>
-
-            {/* Filter Group 1: Meeting Time */}
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Meeting Time
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {['Morning', 'Afternoon', 'Evening', 'Weekends'].map((time) => {
-                  const isActive = selectedMeetingTimes.includes(time);
-                  return (
-                    <button
-                      key={time}
-                      type="button"
-                      onClick={() => handleMeetingTimeToggle(time)}
-                      className={cn(
-                        'cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                        isActive
-                          ? 'border-[#4F46E5] bg-[#4F46E5] text-white shadow-[0_2px_8px_rgba(79,70,229,0.3)]'
-                          : 'border-transparent bg-[#F3F4F6] text-gray-700 hover:bg-gray-200'
-                      )}
-                    >
-                      {time}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Filter Group 2: Commitment Level */}
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Commitment Level
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {['Low', 'Medium', 'High'].map((level) => {
-                  const isActive = selectedCommitments.includes(level);
-                  return (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => handleCommitmentToggle(level)}
-                      className={cn(
-                        'cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                        isActive
-                          ? 'border-[#4F46E5] bg-[#4F46E5] text-white shadow-[0_2px_8px_rgba(79,70,229,0.3)]'
-                          : 'border-transparent bg-[#F3F4F6] text-gray-700 hover:bg-gray-200'
-                      )}
-                    >
-                      {level}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             <button
               type="button"
               onClick={handleApplyFilters}
