@@ -108,9 +108,7 @@ export default function GalleryTab() {
 
     try {
       setIsUploading(true);
-      const response = await api.post('/api/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const response = await api.post('/api/upload', formData);
 
       if (response.status === 200 && response.data.url) {
         const galleryResponse = await api.post('/api/gallery', {
