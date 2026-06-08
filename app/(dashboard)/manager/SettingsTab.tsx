@@ -89,21 +89,6 @@ interface Category {
   name: string;
 }
 
-interface Article {
-  id: string;
-  date: string;
-  title: string;
-  type: 'external' | 'write';
-  url?: string;
-  content?: string;
-  summary?: string;
-}
-
-interface GalleryItem {
-  type: 'photo' | 'video';
-  url: string;
-}
-
 interface ExecutiveMember {
   name: string;
   role: string;
@@ -139,8 +124,7 @@ function isValidUrl(url?: string): boolean {
   return (
     trimmed.startsWith('http://') ||
     trimmed.startsWith('https://') ||
-    trimmed.startsWith('/') ||
-    trimmed.startsWith('data:')
+    trimmed.startsWith('/')
   );
 }
 
@@ -201,42 +185,6 @@ export default function SettingsTab() {
   // Currently selected member ID for adding/editing leadership members
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
 
-  // News states
-  const [articles, setArticles] = useState<Article[]>([
-    {
-      id: 'article-1',
-      date: 'OCT 24, 2023',
-      title: 'Fall Hackathon Registration Now Open',
-      type: 'external',
-      url: 'https://hackathon.example.com',
-      summary: 'Registration is now open for our fall coding marathon.',
-    },
-    {
-      id: 'article-2',
-      date: 'OCT 20, 2023',
-      title: 'New Partnership: TechGiant Cloud',
-      type: 'write',
-      content:
-        'We are thrilled to announce a new partnership. All active members will now receive $500 in cloud credits for their personal projects and research deployments.',
-      summary:
-        'We are thrilled to announce a new partnership with TechGiant Cloud.',
-    },
-  ]);
-  const [isAddingArticle, setIsAddingArticle] = useState(false);
-  const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
-  const [newArticle, setNewArticle] = useState({
-    title: '',
-    date: '',
-    type: 'external' as 'external' | 'write',
-    url: '',
-    content: '',
-  });
-
-  // Gallery states
-  const [gallery, setGallery] = useState<GalleryItem[]>([
-    { type: 'photo', url: '/concert1.jpg' },
-    { type: 'photo', url: '/concert2.jpg' },
-  ]);
   // Core Value Input State
   const [newCoreValue, setNewCoreValue] = useState('');
 
@@ -727,21 +675,18 @@ export default function SettingsTab() {
       if (
         clubInfo.cover_image_url &&
         (clubInfo.cover_image_url.startsWith('http://') ||
-          clubInfo.cover_image_url.startsWith('https://') ||
-          clubInfo.cover_image_url.startsWith('data:'))
+          clubInfo.cover_image_url.startsWith('https://'))
       ) {
         payload.cover_image_url = clubInfo.cover_image_url.trim();
       }
       if (
         clubInfo.logo_url &&
         (clubInfo.logo_url.startsWith('http://') ||
-          clubInfo.logo_url.startsWith('https://') ||
-          clubInfo.logo_url.startsWith('data:'))
+          clubInfo.logo_url.startsWith('https://'))
       ) {
         payload.logo_url = clubInfo.logo_url.trim();
       }
 
-      // TODO: Upload file to backend storage when endpoint is available. For now showing preview only
       // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
       await api.patch(`/api/clubs/${clubId}`, payload);
       setSuccessMsg('Club Assets Preview saved successfully');
@@ -749,93 +694,6 @@ export default function SettingsTab() {
       console.error('Failed to save club assets:', err);
       setErrorMsg(
         `Failed to save Club Assets Preview: ${getFriendlyErrorMessage(err)}`
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSaveClubNews = async () => {
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    if (!clubId) {
-      setErrorMsg('No club is associated with this administrator account.');
-      return;
-    }
-    console.log('Token being sent:', useAuthStore.getState().token);
-    setIsLoading(true);
-    try {
-      const articlesToSend = articles.map((art) => {
-        const item: {
-          id: string;
-          date: string;
-          title: string;
-          type: string;
-          content: string;
-          summary: string;
-          url?: string;
-        } = {
-          id: art.id || '',
-          date: art.date?.trim() || '',
-          title: art.title?.trim() || '',
-          type: art.type || '',
-          content: art.content?.trim() || '',
-          summary: art.summary?.trim() || '',
-        };
-        if (
-          art.url &&
-          (art.url.startsWith('http://') || art.url.startsWith('https://'))
-        ) {
-          item.url = art.url.trim();
-        }
-        return item;
-      });
-
-      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
-      await api.patch(`/api/clubs/${clubId}`, {
-        articles: articlesToSend,
-      });
-      setSuccessMsg('Club News saved successfully');
-    } catch (err: unknown) {
-      console.error('Failed to save club news:', err);
-      setErrorMsg(`Failed to save Club News: ${getFriendlyErrorMessage(err)}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSaveGallery = async () => {
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    if (!clubId) {
-      setErrorMsg('No club is associated with this administrator account.');
-      return;
-    }
-    console.log('Token being sent:', useAuthStore.getState().token);
-    setIsLoading(true);
-    try {
-      const galleryToSend = gallery.map((item) => {
-        const res: { type: string; url?: string } = {
-          type: item.type || '',
-        };
-        if (
-          item.url &&
-          (item.url.startsWith('http://') || item.url.startsWith('https://'))
-        ) {
-          res.url = item.url.trim();
-        }
-        return res;
-      });
-
-      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
-      await api.patch(`/api/clubs/${clubId}`, {
-        gallery: galleryToSend,
-      });
-      setSuccessMsg('Gallery Showcase saved successfully');
-    } catch (err: unknown) {
-      console.error('Failed to save gallery showcase:', err);
-      setErrorMsg(
-        `Failed to save Gallery Showcase: ${getFriendlyErrorMessage(err)}`
       );
     } finally {
       setIsLoading(false);
@@ -1043,146 +901,6 @@ export default function SettingsTab() {
     }
   };
 
-  // Article Action Triggers
-  const handleSaveArticle = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newArticle.title || !newArticle.date) return;
-
-    if (editingArticleId) {
-      setArticles((prev) =>
-        prev.map((art) =>
-          art.id === editingArticleId
-            ? {
-                ...art,
-                title: newArticle.title,
-                date: newArticle.date,
-                type: newArticle.type,
-                url: newArticle.url,
-                content: newArticle.content,
-                summary:
-                  newArticle.type === 'write'
-                    ? newArticle.content?.substring(0, 80) + '...'
-                    : '',
-              }
-            : art
-        )
-      );
-      setEditingArticleId(null);
-    } else {
-      const added: Article = {
-        id: `article-${Date.now()}`,
-        title: newArticle.title,
-        date: newArticle.date,
-        type: newArticle.type,
-        url: newArticle.url,
-        content: newArticle.content,
-        summary:
-          newArticle.type === 'write'
-            ? newArticle.content?.substring(0, 80) + '...'
-            : '',
-      };
-      setArticles((prev) => [added, ...prev]);
-      // TODO: Connect to POST /api/clubs/:id/news when backend adds this endpoint
-    }
-
-    setNewArticle({
-      title: '',
-      date: '',
-      type: 'external',
-      url: '',
-      content: '',
-    });
-    setIsAddingArticle(false);
-  };
-
-  const handleEditArticle = (art: Article) => {
-    setNewArticle({
-      title: art.title,
-      date: art.date,
-      type: art.type,
-      url: art.url || '',
-      content: art.content || '',
-    });
-    setEditingArticleId(art.id);
-    setIsAddingArticle(true);
-  };
-
-  const handleDeleteArticle = (artId: string) => {
-    setArticles((prev) => prev.filter((a) => a.id !== artId));
-  };
-
-  const handleCoverImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setClubInfo((prev) => ({
-            ...prev,
-            cover_image_url: reader.result as string,
-          }));
-          // TODO: Upload file to backend storage when endpoint is available. For now showing preview only
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setClubInfo((prev) => ({
-            ...prev,
-            logo_url: reader.result as string,
-          }));
-          // TODO: Upload file to backend storage when endpoint is available. For now showing preview only
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setGallery((prev) => [
-            ...prev,
-            { type: 'photo', url: reader.result as string },
-          ]);
-          // TODO: Upload file to backend storage when endpoint is available. For now showing preview only
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setGallery((prev) => [
-            ...prev,
-            { type: 'video', url: reader.result as string },
-          ]);
-          // TODO: Upload file to backend storage when endpoint is available. For now showing preview only
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleDeleteGalleryItem = (index: number) => {
-    setGallery((prev) => prev.filter((_, i) => i !== index));
-  };
-
   // Leadership Add/Edit triggers
   const handleMemberAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1194,7 +912,6 @@ export default function SettingsTab() {
             ...prev,
             avatar: reader.result as string,
           }));
-          // TODO: Upload file to backend storage when endpoint is available. For now showing preview only
         }
       };
       reader.readAsDataURL(file);
@@ -1879,15 +1596,20 @@ export default function SettingsTab() {
                   {/* URL Text Inputs with Previews Below */}
                   <div className="mb-4 w-full space-y-4 text-left">
                     <div>
-                      <label className={labelClass}>Cover Image File</label>
+                      <label className={labelClass}>Cover Image URL</label>
                       <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleCoverImageUpload}
+                        type="text"
+                        value={clubInfo.cover_image_url}
+                        onChange={(e) =>
+                          setClubInfo({
+                            ...clubInfo,
+                            cover_image_url: e.target.value,
+                          })
+                        }
+                        placeholder="https://example.com/cover.jpg"
                         className={inputClass}
                         disabled={isLoading}
                       />
-                      {/* TODO: Upload file to backend storage when endpoint is available. For now showing preview only */}
                       <div className="relative mt-2 flex h-24 w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200/50 bg-slate-100 text-gray-300">
                         {isValidUrl(clubInfo.cover_image_url) ? (
                           <img
@@ -1902,17 +1624,23 @@ export default function SettingsTab() {
                         )}
                       </div>
                     </div>
+                    {/* TODO: Add file upload support when backend adds image storage endpoint */}
 
                     <div>
-                      <label className={labelClass}>Logo File</label>
+                      <label className={labelClass}>Logo URL</label>
                       <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoUpload}
+                        type="text"
+                        value={clubInfo.logo_url}
+                        onChange={(e) =>
+                          setClubInfo({
+                            ...clubInfo,
+                            logo_url: e.target.value,
+                          })
+                        }
+                        placeholder="https://example.com/logo.jpg"
                         className={inputClass}
                         disabled={isLoading}
                       />
-                      {/* TODO: Upload file to backend storage when endpoint is available. For now showing preview only */}
                       <div className="mt-2 flex justify-center">
                         <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-indigo-100/60 bg-indigo-50 text-xl font-bold text-[#4F46E5] shadow-inner">
                           {isValidUrl(clubInfo.logo_url) ? (
@@ -1941,301 +1669,6 @@ export default function SettingsTab() {
                     <button
                       type="button"
                       onClick={handleSaveClubAssets}
-                      disabled={isLoading}
-                      className={primaryBtnClass}
-                    >
-                      Save
-                    </button>
-                  </div>
-                </div>
-
-                {/* News Articles Panel */}
-                <div className={bentoCardClass}>
-                  <div className="mb-4 flex items-center justify-between">
-                    <h2 className="font-display text-base font-bold text-gray-900">
-                      Club News
-                    </h2>
-                    <button
-                      onClick={() => {
-                        setEditingArticleId(null);
-                        setNewArticle({
-                          title: '',
-                          date: '',
-                          type: 'external',
-                          url: '',
-                          content: '',
-                        });
-                        setIsAddingArticle(!isAddingArticle);
-                      }}
-                      className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[#4F46E5] text-white transition duration-200 hover:bg-[#4338CA]"
-                      title="Add News Article"
-                    >
-                      <Plus size={16} />
-                    </button>
-                  </div>
-
-                  {isAddingArticle && (
-                    <form
-                      onSubmit={handleSaveArticle}
-                      className="animate-in fade-in mb-4 space-y-3 border-b border-gray-100 pb-4"
-                    >
-                      <h3 className="text-xs font-bold text-gray-700">
-                        {editingArticleId ? 'Edit Article' : 'Add New Article'}
-                      </h3>
-
-                      <div>
-                        <label className="text-[10px] font-bold text-gray-400 uppercase">
-                          Article Title
-                        </label>
-                        <input
-                          type="text"
-                          value={newArticle.title}
-                          onChange={(e) =>
-                            setNewArticle({
-                              ...newArticle,
-                              title: e.target.value,
-                            })
-                          }
-                          placeholder="e.g. Workshop Starting Soon"
-                          className={inputClass}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-[10px] font-bold text-gray-400 uppercase">
-                          Date
-                        </label>
-                        <input
-                          type="text"
-                          value={newArticle.date}
-                          onChange={(e) =>
-                            setNewArticle({
-                              ...newArticle,
-                              date: e.target.value,
-                            })
-                          }
-                          placeholder="e.g. OCT 24, 2023"
-                          className={inputClass}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="mb-1 block text-[10px] font-bold text-gray-400 uppercase">
-                          Article Type
-                        </label>
-                        <div className="flex gap-4">
-                          <label className="flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-gray-700">
-                            <input
-                              type="radio"
-                              name="articleType"
-                              checked={newArticle.type === 'external'}
-                              onChange={() =>
-                                setNewArticle({
-                                  ...newArticle,
-                                  type: 'external',
-                                })
-                              }
-                              className="accent-[#4F46E5]"
-                            />
-                            External Link
-                          </label>
-                          <label className="flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-gray-700">
-                            <input
-                              type="radio"
-                              name="articleType"
-                              checked={newArticle.type === 'write'}
-                              onChange={() =>
-                                setNewArticle({ ...newArticle, type: 'write' })
-                              }
-                              className="accent-[#4F46E5]"
-                            />
-                            Write Directly
-                          </label>
-                        </div>
-                      </div>
-
-                      {newArticle.type === 'external' ? (
-                        <div>
-                          <label className="text-[10px] font-bold text-gray-400 uppercase">
-                            External URL
-                          </label>
-                          <input
-                            type="url"
-                            value={newArticle.url}
-                            onChange={(e) =>
-                              setNewArticle({
-                                ...newArticle,
-                                url: e.target.value,
-                              })
-                            }
-                            placeholder="e.g. https://linkedin.com/posts/..."
-                            className={inputClass}
-                          />
-                        </div>
-                      ) : (
-                        <div>
-                          <label className="text-[10px] font-bold text-gray-400 uppercase">
-                            Article Content
-                          </label>
-                          <textarea
-                            rows={3}
-                            value={newArticle.content}
-                            onChange={(e) =>
-                              setNewArticle({
-                                ...newArticle,
-                                content: e.target.value,
-                              })
-                            }
-                            placeholder="Write the full content of the article here..."
-                            className={cn(inputClass, 'resize-none')}
-                          />
-                        </div>
-                      )}
-
-                      <div className="flex justify-end gap-2 pt-1">
-                        <button
-                          type="button"
-                          onClick={() => setIsAddingArticle(false)}
-                          className={secondaryBtnClass}
-                        >
-                          Cancel
-                        </button>
-                        <button type="submit" className={primaryBtnClass}>
-                          Save
-                        </button>
-                      </div>
-                    </form>
-                  )}
-
-                  {/* List of articles */}
-                  <div className="max-h-60 space-y-3 overflow-y-auto pr-1">
-                    {articles.map((art) => (
-                      <div
-                        key={art.id}
-                        className="flex items-start justify-between gap-2 rounded-xl border border-gray-100 bg-white/50 p-3"
-                      >
-                        <div className="min-w-0">
-                          <span className="mb-0.5 block text-[9px] font-bold text-gray-400">
-                            {art.date}
-                          </span>
-                          <h4 className="truncate text-xs font-bold text-gray-800">
-                            {art.title}
-                          </h4>
-                          <span className="mt-0.5 block text-[9px] font-semibold tracking-wider text-[#4F46E5] uppercase">
-                            {art.type}
-                          </span>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-1.5">
-                          <button
-                            onClick={() => handleEditArticle(art)}
-                            className="p-1 text-gray-400 transition hover:text-gray-600"
-                            title="Edit"
-                          >
-                            <Edit2 size={13} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteArticle(art.id)}
-                            className="p-1 text-red-400 transition hover:text-red-600"
-                            title="Delete"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                    {articles.length === 0 && (
-                      <p className="py-2 text-center text-xs font-medium text-gray-400">
-                        No articles added yet.
-                      </p>
-                    )}
-                  </div>
-                  <div className="mt-6 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={handleSaveClubNews}
-                      disabled={isLoading}
-                      className={primaryBtnClass}
-                    >
-                      Save
-                    </button>
-                  </div>
-                </div>
-
-                {/* Gallery Section */}
-                <div className={bentoCardClass}>
-                  <h2 className="font-display mb-4 text-base font-bold text-gray-900">
-                    Gallery Showcase
-                  </h2>
-
-                  <div className="mb-4 space-y-4 border-b border-gray-100 pb-4">
-                    {/* Photo upload inputs */}
-                    <div>
-                      <label className={labelClass}>Add Photo</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoUpload}
-                        className={inputClass}
-                      />
-                    </div>
-
-                    {/* Video upload inputs */}
-                    <div>
-                      <label className={labelClass}>Add Video</label>
-                      <input
-                        type="file"
-                        accept="video/*"
-                        onChange={handleVideoUpload}
-                        className={inputClass}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Grid of gallery items */}
-                  <div className="grid max-h-60 grid-cols-2 gap-3 overflow-y-auto pr-1">
-                    {gallery.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="group relative aspect-video overflow-hidden rounded-xl border border-gray-100"
-                      >
-                        {item.type === 'photo' ? (
-                          <img
-                            src={item.url}
-                            alt={`Gallery item ${idx}`}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-slate-800 text-[10px] font-bold text-white">
-                            <Video size={16} className="mr-1 text-gray-400" />{' '}
-                            VIDEO
-                          </div>
-                        )}
-
-                        {/* Delete Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteGalleryItem(idx)}
-                            className="rounded-full bg-red-600 p-1.5 text-white transition hover:bg-red-700 active:scale-90"
-                            title="Delete photo"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                    {gallery.length === 0 && (
-                      <p className="col-span-2 py-2 text-center text-xs font-medium text-gray-400">
-                        No gallery items added.
-                      </p>
-                    )}
-                  </div>
-                  <div className="mt-6 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={handleSaveGallery}
                       disabled={isLoading}
                       className={primaryBtnClass}
                     >

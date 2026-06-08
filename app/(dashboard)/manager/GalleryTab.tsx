@@ -112,7 +112,7 @@ export default function GalleryTab() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      if (response.data.success) {
+      if (response.status === 200 && response.data.url) {
         const galleryResponse = await api.post('/api/gallery', {
           type: expectedType,
           url: response.data.url,
