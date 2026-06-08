@@ -13,7 +13,7 @@ interface EventData {
   title: string;
   description: string;
   event_date: string;
-  poster_url: string | null;
+  poster_image_url: string | null;
   location?: string;
 }
 
@@ -153,7 +153,7 @@ export default function EventsTab() {
           description,
           event_date: formattedDate,
           location,
-          poster_url: posterValue,
+          poster_image_url: posterValue,
         });
         newEvent = response.data;
         setEvents((prev) =>
@@ -168,7 +168,7 @@ export default function EventsTab() {
           description,
           event_date: formattedDate,
           location,
-          poster_url: posterValue,
+          poster_image_url: posterValue,
         });
         newEvent = response.data;
         setEvents((prev) => [newEvent, ...prev]);
@@ -463,8 +463,8 @@ export default function EventsTab() {
                         setTitle(e.title);
                         setDescription(e.description);
                         setEventDate(e.event_date.slice(0, 16));
-                        setPosterUrl(e.poster_url || '');
-                        setPosterPreview(e.poster_url || null);
+                        setPosterUrl(e.poster_image_url || '');
+                        setPosterPreview(e.poster_image_url || null);
                         setPosterFile(null);
                         setLocation(e.location || '');
                         setEditingEventId(e.id || null);

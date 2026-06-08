@@ -17,9 +17,8 @@ export function UpcomingEventsSection({
   events: propEvents,
   isLoadingEvents: propIsLoading,
 }: UpcomingEventsSectionProps) {
-  // TODO: Connect to GET /api/events when backend adds this endpoint
-  const events: Event[] = [];
-  const isLoadingEvents = false;
+  const events: Event[] = propEvents || [];
+  const isLoadingEvents = propIsLoading ?? false;
 
   const [activeEventTab, setActiveEventTab] = useState<
     'this-week' | 'next-month'

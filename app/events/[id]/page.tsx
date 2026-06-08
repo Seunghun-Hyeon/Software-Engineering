@@ -32,17 +32,19 @@ export default async function EventDetailPage({
 
   let foundEvent: Event | null = null;
   try {
-    const res = await fetch(apiEndpoint);
+    const res = await fetch(`${apiEndpoint}/${id}`);
     if (res.ok) {
-      const events: Event[] = await res.json();
-      foundEvent = events.find((e) => String(e.id) === id) || null;
+      foundEvent = await res.json();
 
       // Fetch club name for the event host
       if (foundEvent?.club_id) {
         try {
-          const clubRes = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/api/clubs/${foundEvent.club_id}`
-          );
+          const clubsEndpoint = process.env.NEXT_PUBLIC_SERVER_URL
+            ? process.env.NEXT_PUBLIC_SERVER_URL.endsWith('/api')
+              ? `${process.env.NEXT_PUBLIC_SERVER_URL}/clubs`
+              : `${process.env.NEXT_PUBLIC_SERVER_URL}/api/clubs`
+            : apiEndpoint.replace('/events', '/clubs');
+          const clubRes = await fetch(`${clubsEndpoint}/${foundEvent.club_id}`);
           if (clubRes.ok) {
             const club = await clubRes.json();
             foundEvent = { ...foundEvent, host: club.name };
@@ -87,6 +89,7 @@ export default async function EventDetailPage({
             alt={foundEvent.title}
             className="h-full w-full object-cover"
             src={
+              foundEvent.poster_image_url ||
               foundEvent.poster_url ||
               foundEvent.image ||
               '/handongbackground.jpg'

@@ -3,7 +3,8 @@ export interface Event {
   title: string;
   description: string;
   event_date: string;
-  poster_url: string | null;
+  poster_image_url?: string | null;
+  poster_url?: string | null;
   club_id: string;
   host?: string;
   date?: string;

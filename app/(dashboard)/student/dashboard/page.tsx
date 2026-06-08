@@ -158,8 +158,8 @@ export default function StudentDashboard() {
               if (dbStatus === 'accepted') {
                 status = 'accepted';
               } else if (
-                dbStatus === 'pending' ||
-                dbStatus === 'under_review'
+                dbStatus === 'under review' ||
+                dbStatus === 'interview scheduled'
               ) {
                 status = 'under_review';
               } else {
