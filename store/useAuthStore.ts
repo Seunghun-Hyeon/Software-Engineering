@@ -233,8 +233,9 @@ export const useAuthStore = create<AuthState>()(
           const userName = fullName;
 
           const userId = response.data.user?.id || null;
+          const token = response.data.session?.access_token || null;
           set({
-            token: response.data.token || null,
+            token,
             role,
             userName,
             major: major || null,
