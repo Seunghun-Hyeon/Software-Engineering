@@ -78,7 +78,7 @@ export default function EventsPage() {
                   <Link
                     href={`/events/${event.id}`}
                     key={event.id}
-                    className="group block flex cursor-pointer flex-col overflow-hidden rounded-[24px] border border-white/30 bg-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl transition-transform duration-500 hover:-translate-y-1 sm:flex-row"
+                    className="group flex cursor-pointer flex-col overflow-hidden rounded-[24px] border border-white/30 bg-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl transition-transform duration-500 hover:-translate-y-1 sm:flex-row"
                   >
                     <div className="relative h-64 overflow-hidden sm:h-auto sm:w-2/5">
                       <Image

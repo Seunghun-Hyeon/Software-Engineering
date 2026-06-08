@@ -14,7 +14,7 @@ export function InfoTab({ clubData }: { clubData: ClubDataProps }) {
             Description
           </h3>
           <p className="leading-relaxed text-gray-600">
-            {clubData.mission ||
+            {clubData.shortDescription ||
               'We are a dedicated group of students passionate about bringing change and innovation to Handong Global University. Our club serves as a platform for growth, learning, and collaboration.'}
           </p>
         </div>
@@ -49,18 +49,27 @@ export function InfoTab({ clubData }: { clubData: ClubDataProps }) {
           </ul>
         </div>
 
-        <div>
-          <h3 className="font-display mb-3 text-xl font-bold text-[#3323cc]">
-            History & Goals
-          </h3>
-          <p className="leading-relaxed text-gray-600">
-            Founded with the vision to empower students, we have consistently
-            achieved our goals year after year. Our primary objective for this
-            semester is to expand our reach, host larger scale events, and
-            provide more hands-on opportunities for all our active members to
-            thrive.
-          </p>
-        </div>
+        {!clubData.mission ||
+        clubData.mission === 'N/A' ||
+        clubData.mission === 'No mission statement provided.' ? null : (
+          <div>
+            <h3 className="font-display mb-3 text-xl font-bold text-[#3323cc]">
+              Mission
+            </h3>
+            <p className="leading-relaxed text-gray-600">{clubData.mission}</p>
+          </div>
+        )}
+
+        {!clubData.history ||
+        clubData.history === 'N/A' ||
+        clubData.history === 'No history provided.' ? null : (
+          <div>
+            <h3 className="font-display mb-3 text-xl font-bold text-[#3323cc]">
+              History
+            </h3>
+            <p className="leading-relaxed text-gray-600">{clubData.history}</p>
+          </div>
+        )}
       </div>
     </section>
   );

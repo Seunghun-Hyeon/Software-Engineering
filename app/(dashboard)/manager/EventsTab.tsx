@@ -139,19 +139,37 @@ export default function EventsTab() {
       const formattedDate = new Date(eventDate).toISOString();
 
       // Connected to POST /api/events/
-      const response = await api.post('/events/', {
-        club_id: clubId,
-        title,
-        description,
-        event_date: formattedDate,
-        poster_url:
-          posterUrl ||
-          'https://images.unsplash.com/photo-1540575467063-178a50c2df87',
-      });
-
-      const newEvent = response.data;
-      setEvents((prev) => [newEvent, ...prev]);
-      setSuccessMsg(`Event "${title}" has been successfully published!`);
+      let newEvent;
+      if (editingEventId) {
+        // Update existing event
+        const response = await api.patch(`/events/${editingEventId}`, {
+          title,
+          description,
+          event_date: formattedDate,
+          ...(posterUrl ? { poster_url: posterUrl } : {}),
+        });
+        newEvent = response.data;
+        setEvents((prev) =>
+          prev.map((ev) => (ev.id === editingEventId ? newEvent : ev))
+        );
+        setEditingEventId(null);
+      } else {
+        // Create new event
+        const response = await api.post('/events/', {
+          club_id: clubId,
+          title,
+          description,
+          event_date: formattedDate,
+          ...(posterUrl ? { poster_url: posterUrl } : {}),
+        });
+        newEvent = response.data;
+        setEvents((prev) => [newEvent, ...prev]);
+      }
+      setSuccessMsg(
+        editingEventId
+          ? `Event "${title}" has been updated!`
+          : `Event "${title}" has been successfully published!`
+      );
 
       // Clear Form Fields
       setTitle('');
@@ -210,6 +228,7 @@ export default function EventsTab() {
   const now = new Date();
   const upcomingEvents = events.filter((e) => new Date(e.event_date) >= now);
   const pastEvents = events.filter((e) => new Date(e.event_date) < now);
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
 
   return (
     <div className="w-full font-sans text-slate-900 antialiased">
@@ -364,7 +383,7 @@ export default function EventsTab() {
                 disabled={isLoading}
                 className="rounded-xl bg-[#4F46E5] px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-indigo-100 transition-all hover:bg-indigo-700 disabled:opacity-50"
               >
-                Publish Event
+                {editingEventId ? 'Update Event' : 'Publish Event'}
               </button>
             </div>
           </form>
@@ -392,6 +411,44 @@ export default function EventsTab() {
                   <p className="text-xs leading-relaxed font-medium text-gray-500">
                     {e.description}
                   </p>
+                  <div className="mt-4 flex gap-3 border-t border-gray-50 pt-4">
+                    <button
+                      onClick={() => {
+                        setTitle(e.title);
+                        setDescription(e.description);
+                        setEventDate(e.event_date.slice(0, 16));
+                        setPosterUrl(e.poster_url || '');
+                        setEditingEventId(e.id || null);
+                        setActiveSubTab('create');
+                      }}
+                      className="rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-2 text-xs font-bold text-[#4F46E5] hover:bg-indigo-100"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (
+                          !window.confirm(
+                            'Are you sure you want to delete this event?'
+                          )
+                        )
+                          return;
+                        try {
+                          await api.delete(`/events/${e.id}`);
+                          setEvents((prev) =>
+                            prev.filter((ev) => ev.id !== e.id)
+                          );
+                          setSuccessMsg('Event deleted successfully!');
+                        } catch (err) {
+                          setErrorMsg('Failed to delete event.');
+                          console.error(err);
+                        }
+                      }}
+                      className="rounded-xl border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-100"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))
             )}
@@ -420,6 +477,18 @@ export default function EventsTab() {
                   <p className="text-xs leading-relaxed font-medium text-gray-500">
                     {e.description}
                   </p>
+                  <div className="mt-4 border-t border-gray-50 pt-4">
+                    <button
+                      onClick={() =>
+                        alert(
+                          `Event: ${e.title}\nDate: ${new Date(e.event_date).toLocaleString()}\n\n${e.description}`
+                        )
+                      }
+                      className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100"
+                    >
+                      View Details
+                    </button>
+                  </div>
                 </div>
               ))
             )}

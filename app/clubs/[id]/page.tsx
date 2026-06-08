@@ -5,14 +5,46 @@ import { HeroProfile } from '@/app/clubs/[id]/HeroProfile';
 import { ClubContent } from '@/app/clubs/[id]/ClubContent';
 import { headers } from 'next/headers';
 
+interface Article {
+  id: string;
+  date: string;
+  title: string;
+  type: string;
+  url?: string;
+  content?: string;
+  summary?: string;
+}
+
+interface GalleryItem {
+  type: string;
+  url: string;
+}
+
 interface ApiClub {
   id: string;
   name: string;
   categories: { name: string } | null;
   description?: string;
-  logoUrl?: string;
-  coverImageUrl?: string;
+  logo_url?: string;
+  cover_image_url?: string;
   is_recruiting?: boolean;
+  mission?: string;
+  history?: string;
+  core_values?: string[] | string;
+  memberCount?: number;
+  meeting_schedule?: string;
+  meeting_location?: string;
+  membership_fee?: string;
+  executives?: { name: string; role: string; avatar?: string }[];
+  social_links?: {
+    instagram?: string;
+    kakao?: string;
+    youtube?: string;
+    website?: string;
+    leadership?: { name: string; title: string; avatar?: string }[];
+  };
+  articles?: Article[];
+  gallery?: GalleryItem[];
 }
 
 export default async function ClubProfilePage({
@@ -38,7 +70,6 @@ export default async function ClubProfilePage({
     apiEndpoint = `${protocol}://${host}/api/clubs`;
   }
 
-  // TODO: Replace with GET /api/clubs/:id when backend adds this endpoint
   let foundClub: ApiClub | null = null;
   try {
     const res = await fetch(`${apiEndpoint}/${id}`);
@@ -71,23 +102,44 @@ export default async function ClubProfilePage({
     name: foundClub.name,
     category: foundClub.categories?.name || 'Uncategorized',
     shortDescription: foundClub.description || 'No description available.',
-    logo: foundClub.logoUrl || '',
-    heroImage: foundClub.coverImageUrl || '',
-    isAcceptingApplications: foundClub.is_recruiting ?? false, // Dynamic check
-
-    // Placeholders for fields the backend doesn't return yet
-    mission: 'No mission statement provided.',
-    coreValues: 'No core values listed.',
-    memberCount: 0,
-    meetingTime: 'TBD',
-    meetingLocation: 'TBD',
-    fee: 'TBD',
-    executives: [],
+    logo: foundClub.logo_url || '',
+    heroImage: foundClub.cover_image_url || '',
+    isAcceptingApplications: foundClub.is_recruiting ?? false,
+    mission: foundClub.mission || 'No mission statement provided.',
+    history: foundClub.history || 'No history provided.',
+    coreValues: Array.isArray(foundClub.core_values)
+      ? foundClub.core_values
+      : typeof foundClub.core_values === 'string'
+        ? foundClub.core_values
+            .split(',')
+            .map((v: string) => v.trim())
+            .filter(Boolean)
+        : 'No core values listed.',
+    memberCount: foundClub.memberCount || 0,
+    meetingTime: foundClub.meeting_schedule || 'TBD',
+    meetingLocation: foundClub.meeting_location || 'TBD',
+    fee: foundClub.membership_fee || 'TBD',
+    executives: Array.isArray(foundClub.social_links?.leadership)
+      ? foundClub.social_links.leadership.map(
+          (ex: { name: string; title: string }) => ({
+            name: ex.name || '',
+            role: ex.title || '',
+          })
+        )
+      : Array.isArray(foundClub.executives)
+        ? foundClub.executives.map((ex: { name: string; role: string }) => ({
+            name: ex.name || '',
+            role: ex.role || '',
+          }))
+        : [],
     socials: {
-      instagram: 'TBD',
-      kakao: 'TBD',
-      youtube: 'TBD',
+      instagram: foundClub.social_links?.instagram || 'TBD',
+      kakao: foundClub.social_links?.kakao || 'TBD',
+      youtube: foundClub.social_links?.youtube || 'TBD',
+      website: foundClub.social_links?.website || 'TBD',
     },
+    articles: foundClub.articles || [],
+    gallery: foundClub.gallery || [],
   };
 
   return (

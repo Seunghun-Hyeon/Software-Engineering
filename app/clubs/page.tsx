@@ -13,6 +13,7 @@ import api from '@/lib/axios';
 import { Heart, X } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/lib/utils';
+import Card from '@/app/components/Card';
 
 function ClubsDirectoryContent() {
   const router = useRouter();
@@ -21,7 +22,17 @@ function ClubsDirectoryContent() {
   const toggleFavouriteClub = useAuthStore(
     (state) => state.toggleFavouriteClub
   );
-  const [clubs, setClubs] = useState<Club[]>([]);
+  interface ClubDirectoryItem {
+    id: string;
+    name: string;
+    category: string;
+    description: string;
+    isActive: boolean;
+    cover_image_url?: string;
+    logo_url?: string;
+  }
+
+  const [clubs, setClubs] = useState<ClubDirectoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,13 +47,24 @@ function ClubsDirectoryContent() {
   const [searchQuery, setSearchQuery] = useState(searchParam || '');
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  const isValidUrl = (url?: string): boolean => {
+    if (!url) return false;
+    const trimmed = url.trim();
+    if (trimmed === 'N/A' || trimmed === '' || trimmed === 'TBD') return false;
+    return (
+      trimmed.startsWith('http://') ||
+      trimmed.startsWith('https://') ||
+      trimmed.startsWith('/')
+    );
+  };
+
   interface BackendClubItem {
     id: string;
     name: string;
     description: string;
     isActive: boolean;
-    coverImageUrl?: string;
-    logoUrl?: string;
+    cover_image_url?: string;
+    logo_url?: string;
     categories: {
       name: string;
     } | null;
@@ -55,17 +77,17 @@ function ClubsDirectoryContent() {
         const response = await api.get('/clubs');
 
         // Map the backend structure to populate the club.category field
-        const mappedClubs: Club[] = (response.data as BackendClubItem[]).map(
-          (item) => ({
-            id: String(item.id),
-            name: item.name,
-            description: item.description,
-            isActive: item.isActive,
-            coverImageUrl: item.coverImageUrl,
-            logoUrl: item.logoUrl,
-            category: item.categories?.name || 'Uncategorized',
-          })
-        );
+        const mappedClubs: ClubDirectoryItem[] = (
+          response.data as BackendClubItem[]
+        ).map((item) => ({
+          id: String(item.id),
+          name: item.name,
+          description: item.description,
+          isActive: item.isActive,
+          cover_image_url: item.cover_image_url,
+          logo_url: item.logo_url,
+          category: item.categories?.name || 'Uncategorized',
+        }));
 
         setClubs(mappedClubs);
       } catch (err) {
@@ -96,6 +118,8 @@ function ClubsDirectoryContent() {
       name === query ||
       name.includes(query) ||
       description.includes(query);
+
+    console.log('Club data:', clubs);
 
     return matchesCategory && matchesSearch;
   });
@@ -154,83 +178,11 @@ function ClubsDirectoryContent() {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {filteredClubs.map((club) => (
-              <BentoCard
+              <Card
                 key={club.id}
-                className="overflow-hidden p-0 transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0px_15px_40px_rgba(0,0,0,0.08)]"
-              >
-                {/* Image Section */}
-                <div className="relative h-32 w-full shrink-0 bg-gray-200">
-                  <Image
-                    src={`https://picsum.photos/seed/${club.id}/400/200`}
-                    alt={`${club.name} cover`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    unoptimized
-                    className="object-cover"
-                  />
-
-                  {/* Heart Icon Button */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      if (token) {
-                        // TODO: Connect to POST /api/clubs/favourite when backend adds this endpoint
-                        toggleFavouriteClub(String(club.id));
-                      } else {
-                        setShowAuthModal(true);
-                      }
-                    }}
-                    className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-gray-500 shadow-sm transition-all duration-200 hover:bg-red-50 hover:text-red-500 focus:outline-none"
-                  >
-                    <Heart
-                      className={cn(
-                        'h-4 w-4 transition-all duration-300',
-                        token && favouriteClubIds.includes(String(club.id))
-                          ? 'scale-110 fill-red-500 text-red-500'
-                          : 'text-gray-500'
-                      )}
-                    />
-                  </button>
-
-                  {/* Small Circle Logo */}
-                  <div className="absolute -bottom-6 left-6 h-12 w-12 overflow-hidden rounded-full border-4 border-white bg-white shadow-sm">
-                    <Image
-                      src={`https://picsum.photos/seed/logo${club.id}/100/100`}
-                      alt={`${club.name} logo`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      unoptimized
-                      className="object-cover"
-                    />
-                  </div>
-                </div>
-
-                {/* Text Section */}
-                <div className="flex grow flex-col p-6 pt-8">
-                  <div className="mb-4 flex items-start justify-between">
-                    <Badge>{club.category}</Badge>
-                    {club.isActive && <Badge variant="active">Active</Badge>}
-                  </div>
-
-                  <h3 className="font-display mb-2 line-clamp-1 text-xl font-semibold text-gray-900">
-                    {club.name}
-                  </h3>
-
-                  <p className="mb-6 line-clamp-2 grow text-sm text-gray-600">
-                    {club.description}
-                  </p>
-
-                  {/* View details links to /clubs/[club.id] using Next.js Link component */}
-                  <Link
-                    href={`/clubs/${club.id}`}
-                    className="mt-auto inline-flex w-full items-center justify-center rounded-full bg-[#4F46E5]/10 px-4 py-2.5 text-sm font-semibold text-[#4F46E5] transition-colors hover:bg-[#4F46E5] hover:text-white"
-                  >
-                    View Details
-                  </Link>
-                </div>
-              </BentoCard>
+                club={club}
+                onShowAuthModal={() => setShowAuthModal(true)}
+              />
             ))}
           </div>
         )}

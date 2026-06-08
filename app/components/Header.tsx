@@ -150,7 +150,7 @@ function HeaderContent({}: { activeLabel?: string }) {
             </>
           ) : (
             <>
-              {isExecutive ? (
+              {activeRole === 'club_executive' ? (
                 <Link
                   href="/manager/dashboard"
                   className={cn(
@@ -189,7 +189,7 @@ function HeaderContent({}: { activeLabel?: string }) {
                     >
                       View Profile
                     </Link>
-                    {isExecutive ? (
+                    {activeRole === 'club_executive' || isExecutive ? (
                       <Link
                         href="/manager/dashboard"
                         onClick={() => setIsProfileDropdownOpen(false)}
@@ -299,7 +299,7 @@ function HeaderContent({}: { activeLabel?: string }) {
                 </>
               ) : (
                 <>
-                  {!isExecutive && (
+                  {activeRole !== 'club_executive' && (
                     <Link
                       href="/become-manager"
                       onClick={() => setIsMobileMenuOpen(false)}
@@ -315,7 +315,7 @@ function HeaderContent({}: { activeLabel?: string }) {
                   >
                     View Profile
                   </Link>
-                  {isExecutive ? (
+                  {activeRole === 'club_executive' ? (
                     <Link
                       href="/manager/dashboard"
                       onClick={() => setIsMobileMenuOpen(false)}
