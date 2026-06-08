@@ -101,7 +101,7 @@ function HeaderContent({}: { activeLabel?: string }) {
   }, []);
 
   useEffect(() => {
-    if (token && activeRole === 'executive' && userId) {
+    if (token && activeRole === 'club_executive' && userId) {
       api
         .get('/api/clubs/')
         .then((res) => {

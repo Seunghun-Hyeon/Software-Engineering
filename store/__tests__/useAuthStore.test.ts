@@ -53,8 +53,8 @@ describe('useAuthStore', () => {
     });
 
     it('setActiveRole updates active role', () => {
-      useAuthStore.getState().setActiveRole('executive');
-      expect(useAuthStore.getState().activeRole).toBe('executive');
+      useAuthStore.getState().setActiveRole('club_executive');
+      expect(useAuthStore.getState().activeRole).toBe('club_executive');
     });
 
     it('toggleFavouriteClub adds and removes club IDs', () => {
