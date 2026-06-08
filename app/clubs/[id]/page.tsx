@@ -75,15 +75,9 @@ export default async function ClubProfilePage({
     const res = await fetch(`${apiEndpoint}/${id}`);
     if (res.ok) {
       foundClub = await res.json();
-    } else {
-      const listRes = await fetch(apiEndpoint);
-      if (listRes.ok) {
-        const clubs: ApiClub[] = await listRes.json();
-        foundClub = clubs.find((c) => String(c.id) === id) || null;
-      }
     }
   } catch (err) {
-    console.error('Failed to fetch club from backend:', err);
+    console.error(`Failed to fetch club ${id} from backend:`, err);
   }
 
   if (!foundClub) {

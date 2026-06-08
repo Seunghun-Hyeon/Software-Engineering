@@ -1,8 +1,8 @@
 import { useAuthStore } from '../useAuthStore';
-import api from '@/lib/axios';
+import api from '../../lib/axios';
 
 // Mock the axios api wrapper
-jest.mock('@/lib/axios', () => ({
+jest.mock('../../lib/axios', () => ({
   post: jest.fn(),
   get: jest.fn(),
   interceptors: {
@@ -53,8 +53,8 @@ describe('useAuthStore', () => {
     });
 
     it('setActiveRole updates active role', () => {
-      useAuthStore.getState().setActiveRole('executive');
-      expect(useAuthStore.getState().activeRole).toBe('executive');
+      useAuthStore.getState().setActiveRole('club_executive');
+      expect(useAuthStore.getState().activeRole).toBe('club_executive');
     });
 
     it('toggleFavouriteClub adds and removes club IDs', () => {
@@ -105,7 +105,7 @@ describe('useAuthStore', () => {
       expect(role).toBe('student');
       expect(useAuthStore.getState().token).toBe('mock-token');
       expect(useAuthStore.getState().isLoading).toBe(false);
-      expect(api.post).toHaveBeenCalledWith('/api/auth/login', {
+      expect(api.post).toHaveBeenCalledWith('/auth/login', {
         email: 'test@test.com',
         password: 'password123',
       });

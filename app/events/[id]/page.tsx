@@ -32,13 +32,12 @@ export default async function EventDetailPage({
 
   let foundEvent: Event | null = null;
   try {
-    const res = await fetch(apiEndpoint);
+    const res = await fetch(`${apiEndpoint}/${id}`);
     if (res.ok) {
-      const events: Event[] = await res.json();
-      foundEvent = events.find((e) => String(e.id) === id) || null;
+      foundEvent = await res.json();
     }
   } catch (err) {
-    console.error('Failed to fetch events from backend:', err);
+    console.error(`Failed to fetch event ${id} from backend:`, err);
   }
 
   if (!foundEvent) {

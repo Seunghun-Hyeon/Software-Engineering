@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { MapPin, Calendar, ArrowRight, Users } from 'lucide-react';
 import type { Event } from '@/types/event';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface BentoViewProps {
   events: Event[];
@@ -18,10 +19,11 @@ export function BentoView({ events }: BentoViewProps) {
           const isFeatured = idx === 0;
 
           return (
-            <div
+            <Link
+              href={`/events/${event.id}`}
               key={event.id}
               className={cn(
-                'group relative overflow-hidden rounded-[24px] border border-white/30 bg-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl transition-all hover:-translate-y-1',
+                'group relative block overflow-hidden rounded-[24px] border border-white/30 bg-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl transition-all hover:-translate-y-1',
                 isFeatured && 'lg:col-span-2'
               )}
             >
@@ -129,7 +131,7 @@ export function BentoView({ events }: BentoViewProps) {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
