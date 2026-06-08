@@ -220,31 +220,35 @@ export const useAuthStore = create<AuthState>()(
         try {
           const fullName = `${firstName} ${lastName}`;
           const serializedName = major ? `${fullName} | ${major}` : fullName;
-          const response = await api.post('/auth/signup', {
+          await api.post('/auth/signup', {
             email,
             password,
             name: serializedName,
             role: 'student',
           });
 
-          const role: Role = 'student';
-          const isExecutive = false;
+          // Signup succeeded — now login to get a valid session token.
+          // supabase.auth.signUp() only returns a session when email
+          // confirmation is disabled, so we can't rely on it here.
+          const loginResponse = await api.post('/auth/login', {
+            email,
+            password,
+          });
 
-          const userName = fullName;
+          const token = loginResponse.data.session?.access_token || null;
+          const userId = loginResponse.data.user?.id || null;
 
-          const userId = response.data.user?.id || null;
-          const token = response.data.session?.access_token || null;
           set({
             token,
-            role,
-            userName,
+            role: 'student',
+            userName: fullName,
             major: major || null,
-            isExecutive,
+            isExecutive: false,
             isLoading: false,
             activeRole: 'student',
             userId,
           });
-          return role;
+          return 'student';
         } catch (err) {
           const axiosErr = err as AxiosErrorLike;
           set({ isLoading: false });

@@ -15,10 +15,6 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
-  console.log(
-    'Full Authorization header:',
-    `Bearer ${token?.substring(0, 50)}...`
-  );
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
