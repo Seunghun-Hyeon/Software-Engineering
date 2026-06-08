@@ -150,14 +150,25 @@ function HeaderContent({}: { activeLabel?: string }) {
             </>
           ) : (
             <>
-              <Link
-                href="/become-manager"
-                className={cn(
-                  'text-sm font-semibold text-gray-700 transition-colors hover:text-[#4F46E5]'
-                )}
-              >
-                For Clubs
-              </Link>
+              {isExecutive ? (
+                <Link
+                  href="/manager/dashboard"
+                  className={cn(
+                    'text-sm font-semibold text-[#4F46E5] transition-colors hover:text-[#4338CA]'
+                  )}
+                >
+                  Manager Dashboard
+                </Link>
+              ) : (
+                <Link
+                  href="/become-manager"
+                  className={cn(
+                    'text-sm font-semibold text-gray-700 transition-colors hover:text-[#4F46E5]'
+                  )}
+                >
+                  For Clubs
+                </Link>
+              )}
               <div className="relative" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() =>
@@ -288,13 +299,15 @@ function HeaderContent({}: { activeLabel?: string }) {
                 </>
               ) : (
                 <>
-                  <Link
-                    href="/become-manager"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="py-2 text-center text-sm font-semibold text-gray-700 hover:text-[#4F46E5]"
-                  >
-                    For Clubs
-                  </Link>
+                  {!isExecutive && (
+                    <Link
+                      href="/become-manager"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="py-2 text-center text-sm font-semibold text-gray-700 hover:text-[#4F46E5]"
+                    >
+                      For Clubs
+                    </Link>
+                  )}
                   <Link
                     href="/student/dashboard"
                     onClick={() => setIsMobileMenuOpen(false)}

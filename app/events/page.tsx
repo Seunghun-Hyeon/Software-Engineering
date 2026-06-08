@@ -16,6 +16,7 @@ import {
   ArrowRight,
   Users,
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function EventsPage() {
   const [view, setView] = useState<'structured' | 'bento'>('structured');
@@ -74,9 +75,10 @@ export default function EventsPage() {
               /* Events Structured List View (Inlined to satisfy allowed file edits constraints) */
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {events.map((event, idx) => (
-                  <div
+                  <Link
+                    href={`/events/${event.id}`}
                     key={event.id}
-                    className="group flex cursor-pointer flex-col overflow-hidden rounded-[24px] border border-white/30 bg-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl transition-transform duration-500 hover:-translate-y-1 sm:flex-row"
+                    className="group block flex cursor-pointer flex-col overflow-hidden rounded-[24px] border border-white/30 bg-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl transition-transform duration-500 hover:-translate-y-1 sm:flex-row"
                   >
                     <div className="relative h-64 overflow-hidden sm:h-auto sm:w-2/5">
                       <Image
@@ -153,7 +155,7 @@ export default function EventsPage() {
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
@@ -163,10 +165,11 @@ export default function EventsPage() {
                   {events.map((event, idx) => {
                     const isFeatured = idx === 0;
                     return (
-                      <div
+                      <Link
+                        href={`/events/${event.id}`}
                         key={event.id}
                         className={cn(
-                          'group relative overflow-hidden rounded-[24px] border border-white/30 bg-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl transition-all hover:-translate-y-1',
+                          'group relative block overflow-hidden rounded-[24px] border border-white/30 bg-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl transition-all hover:-translate-y-1',
                           isFeatured && 'lg:col-span-2'
                         )}
                       >
@@ -306,7 +309,7 @@ export default function EventsPage() {
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     );
                   })}
                 </div>

@@ -12,7 +12,7 @@ interface AxiosErrorLike {
 }
 
 // Define the role types supported by our application access control list
-export type Role = 'student' | 'executive' | null;
+export type Role = 'student' | 'club_executive' | null;
 
 // The full shape and interface representing our global Zustand authentication state
 interface AuthState {
@@ -22,7 +22,7 @@ interface AuthState {
   major: string | null; // Authenticated user's major
   isExecutive: boolean; // Flag tracking whether user is an executive
   isLoading: boolean; // Flag tracking network flight status
-  activeRole: 'student' | 'executive' | null; // Currently active user role profile view
+  activeRole: 'student' | 'club_executive' | null; // Currently active user role profile view
   favouriteClubIds: string[]; // Favourited club IDs
   savedEventIds: string[]; // Saved event IDs
   userId: string | null; // Authenticated user ID
@@ -36,7 +36,7 @@ interface AuthState {
     userId?: string | null
   ) => void; // Directly updates session details
   clearAuth: () => void; // Reset store parameters (logout action)
-  setActiveRole: (role: 'student' | 'executive') => void; // Set currently active role
+  setActiveRole: (role: 'student' | 'club_executive') => void; // Set currently active role
   login: (email: string, password: string) => Promise<Role>; // Validates user credentials
   register: (
     email: string,
@@ -142,37 +142,21 @@ export const useAuthStore = create<AuthState>()(
             major = persistedProfiles[userId].major;
           }
 
-          // Fetch all clubs from GET /api/clubs/ using api
-          let isExecutive = false;
-          try {
-            const clubsResponse = await api.get('/clubs/', {
-              headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-            });
-            const clubs = clubsResponse.data;
-            if (Array.isArray(clubs)) {
-              isExecutive = clubs.some(
-                (club: { exec_user_id: string }) => club.exec_user_id === userId
-              );
-            }
-          } catch (clubErr) {
-            const axiosErr = clubErr as AxiosErrorLike;
-            console.error(
-              'Failed to check executive status:',
-              axiosErr.message || axiosErr
-            );
-          }
+          const userRole = response.data.user.role || 'student';
+          const isExecutive = userRole === 'club_executive';
 
           set({
             token,
-            role: 'student',
+            role: userRole as Role,
             userName,
             major,
             isExecutive,
             isLoading: false,
-            activeRole: 'student',
+            activeRole: isExecutive ? 'club_executive' : 'student',
             userId,
           });
-          return 'student';
+
+          return userRole as Role;
         } catch (err) {
           const axiosErr = err as AxiosErrorLike;
           set({ isLoading: false });
