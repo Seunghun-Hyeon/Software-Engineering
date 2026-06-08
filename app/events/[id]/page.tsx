@@ -36,6 +36,21 @@ export default async function EventDetailPage({
     if (res.ok) {
       const events: Event[] = await res.json();
       foundEvent = events.find((e) => String(e.id) === id) || null;
+
+      // Fetch club name for the event host
+      if (foundEvent?.club_id) {
+        try {
+          const clubRes = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/api/clubs/${foundEvent.club_id}`
+          );
+          if (clubRes.ok) {
+            const club = await clubRes.json();
+            foundEvent = { ...foundEvent, host: club.name };
+          }
+        } catch {
+          // host stays empty if club fetch fails
+        }
+      }
     }
   } catch (err) {
     console.error('Failed to fetch events from backend:', err);
@@ -74,7 +89,7 @@ export default async function EventDetailPage({
             src={
               foundEvent.poster_url ||
               foundEvent.image ||
-              'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2500&auto=format&fit=crop'
+              '/handongbackground.jpg'
             }
           />
         </div>
@@ -100,11 +115,17 @@ export default async function EventDetailPage({
                     'No description provided for this event.'}
                 </p>
                 <p>
-                  Hosted by{' '}
-                  <strong className="font-semibold text-gray-900">
-                    {foundEvent.host}
-                  </strong>
-                  .
+                  {foundEvent.host ? (
+                    <>
+                      Hosted by{' '}
+                      <strong className="font-semibold text-gray-900">
+                        {foundEvent.host}
+                      </strong>
+                      .
+                    </>
+                  ) : (
+                    ''
+                  )}
                 </p>
               </div>
             </BentoCard>
@@ -120,8 +141,9 @@ export default async function EventDetailPage({
                   alt="Event Poster"
                   className="h-auto w-full object-cover"
                   src={
+                    foundEvent.poster_url ||
                     foundEvent.image ||
-                    'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2500&auto=format&fit=crop'
+                    '/handongbackground.jpg'
                   }
                 />
               </div>
@@ -145,7 +167,9 @@ export default async function EventDetailPage({
                       Date
                     </p>
                     <p className="font-sans text-base font-medium text-gray-900">
-                      {foundEvent.date}
+                      {foundEvent.event_date
+                        ? new Date(foundEvent.event_date).toLocaleDateString()
+                        : 'TBD'}
                     </p>
                   </div>
                 </li>
@@ -158,7 +182,12 @@ export default async function EventDetailPage({
                       Time
                     </p>
                     <p className="font-sans text-base font-medium text-gray-900">
-                      {foundEvent.time}
+                      {foundEvent.event_date
+                        ? new Date(foundEvent.event_date).toLocaleTimeString(
+                            [],
+                            { hour: '2-digit', minute: '2-digit' }
+                          )
+                        : 'TBD'}
                     </p>
                   </div>
                 </li>
@@ -171,17 +200,11 @@ export default async function EventDetailPage({
                       Location
                     </p>
                     <p className="font-sans text-base font-medium text-gray-900">
-                      {foundEvent.location}
+                      {foundEvent.location || 'TBD'}
                     </p>
                   </div>
                 </li>
               </ul>
-              <Button className="w-full rounded-full bg-[#4F46E5] py-4 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-indigo-600 hover:shadow-indigo-500/40">
-                {foundEvent.requiresTickets ? 'Get Tickets' : 'Register Now'}
-              </Button>
-              <p className="mt-4 text-center font-sans text-xs font-medium text-gray-500">
-                Secure your spot today
-              </p>
             </BentoCard>
           </div>
         </div>
