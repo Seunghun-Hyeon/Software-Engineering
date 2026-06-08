@@ -146,7 +146,7 @@ export default async function ClubProfilePage({
     <div className="relative min-h-screen w-full bg-[#F3F4F6] font-sans selection:bg-[#4F46E5]/20">
       <Header activeLabel="Clubs" />
 
-      <main className="mx-auto max-w-7xl px-4 pt-24 pb-20 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 pt-16 pb-20 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <HeroProfile
           clubName={clubData.name}

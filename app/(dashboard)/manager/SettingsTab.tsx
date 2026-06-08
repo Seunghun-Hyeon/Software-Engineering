@@ -139,7 +139,8 @@ function isValidUrl(url?: string): boolean {
   return (
     trimmed.startsWith('http://') ||
     trimmed.startsWith('https://') ||
-    trimmed.startsWith('/')
+    trimmed.startsWith('/') ||
+    trimmed.startsWith('data:')
   );
 }
 
@@ -236,9 +237,6 @@ export default function SettingsTab() {
     { type: 'photo', url: '/concert1.jpg' },
     { type: 'photo', url: '/concert2.jpg' },
   ]);
-  const [newPhotoUrl, setNewPhotoUrl] = useState('');
-  const [newVideoUrl, setNewVideoUrl] = useState('');
-
   // Core Value Input State
   const [newCoreValue, setNewCoreValue] = useState('');
 
@@ -729,18 +727,21 @@ export default function SettingsTab() {
       if (
         clubInfo.cover_image_url &&
         (clubInfo.cover_image_url.startsWith('http://') ||
-          clubInfo.cover_image_url.startsWith('https://'))
+          clubInfo.cover_image_url.startsWith('https://') ||
+          clubInfo.cover_image_url.startsWith('data:'))
       ) {
         payload.cover_image_url = clubInfo.cover_image_url.trim();
       }
       if (
         clubInfo.logo_url &&
         (clubInfo.logo_url.startsWith('http://') ||
-          clubInfo.logo_url.startsWith('https://'))
+          clubInfo.logo_url.startsWith('https://') ||
+          clubInfo.logo_url.startsWith('data:'))
       ) {
         payload.logo_url = clubInfo.logo_url.trim();
       }
 
+      // TODO: Upload file to backend storage when endpoint is available. For now showing preview only
       // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
       await api.patch(`/api/clubs/${clubId}`, payload);
       setSuccessMsg('Club Assets Preview saved successfully');
@@ -1110,26 +1111,37 @@ export default function SettingsTab() {
     setArticles((prev) => prev.filter((a) => a.id !== artId));
   };
 
-  // Gallery Photo/Video loaders
-  const handleAddPhotoUrl = () => {
-    if (newPhotoUrl.trim()) {
-      setGallery((prev) => [
-        ...prev,
-        { type: 'photo', url: newPhotoUrl.trim() },
-      ]);
-      setNewPhotoUrl('');
-      // TODO: Connect to POST /api/clubs/:id/gallery when backend adds this endpoint
+  const handleCoverImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setClubInfo((prev) => ({
+            ...prev,
+            cover_image_url: reader.result as string,
+          }));
+          // TODO: Upload file to backend storage when endpoint is available. For now showing preview only
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleAddVideoUrl = () => {
-    if (newVideoUrl.trim()) {
-      setGallery((prev) => [
-        ...prev,
-        { type: 'video', url: newVideoUrl.trim() },
-      ]);
-      setNewVideoUrl('');
-      // TODO: Connect to POST /api/clubs/:id/gallery when backend adds this endpoint
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setClubInfo((prev) => ({
+            ...prev,
+            logo_url: reader.result as string,
+          }));
+          // TODO: Upload file to backend storage when endpoint is available. For now showing preview only
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -1143,7 +1155,7 @@ export default function SettingsTab() {
             ...prev,
             { type: 'photo', url: reader.result as string },
           ]);
-          // TODO: Connect to POST /api/clubs/:id/gallery when backend adds this endpoint
+          // TODO: Upload file to backend storage when endpoint is available. For now showing preview only
         }
       };
       reader.readAsDataURL(file);
@@ -1160,7 +1172,7 @@ export default function SettingsTab() {
             ...prev,
             { type: 'video', url: reader.result as string },
           ]);
-          // TODO: Connect to POST /api/clubs/:id/gallery when backend adds this endpoint
+          // TODO: Upload file to backend storage when endpoint is available. For now showing preview only
         }
       };
       reader.readAsDataURL(file);
@@ -1182,6 +1194,7 @@ export default function SettingsTab() {
             ...prev,
             avatar: reader.result as string,
           }));
+          // TODO: Upload file to backend storage when endpoint is available. For now showing preview only
         }
       };
       reader.readAsDataURL(file);
@@ -1866,20 +1879,15 @@ export default function SettingsTab() {
                   {/* URL Text Inputs with Previews Below */}
                   <div className="mb-4 w-full space-y-4 text-left">
                     <div>
-                      <label className={labelClass}>Cover Image URL</label>
+                      <label className={labelClass}>Cover Image File</label>
                       <input
-                        type="text"
-                        value={clubInfo.cover_image_url}
-                        onChange={(e) =>
-                          setClubInfo({
-                            ...clubInfo,
-                            cover_image_url: e.target.value,
-                          })
-                        }
-                        placeholder="https://example.com/cover.jpg"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleCoverImageUpload}
                         className={inputClass}
                         disabled={isLoading}
                       />
+                      {/* TODO: Upload file to backend storage when endpoint is available. For now showing preview only */}
                       <div className="relative mt-2 flex h-24 w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200/50 bg-slate-100 text-gray-300">
                         {isValidUrl(clubInfo.cover_image_url) ? (
                           <img
@@ -1894,23 +1902,17 @@ export default function SettingsTab() {
                         )}
                       </div>
                     </div>
-                    {/* TODO: Add file upload support when backend adds image storage endpoint */}
 
                     <div>
-                      <label className={labelClass}>Logo URL</label>
+                      <label className={labelClass}>Logo File</label>
                       <input
-                        type="text"
-                        value={clubInfo.logo_url}
-                        onChange={(e) =>
-                          setClubInfo({
-                            ...clubInfo,
-                            logo_url: e.target.value,
-                          })
-                        }
-                        placeholder="https://example.com/logo.jpg"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
                         className={inputClass}
                         disabled={isLoading}
                       />
+                      {/* TODO: Upload file to backend storage when endpoint is available. For now showing preview only */}
                       <div className="mt-2 flex justify-center">
                         <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-indigo-100/60 bg-indigo-50 text-xl font-bold text-[#4F46E5] shadow-inner">
                           {isValidUrl(clubInfo.logo_url) ? (
@@ -2170,70 +2172,24 @@ export default function SettingsTab() {
                   <div className="mb-4 space-y-4 border-b border-gray-100 pb-4">
                     {/* Photo upload inputs */}
                     <div>
-                      <label className="mb-1 block text-[10px] font-bold text-gray-400 uppercase">
-                        Add Photo
-                      </label>
-                      <div className="mb-2 flex gap-2">
-                        <input
-                          type="text"
-                          value={newPhotoUrl}
-                          onChange={(e) => setNewPhotoUrl(e.target.value)}
-                          placeholder="Paste photo image URL..."
-                          className={inputClass}
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddPhotoUrl}
-                          className={primaryBtnClass}
-                        >
-                          Add
-                        </button>
-                      </div>
-
-                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 bg-white/20 p-2.5 text-xs font-semibold text-gray-500 transition hover:bg-gray-50">
-                        <ImageIcon size={14} />
-                        Choose Local Photo File
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handlePhotoUpload}
-                          className="hidden"
-                        />
-                      </label>
+                      <label className={labelClass}>Add Photo</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        className={inputClass}
+                      />
                     </div>
 
                     {/* Video upload inputs */}
                     <div>
-                      <label className="mb-1 block text-[10px] font-bold text-gray-400 uppercase">
-                        Add Video
-                      </label>
-                      <div className="mb-2 flex gap-2">
-                        <input
-                          type="text"
-                          value={newVideoUrl}
-                          onChange={(e) => setNewVideoUrl(e.target.value)}
-                          placeholder="Paste video URL..."
-                          className={inputClass}
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddVideoUrl}
-                          className={primaryBtnClass}
-                        >
-                          Add
-                        </button>
-                      </div>
-
-                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 bg-white/20 p-2.5 text-xs font-semibold text-gray-500 transition hover:bg-gray-50">
-                        <Video size={14} />
-                        Choose Local Video File
-                        <input
-                          type="file"
-                          accept="video/*"
-                          onChange={handleVideoUpload}
-                          className="hidden"
-                        />
-                      </label>
+                      <label className={labelClass}>Add Video</label>
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={handleVideoUpload}
+                        className={inputClass}
+                      />
                     </div>
                   </div>
 

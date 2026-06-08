@@ -19,6 +19,7 @@ export interface SavedEvent {
   time: string;
   location: string;
   category: string;
+  event_date?: string;
 }
 
 export interface FavouriteClub {
