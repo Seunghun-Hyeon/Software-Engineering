@@ -16,6 +16,7 @@ import {
   Globe,
   MessageCircle,
   Upload,
+  Loader2,
 } from 'lucide-react';
 import api from '@/lib/axios';
 import axios from 'axios';
@@ -143,6 +144,7 @@ export default function SettingsTab() {
   >([]);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isCoverUploading, setIsCoverUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -696,41 +698,28 @@ export default function SettingsTab() {
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setIsLoading(true);
-      setErrorMsg(null);
-      setSuccessMsg(null);
-      try {
-        // Connected to POST /api/upload
-        const formData = new FormData();
-        formData.append('file', file);
-        const response = await api.post('/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        const returnedUrl =
-          response.data?.url ||
-          response.data?.secure_url ||
-          response.data?.fileUrl ||
-          response.data;
-        if (returnedUrl && typeof returnedUrl === 'string') {
-          setClubInfo((prev) => ({
-            ...prev,
-            cover_image_url: returnedUrl,
-          }));
-          setSuccessMsg('Cover image uploaded successfully');
-        } else {
-          throw new Error(
-            'Invalid response format: No image URL returned from upload endpoint.'
-          );
-        }
-      } catch (err) {
-        console.error('Failed to upload cover image:', err);
-        setErrorMsg(
-          `Failed to upload cover image: ${getFriendlyErrorMessage(err)}`
-        );
-      } finally {
-        setIsLoading(false);
+    if (!file) return;
+    setIsCoverUploading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await api.post('/upload?bucket=club_banner', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const returnedUrl = response.data?.url;
+      if (returnedUrl && typeof returnedUrl === 'string') {
+        setClubInfo((prev) => ({ ...prev, cover_image_url: returnedUrl }));
+        setSuccessMsg('Cover image uploaded successfully');
+      } else {
+        throw new Error('No image URL returned from upload.');
       }
+    } catch (err) {
+      setErrorMsg(`Failed to upload cover image: ${getFriendlyErrorMessage(err)}`);
+    } finally {
+      setIsCoverUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -1668,45 +1657,62 @@ export default function SettingsTab() {
                   {/* URL Text Inputs with Previews Below */}
                   <div className="mb-4 w-full space-y-4 text-left">
                     <div>
-                      <label className={labelClass}>Cover Image File</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleCoverImageUpload}
-                        className={inputClass}
-                        disabled={isLoading}
-                      />
-                      <div className="mt-2">
-                        <label className="mb-1 block text-[10px] font-bold text-gray-400 uppercase">
-                          Or paste an image URL
-                        </label>
-                        <input
-                          type="text"
-                          value={clubInfo.cover_image_url || ''}
-                          onChange={(e) =>
-                            setClubInfo((prev) => ({
-                              ...prev,
-                              cover_image_url: e.target.value,
-                            }))
-                          }
-                          placeholder="https://example.com/cover.jpg"
-                          className={inputClass}
-                          disabled={isLoading}
-                        />
-                      </div>
-                      <div className="relative mt-2 flex h-24 w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200/50 bg-slate-100 text-gray-300">
-                        {isValidUrl(clubInfo.cover_image_url) ? (
+                      <label className={labelClass}>Cover Image</label>
+                      <label
+                        className={`group relative flex h-36 w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed transition ${
+                          isCoverUploading || isLoading
+                            ? 'cursor-not-allowed border-gray-200'
+                            : 'border-gray-300 hover:border-[#4F46E5]'
+                        }`}
+                      >
+                        {/* Current image */}
+                        {isValidUrl(clubInfo.cover_image_url) && (
                           <img
                             src={clubInfo.cover_image_url}
-                            alt="Cover Preview"
-                            className="h-full w-full object-cover"
+                            alt="Cover"
+                            className="absolute inset-0 h-full w-full object-cover"
                           />
-                        ) : (
-                          <span className="font-sans text-xs font-semibold">
-                            No cover image
-                          </span>
                         )}
-                      </div>
+
+                        {/* Placeholder when no image */}
+                        {!isValidUrl(clubInfo.cover_image_url) && !isCoverUploading && (
+                          <div className="flex flex-col items-center gap-2 text-gray-400">
+                            <ImageIcon size={28} />
+                            <span className="text-xs font-bold">Upload Cover Image</span>
+                            <span className="text-[10px] font-medium text-gray-400">
+                              PNG, JPG, WEBP · max 10 MB
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Uploading overlay */}
+                        {isCoverUploading && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/80">
+                            <Loader2 size={22} className="animate-spin text-[#4F46E5]" />
+                            <span className="text-xs font-semibold text-gray-500">
+                              Uploading...
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Hover overlay (only when image exists and not uploading) */}
+                        {isValidUrl(clubInfo.cover_image_url) && !isCoverUploading && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                            <Upload size={20} className="text-white" />
+                            <span className="text-xs font-bold text-white">
+                              Change Cover
+                            </span>
+                          </div>
+                        )}
+
+                        <input
+                          type="file"
+                          accept="image/*"
+                          disabled={isCoverUploading || isLoading}
+                          onChange={handleCoverImageUpload}
+                          className="hidden"
+                        />
+                      </label>
                     </div>
 
                     <div>
