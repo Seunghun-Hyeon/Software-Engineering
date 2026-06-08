@@ -12,6 +12,7 @@ interface ApiClub {
   description?: string;
   logoUrl?: string;
   coverImageUrl?: string;
+  is_recruiting?: boolean;
 }
 
 export default async function ClubProfilePage({
@@ -23,7 +24,10 @@ export default async function ClubProfilePage({
 
   let apiEndpoint = '';
   if (process.env.NEXT_PUBLIC_SERVER_URL) {
-    apiEndpoint = `${process.env.NEXT_PUBLIC_SERVER_URL}/clubs`;
+    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+    apiEndpoint = serverUrl.endsWith('/api')
+      ? `${serverUrl}/clubs`
+      : `${serverUrl}/api/clubs`;
   } else {
     const headersList = await headers();
     const host = headersList.get('host') || 'localhost:3000';
@@ -70,7 +74,7 @@ export default async function ClubProfilePage({
     shortDescription: foundClub.description || 'No description available.',
     logo: foundClub.logoUrl || '',
     heroImage: foundClub.coverImageUrl || '',
-    isAcceptingApplications: false, // Hide join CTA section in sidebar
+    isAcceptingApplications: foundClub.is_recruiting ?? false, // Dynamic check
 
     // Placeholders for fields the backend doesn't return yet
     mission: 'No mission statement provided.',

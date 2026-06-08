@@ -1,86 +1,139 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-// 경고가 발생했던 사용하지 않는 아이콘들을 모두 제거했습니다.
 import {
   Check,
-  ArrowUpRight,
-  Clock,
   CheckCircle2,
   AlertCircle,
+  Plus,
+  Trash2,
+  ListTodo,
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { useAuthStore } from '@/store/useAuthStore';
+import api from '@/lib/axios';
 
 interface Task {
   id: number;
   text: string;
-  sub: string;
   done: boolean;
 }
 
-interface Activity {
-  id: string;
-  initials: string;
-  name: string;
-  action: string;
-  time: string;
-  type: 'edit' | 'void';
-}
-
 export default function Dashboard() {
-  // 실제 대시보드에서 관리할 미완료/완료 미션 태스크 상태 관리 (2개 완료, 2개 미완료 구조)
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: 1,
-      text: 'Approve applicants in queue',
-      sub: 'Due today',
-      done: true,
-    },
-    {
-      id: 2,
-      text: 'Email all club presidents',
-      sub: 'Due yesterday',
-      done: true,
-    },
-    {
-      id: 3,
-      text: 'Generate member profile report',
-      sub: 'Due Jun 5, 2026',
-      done: false,
-    },
-    {
-      id: 4,
-      text: 'Finalize fall intake dates',
-      sub: 'Due Jun 10, 2026',
-      done: false,
-    },
-  ]);
+  const supabase = createClient();
+  const userId = useAuthStore((state) => state.userId);
 
-  // 최근 활동 내역 로그 샘플 데이터
-  const [activities] = useState<Activity[]>([
-    {
-      id: 'act-1',
-      initials: 'EC',
-      name: 'Elena Chang',
-      action: 'Updated Event "Global Welcoming Night"',
-      time: '1 hr ago',
-      type: 'edit',
-    },
-    {
-      id: 'act-2',
-      initials: 'JC',
-      name: 'James Chan',
-      action: 'Cancelled Workshop Registration',
-      time: '3 hr ago',
-      type: 'void',
-    },
-  ]);
+  const [clubId, setClubId] = useState<string | null>(null);
+  const [totalMembers, setTotalMembers] = useState<number>(0);
+  const [upcomingEventsCount, setUpcomingEventsCount] = useState<number>(0);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
-  // 태스크 체크박스 상태 토글 스위치 핸들러
+  // Tasks State
+  const [newTaskText, setNewTaskText] = useState('');
+
+  // Load stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!userId) return;
+      setIsLoadingStats(true);
+      try {
+        const { data: clubs, error: clubsError } = await supabase
+          .from('clubs')
+          .select('id')
+          .eq('exec_user_id', userId);
+
+        if (clubsError) throw clubsError;
+
+        if (clubs && clubs.length > 0) {
+          const currentClubId = clubs[0].id;
+          setClubId(currentClubId);
+
+          // Get members count
+          const { count, error: membersError } = await supabase
+            .from('club_members')
+            .select('id', { count: 'exact', head: true })
+            .eq('club_id', currentClubId);
+
+          if (membersError) throw membersError;
+          setTotalMembers(count || 0);
+
+          // Get events count
+          const eventsResponse = await api.get('/events/');
+          const allEvents = eventsResponse.data;
+          if (Array.isArray(allEvents)) {
+            const now = new Date();
+            const clubUpcoming = allEvents.filter(
+              (e: { club_id: string; event_date: string }) =>
+                e.club_id === currentClubId && new Date(e.event_date) >= now
+            );
+            setUpcomingEventsCount(clubUpcoming.length);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load dashboard stats:', err);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+
+    fetchStats();
+  }, [userId, supabase]);
+
+  // Load tasks from localStorage when clubId is resolved
+  const [tasks, setTasks] = useState<Task[]>(() => []);
+
+  useEffect(() => {
+    if (clubId) {
+      const savedTasks = localStorage.getItem(`dashboard_tasks_${clubId}`);
+      const initialTasks = savedTasks
+        ? (JSON.parse(savedTasks) as Task[])
+        : [
+            { id: 1, text: 'Review new application forms', done: false },
+            { id: 2, text: 'Send welcoming email to new members', done: true },
+          ];
+      Promise.resolve().then(() => setTasks(initialTasks));
+    }
+  }, [clubId]);
+
+  // Save tasks to localStorage
+  const saveTasksLocally = (updatedTasks: Task[]) => {
+    setTasks(updatedTasks);
+    if (clubId) {
+      localStorage.setItem(
+        `dashboard_tasks_${clubId}`,
+        JSON.stringify(updatedTasks)
+      );
+    }
+  };
+
   const toggleTask = (id: number) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
+    const updated = tasks.map((t) =>
+      t.id === id ? { ...t, done: !t.done } : t
     );
+    saveTasksLocally(updated);
+  };
+
+  const deleteTask = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Avoid triggering toggle
+    const updated = tasks.filter((t) => t.id !== id);
+    saveTasksLocally(updated);
+  };
+
+  const handleAddTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskText.trim()) return;
+
+    // TODO: Connect tasks to backend when endpoint is available
+    const newTask: Task = {
+      id: Date.now(),
+      text: newTaskText.trim(),
+      done: false,
+    };
+
+    const updated = [...tasks, newTask];
+    saveTasksLocally(updated);
+    setNewTaskText('');
   };
 
   return (
@@ -88,82 +141,103 @@ export default function Dashboard() {
       <div className="w-full">
         {/* 타이틀 인트로 헤더 */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-gray-900">
             Executive Dashboard
           </h1>
           <p className="mt-1 text-sm leading-relaxed font-medium text-gray-400">
-            Welcome back, your club operations and pending actions were updated.
+            Welcome back. View operational statistics and coordinate tasks for
+            your club.
           </p>
         </div>
 
-        {/* 상단 4열 요약 통계 벤토 그리드 섹션 */}
-        <div className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        {/* 2-Column Summary Stats Grid */}
+        <div className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {/* Total Members */}
+          <div className="rounded-[24px] border border-white/30 bg-white/70 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md">
             <span className="block text-[10px] font-bold tracking-wider text-gray-400 uppercase">
               Total Members
             </span>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-gray-800">1,284</span>
-              <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">
-                +12%
-              </span>
+              {isLoadingStats ? (
+                <span className="text-2xl font-bold text-gray-300">--</span>
+              ) : (
+                <>
+                  <span className="text-3xl font-black text-gray-800">
+                    {totalMembers}
+                  </span>
+                  <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">
+                    Active Members
+                  </span>
+                </>
+              )}
             </div>
           </div>
-          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <span className="block text-[10px] font-bold tracking-wider text-gray-400 uppercase">
-              Active Apps
-            </span>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-gray-800">48</span>
-              <span className="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-bold text-indigo-600">
-                In Queue
-              </span>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+
+          {/* Upcoming Events */}
+          <div className="rounded-[24px] border border-white/30 bg-white/70 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md">
             <span className="block text-[10px] font-bold tracking-wider text-gray-400 uppercase">
               Upcoming Events
             </span>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-gray-800">3</span>
-              <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-600">
-                This Month
-              </span>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <span className="block text-[10px] font-bold tracking-wider text-gray-400 uppercase">
-              Operational Score
-            </span>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-gray-800">98%</span>
-              <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">
-                Excellent
-              </span>
+              {isLoadingStats ? (
+                <span className="text-2xl font-bold text-gray-300">--</span>
+              ) : (
+                <>
+                  <span className="text-3xl font-black text-gray-800">
+                    {upcomingEventsCount}
+                  </span>
+                  <span className="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-bold text-indigo-600">
+                    This intake
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        {/* 하단 핵심 분할 2열 컴포넌트 레이아웃 */}
-        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
-          {/* 왼쪽 파트: Tasks (인터랙티브 체크박스 카드 리스트) */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-center justify-between">
+        {/* Full-width Tasks Section */}
+        <div className="max-w-4xl rounded-[24px] border border-white/30 bg-white/70 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md">
+          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-[#4F46E5]">
+                <ListTodo className="h-4 w-4" />
+              </div>
               <div>
                 <h3 className="text-sm font-bold tracking-tight text-gray-800">
                   Pending Tasks
                 </h3>
-                <p className="mt-0.5 text-xs font-medium text-gray-400">
-                  Click indicators to toggle completion status
+                <p className="text-[11px] font-medium text-gray-400">
+                  Manage tasks locally for your administrative tasks.
                 </p>
               </div>
-              <span className="rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-[#4F46E5]">
-                {tasks.filter((t) => !t.done).length} Remaining
-              </span>
             </div>
 
-            <div className="space-y-3">
-              {tasks.map((task) => (
+            <span className="self-start rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-[10px] font-bold tracking-wide text-[#4F46E5] uppercase sm:self-center">
+              {tasks.filter((t) => !t.done).length} Remaining
+            </span>
+          </div>
+
+          {/* Task Addition Form */}
+          <form onSubmit={handleAddTask} className="mb-6 flex gap-2">
+            <input
+              type="text"
+              value={newTaskText}
+              onChange={(e) => setNewTaskText(e.target.value)}
+              placeholder="Add a new task description..."
+              className="flex-1 rounded-xl border border-gray-200 bg-[#FAFAFA]/50 px-4 py-2 text-xs font-semibold outline-none focus:border-[#4F46E5] focus:bg-white"
+            />
+            <button
+              type="submit"
+              className="flex items-center gap-1.5 rounded-xl bg-[#4F46E5] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 active:scale-95"
+            >
+              <Plus className="h-4 w-4" /> Add Task
+            </button>
+          </form>
+
+          {/* Tasks List */}
+          <div className="space-y-2">
+            {tasks.length > 0 ? (
+              tasks.map((task) => (
                 <div
                   key={task.id}
                   onClick={() => toggleTask(task.id)}
@@ -174,11 +248,11 @@ export default function Dashboard() {
                       : 'border-gray-200/80 bg-white hover:border-indigo-200 hover:shadow-sm'
                   )}
                 >
-                  <div className="flex items-center gap-3.5">
-                    {/* 체크 링 인디케이터 */}
+                  <div className="flex items-center gap-3">
+                    {/* Checkbox Indicator */}
                     <div
                       className={cn(
-                        'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all',
+                        'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all',
                         task.done
                           ? 'border-indigo-600 bg-indigo-600 text-white'
                           : 'border-gray-300 bg-white'
@@ -187,113 +261,37 @@ export default function Dashboard() {
                       {task.done && <Check className="h-3 w-3 stroke-[3px]" />}
                     </div>
 
-                    <div>
-                      <p
-                        className={cn(
-                          'text-xs font-bold tracking-tight',
-                          task.done
-                            ? 'text-gray-400 line-through'
-                            : 'text-gray-700'
-                        )}
-                      >
-                        {task.text}
-                      </p>
-                      <span className="mt-0.5 block text-[10px] font-semibold text-gray-400">
-                        {task.sub}
-                      </span>
-                    </div>
+                    <p
+                      className={cn(
+                        'text-xs font-bold tracking-tight text-slate-800',
+                        task.done && 'text-gray-400 line-through'
+                      )}
+                    >
+                      {task.text}
+                    </p>
                   </div>
 
-                  {!task.done ? (
-                    <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-                  ) : (
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 오른쪽 파트: Recent Activity (최근 이력 내역 테이블 카드) */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold tracking-tight text-gray-800">
-                  Recent Activity
-                </h3>
-                <p className="mt-0.5 text-xs font-medium text-gray-400">
-                  Real-time update stream of executive actions
-                </p>
-              </div>
-              <button className="flex items-center gap-0.5 text-[11px] font-bold text-[#4F46E5] hover:underline">
-                View All History <ArrowUpRight className="h-3 w-3" />
-              </button>
-            </div>
-
-            {/* 활동 로그 테이블 */}
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left">
-                <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="w-1/3 pb-3 text-[10px] font-bold tracking-wider text-gray-400 uppercase">
-                      EXECUTOR
-                    </th>
-                    <th className="w-1/2 pb-3 text-[10px] font-bold tracking-wider text-gray-400 uppercase">
-                      ACTION
-                    </th>
-                    <th className="pb-3 text-right text-[10px] font-bold tracking-wider text-gray-400 uppercase">
-                      STATUS
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {activities.map((act) => (
-                    <tr
-                      key={act.id}
-                      className="group transition-colors hover:bg-slate-50/40"
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => deleteTask(task.id, e)}
+                      className="rounded-lg p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
+                      title="Delete Task"
                     >
-                      <td className="py-4 pr-2">
-                        <div className="flex items-center gap-2.5">
-                          <div
-                            className={cn(
-                              'flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold',
-                              act.type === 'edit'
-                                ? 'border-indigo-100 bg-indigo-50 text-[#4F46E5]'
-                                : 'border-rose-100 bg-rose-50 text-rose-600'
-                            )}
-                          >
-                            {act.initials}
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-gray-800">
-                              {act.name}
-                            </p>
-                            <span className="mt-0.5 flex items-center gap-1 text-[10px] font-medium text-gray-400">
-                              <Clock className="h-2.5 w-2.5" /> {act.time}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 pr-2 text-xs leading-normal font-medium text-gray-500">
-                        {act.action}
-                      </td>
-                      <td className="py-4 text-right">
-                        <span
-                          className={cn(
-                            'inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold',
-                            act.type === 'edit'
-                              ? 'border-blue-100 bg-blue-50 text-blue-700'
-                              : 'border-rose-100 bg-rose-50 text-rose-700'
-                          )}
-                        >
-                          {act.type === 'edit' ? 'Edit' : 'Void'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                    {!task.done ? (
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                    ) : (
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="py-8 text-center text-xs font-semibold text-gray-400">
+                No tasks available. Add some tasks above!
+              </div>
+            )}
           </div>
         </div>
       </div>

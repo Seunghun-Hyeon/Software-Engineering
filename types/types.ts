@@ -9,7 +9,7 @@ export interface StudentProfile {
 export interface Application {
   id: string;
   clubName: string;
-  status: 'submitted' | 'under_review' | 'interview' | 'result';
+  status: 'submitted' | 'under_review' | 'accepted';
 }
 
 export interface SavedEvent {

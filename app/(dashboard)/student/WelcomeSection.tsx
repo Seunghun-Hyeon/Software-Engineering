@@ -2,8 +2,6 @@
 
 import React from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useRouter } from 'next/navigation';
-import { ArrowRightLeft } from 'lucide-react';
 
 interface WelcomeSectionProps {
   profile?: {
@@ -13,11 +11,8 @@ interface WelcomeSectionProps {
 }
 
 export function WelcomeSection({ profile }: WelcomeSectionProps = {}) {
-  const router = useRouter();
   const userName = useAuthStore((state) => state.userName);
   const userMajor = useAuthStore((state) => state.major);
-  const isExecutive = useAuthStore((state) => state.isExecutive);
-  const setActiveRole = useAuthStore((state) => state.setActiveRole);
 
   // Primary source of truth is userName from useAuthStore, fallback to profile.name if provided
   const name = userName || profile?.name;
@@ -44,19 +39,6 @@ export function WelcomeSection({ profile }: WelcomeSectionProps = {}) {
           </p>
         )}
       </div>
-
-      {isExecutive && (
-        <button
-          onClick={() => {
-            setActiveRole('executive');
-            router.push('/manager/dashboard');
-          }}
-          className="flex items-center justify-center gap-2 rounded-full border-2 border-indigo-600 bg-indigo-50 px-5 py-2.5 text-sm font-bold text-indigo-600 shadow-sm transition-all duration-300 hover:bg-indigo-600 hover:text-white"
-        >
-          <ArrowRightLeft size={16} />
-          Switch to Executive Account
-        </button>
-      )}
     </section>
   );
 }

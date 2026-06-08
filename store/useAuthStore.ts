@@ -25,12 +25,15 @@ interface AuthState {
   activeRole: 'student' | 'executive' | null; // Currently active user role profile view
   favouriteClubIds: string[]; // Favourited club IDs
   savedEventIds: string[]; // Saved event IDs
+  userId: string | null; // Authenticated user ID
+  updatedProfiles: Record<string, { userName: string; major: string }>; // Persistent profiles override
   setAuth: (
     token: string,
     role: Role,
     userName?: string | null,
     major?: string | null,
-    isExecutive?: boolean
+    isExecutive?: boolean,
+    userId?: string | null
   ) => void; // Directly updates session details
   clearAuth: () => void; // Reset store parameters (logout action)
   setActiveRole: (role: 'student' | 'executive') => void; // Set currently active role
@@ -61,6 +64,8 @@ export const useAuthStore = create<AuthState>()(
       activeRole: null,
       favouriteClubIds: [],
       savedEventIds: [],
+      userId: null,
+      updatedProfiles: {},
 
       // ----------------------------------------------------
       // Sync Store Actions
@@ -70,8 +75,9 @@ export const useAuthStore = create<AuthState>()(
         role,
         userName = null,
         major = null,
-        isExecutive = false
-      ) => set({ token, role, userName, major, isExecutive }),
+        isExecutive = false,
+        userId = null
+      ) => set({ token, role, userName, major, isExecutive, userId }),
       clearAuth: () =>
         set({
           token: null,
@@ -82,6 +88,7 @@ export const useAuthStore = create<AuthState>()(
           activeRole: null,
           favouriteClubIds: [],
           savedEventIds: [],
+          userId: null,
         }),
       setActiveRole: (role) => set({ activeRole: role }),
       toggleFavouriteClub: (clubId) =>
@@ -116,8 +123,24 @@ export const useAuthStore = create<AuthState>()(
           });
 
           const token = response.data.session?.access_token || null;
-          const userId = response.data.user.id;
-          const userName = null; // TODO: Backend needs to return user name in login response
+          const userId = response.data.user?.id || null;
+
+          const dbName = response.data.user?.name || '';
+          let userName = dbName;
+          let major = null;
+          if (dbName.includes('|')) {
+            const parts = dbName.split('|');
+            userName = parts[0].trim();
+            major = parts[1].trim();
+          }
+
+          // Override with locally persisted updated name/major if present
+          const persistedProfiles =
+            useAuthStore.getState().updatedProfiles || {};
+          if (userId && persistedProfiles[userId]) {
+            userName = persistedProfiles[userId].userName;
+            major = persistedProfiles[userId].major;
+          }
 
           // Fetch all clubs from GET /api/clubs/ using api
           let isExecutive = false;
@@ -143,10 +166,11 @@ export const useAuthStore = create<AuthState>()(
             token,
             role: 'student',
             userName,
-            major: null,
+            major,
             isExecutive,
             isLoading: false,
             activeRole: 'student',
+            userId,
           });
           return 'student';
         } catch (err) {
@@ -186,23 +210,21 @@ export const useAuthStore = create<AuthState>()(
         }
 
         try {
-          // TODO: Replace this simulated signup delay with an actual POST request to the backend:
-          // const response = await axios.post('/auth/signup', { email, password, firstName, lastName });
           const fullName = `${firstName} ${lastName}`;
+          const serializedName = major ? `${fullName} | ${major}` : fullName;
           const response = await api.post('/auth/signup', {
             email,
             password,
-            name: fullName,
+            name: serializedName,
             role: 'student',
           });
 
-          // TODO: Replace with actual role and isExecutive value from backend API response
-          // const response = await axios.post('/auth/signup', { email, password, firstName, lastName });
           const role: Role = 'student';
           const isExecutive = false;
 
-          const userName = response.data.userName || fullName;
+          const userName = fullName;
 
+          const userId = response.data.user?.id || null;
           set({
             token: response.data.token || null,
             role,
@@ -211,6 +233,7 @@ export const useAuthStore = create<AuthState>()(
             isExecutive,
             isLoading: false,
             activeRole: 'student',
+            userId,
           });
           return role;
         } catch (err) {
@@ -252,6 +275,8 @@ export const useAuthStore = create<AuthState>()(
         activeRole: state.activeRole,
         favouriteClubIds: state.favouriteClubIds,
         savedEventIds: state.savedEventIds,
+        userId: state.userId,
+        updatedProfiles: state.updatedProfiles,
       }),
     }
   )

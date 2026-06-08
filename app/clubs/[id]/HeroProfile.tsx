@@ -48,7 +48,7 @@ export function HeroProfile({
     if (isAcceptingApplications) {
       router.push(`/apply/${clubId}`);
     } else {
-      alert('This club is not accepting members right now');
+      alert('This club is not accepting applications right now');
     }
   };
 

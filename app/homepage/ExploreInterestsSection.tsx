@@ -21,10 +21,7 @@ interface ExploreInterestsSectionProps {
   isLoadingCategories?: boolean;
 }
 
-export function ExploreInterestsSection({
-  categories: propCategories,
-  isLoadingCategories: propIsLoading,
-}: ExploreInterestsSectionProps) {
+export function ExploreInterestsSection(_props: ExploreInterestsSectionProps) {
   const [clubs, setClubs] = useState<BackendClub[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
