@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import api from '@/lib/axios';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { createClient } from '@/lib/supabase/client';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface GalleryItem {
   id?: string;
@@ -27,20 +29,51 @@ const primaryBtnClass =
 
 export default function GalleryTab() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [clubId, setClubId] = useState<string | null>(null);
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
   const [newVideoUrl, setNewVideoUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isLoadingGallery, setIsLoadingGallery] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const userId = useAuthStore((state) => state.userId);
+
   // Modal State
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   useEffect(() => {
+    if (!userId) return;
+    const supabase = createClient();
     const fetchGallery = async () => {
       try {
-        const response = await api.get('/api/gallery');
-        setGallery(response.data);
+        const { data: club } = await supabase
+          .from('clubs')
+          .select('id')
+          .eq('exec_user_id', userId)
+          .single();
+
+        if (!club) {
+          setIsLoadingGallery(false);
+          return;
+        }
+
+        setClubId(club.id);
+
+        const { data, error: fetchError } = await supabase
+          .from('club_gallery_images')
+          .select('*')
+          .eq('club_id', club.id)
+          .order('created_at', { ascending: false });
+
+        if (fetchError) throw fetchError;
+
+        setGallery(
+          (data || []).map((item) => ({
+            id: item.id,
+            type: (item.caption?.startsWith('video:') ? 'video' : 'photo') as 'photo' | 'video',
+            url: item.image_url,
+          }))
+        );
       } catch (err) {
         setError(getApiErrorMessage(err));
       } finally {
@@ -48,7 +81,7 @@ export default function GalleryTab() {
       }
     };
     fetchGallery();
-  }, []);
+  }, [userId]);
 
   const handleAddPhotoUrl = async () => {
     if (!newPhotoUrl) return;

@@ -15,6 +15,7 @@ import {
 import api from '@/lib/axios';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { createClient } from '@/lib/supabase/client';
 
 interface Article {
   id: string;
@@ -41,20 +42,42 @@ export default function NewsTab() {
   const userId = useAuthStore((state) => state.userId);
 
   useEffect(() => {
+    if (!userId) return;
+    const supabase = createClient();
     const fetchClubAndNews = async () => {
       try {
-        if (!userId) return;
+        const { data: club } = await supabase
+          .from('clubs')
+          .select('id')
+          .eq('exec_user_id', userId)
+          .single();
 
-        const clubsRes = await api.get('/clubs/');
-        const myClub = clubsRes.data.find(
-          (c: { id: string; exec_user_id: string }) => c.exec_user_id === userId
-        );
-
-        if (myClub) {
-          setClubId(myClub.id);
-          const newsRes = await api.get(`/clubs/${myClub.id}/news`);
-          setArticles(newsRes.data);
+        if (!club) {
+          setIsLoading(false);
+          return;
         }
+
+        setClubId(club.id);
+
+        const { data: posts, error: fetchError } = await supabase
+          .from('club_posts')
+          .select('*')
+          .eq('club_id', club.id)
+          .order('published_at', { ascending: false });
+
+        if (fetchError) throw fetchError;
+
+        setArticles(
+          (posts || []).map((post) => ({
+            id: post.id,
+            date: new Date(post.published_at)
+              .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              .toUpperCase(),
+            title: post.title,
+            content: post.content,
+            summary: post.excerpt,
+          }))
+        );
       } catch (error) {
         setError(getApiErrorMessage(error));
       } finally {
