@@ -229,6 +229,7 @@ export const useAuthStore = create<AuthState>()(
             const status = axiosErr.response.status;
             if (status === 400) {
               friendlyMessage =
+                (axiosErr.response.data as { error?: string })?.error ||
                 'Invalid registration details. Please check the form data.';
             } else if (status === 401) {
               friendlyMessage =
