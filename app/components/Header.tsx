@@ -189,7 +189,7 @@ function HeaderContent({}: { activeLabel?: string }) {
                     >
                       View Profile
                     </Link>
-                    {activeRole === 'club_executive' ? (
+                    {activeRole === 'club_executive' || isExecutive ? (
                       <Link
                         href="/manager/dashboard"
                         onClick={() => setIsProfileDropdownOpen(false)}

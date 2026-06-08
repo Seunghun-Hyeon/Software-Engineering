@@ -54,7 +54,7 @@ export const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
           {/* Colored gradient overlay that adds consistent styling and keeps text readable */}
           <div
             className={cn(
-              'absolute inset-0 bg-gradient-to-b opacity-90 transition-opacity duration-300 group-hover:opacity-95',
+              'absolute inset-0 bg-linear-to-b opacity-90 transition-opacity duration-300 group-hover:opacity-95',
               gradient
             )}
           />

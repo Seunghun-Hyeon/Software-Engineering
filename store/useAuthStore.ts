@@ -142,21 +142,32 @@ export const useAuthStore = create<AuthState>()(
             major = persistedProfiles[userId].major;
           }
 
-          const userRole = response.data.user.role || 'student';
-          const isExecutive = userRole === 'club_executive';
+          // Check executive status by matching userId against exec_user_id in clubs
+          let isExec = false;
+          try {
+            const clubsResponse = await api.get('/clubs/');
+            const clubs = clubsResponse.data;
+            isExec = clubs.some(
+              (club: { exec_user_id: string }) => club.exec_user_id === userId
+            );
+          } catch {
+            isExec = false;
+          }
+
+          const userRole: Role = isExec ? 'club_executive' : 'student';
 
           set({
             token,
-            role: userRole as Role,
+            role: userRole,
             userName,
             major,
-            isExecutive,
+            isExecutive: isExec,
             isLoading: false,
-            activeRole: isExecutive ? 'club_executive' : 'student',
+            activeRole: isExec ? null : 'student',
             userId,
           });
 
-          return userRole as Role;
+          return userRole;
         } catch (err) {
           const axiosErr = err as AxiosErrorLike;
           set({ isLoading: false });
