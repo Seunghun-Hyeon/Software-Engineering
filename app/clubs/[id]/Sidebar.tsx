@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   Users,
   Calendar,
@@ -8,9 +9,12 @@ import {
   MessageCircle,
   Video,
   ArrowRight,
+  CheckCircle2,
 } from 'lucide-react';
 import type { ClubDataProps, ClubExecutive } from './types';
 import api from '@/lib/axios';
+import { createClient } from '@/lib/supabase/client';
+import { useAuthStore } from '@/store/useAuthStore';
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -39,9 +43,11 @@ interface SidebarSocialLinks {
 }
 
 export function Sidebar({ clubData }: { clubData: ClubDataProps }) {
+  const userId = useAuthStore((state) => state.userId);
   const [dbSocialLinks, setDbSocialLinks] = useState<SidebarSocialLinks | null>(
     null
   );
+  const [hasJoined, setHasJoined] = useState(false);
 
   useEffect(() => {
     if (clubData.id) {
@@ -55,6 +61,18 @@ export function Sidebar({ clubData }: { clubData: ClubDataProps }) {
         });
     }
   }, [clubData.id]);
+
+  useEffect(() => {
+    if (!userId || !clubData.id) return;
+    const supabase = createClient();
+    supabase
+      .from('club_members')
+      .select('id')
+      .eq('club_id', clubData.id)
+      .eq('user_id', userId)
+      .maybeSingle()
+      .then(({ data }) => setHasJoined(!!data));
+  }, [userId, clubData.id]);
 
   const club = {
     social_links: dbSocialLinks || {
@@ -74,8 +92,6 @@ export function Sidebar({ clubData }: { clubData: ClubDataProps }) {
           : undefined,
     },
   };
-
-  console.log('Reading social links:', club.social_links);
 
   const hasLink = (val?: string | null) => {
     if (val === null || val === undefined) return false;
@@ -145,7 +161,19 @@ export function Sidebar({ clubData }: { clubData: ClubDataProps }) {
       </div>
 
       {/* Join CTA */}
-      {clubData.isAcceptingApplications && (
+      {hasJoined ? (
+        <div className="flex flex-col items-center rounded-[24px] border-2 border-emerald-100 bg-emerald-50 p-6 text-center shadow-sm">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+            <CheckCircle2 className="h-8 w-8" />
+          </div>
+          <h3 className="font-display mb-2 text-xl font-bold text-gray-900">
+            You&apos;re a Member
+          </h3>
+          <p className="text-sm text-gray-500">
+            You have joined {clubData.name}.
+          </p>
+        </div>
+      ) : clubData.isAcceptingApplications ? (
         <div className="flex flex-col items-center rounded-[24px] border-2 border-[#e1e0ff] bg-white p-6 text-center shadow-sm">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e1e0ff] text-[#3323cc]">
             <Users className="h-8 w-8" />
@@ -157,11 +185,14 @@ export function Sidebar({ clubData }: { clubData: ClubDataProps }) {
             Applications for the Spring semester are currently open. Don&apos;t
             miss out!
           </p>
-          <button className="w-full rounded-full bg-[#3323cc] py-4 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#2a1ca8]">
+          <Link
+            href={`/apply/${clubData.id}`}
+            className="w-full rounded-full bg-[#3323cc] py-4 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#2a1ca8] block text-center"
+          >
             Apply Now
-          </button>
+          </Link>
         </div>
-      )}
+      ) : null}
 
       {/* Leadership Team */}
       {clubData.executives && clubData.executives.length > 0 && (

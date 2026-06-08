@@ -48,7 +48,7 @@ export function ClubContent({ clubData }: { clubData: ClubDataProps }) {
             <OverviewTab setActiveTab={setActiveTab} />
           )}
           {activeTab === 'info' && <InfoTab clubData={clubData} />}
-          {activeTab === 'news' && <NewsTab clubData={clubData} />}
+          {activeTab === 'news' && <NewsTab clubId={String(clubData.id)} />}
           {activeTab === 'events' && <EventsTab clubId={String(clubData.id)} />}
           {activeTab === 'gallery' && <GalleryTab clubId={String(clubData.id)} />}
         </div>
