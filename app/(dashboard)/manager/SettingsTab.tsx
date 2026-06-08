@@ -709,7 +709,7 @@ export default function SettingsTab() {
       // 5. Update local Zustand state
       useAuthStore.setState({
         isExecutive: stillExecutive,
-        role: stillExecutive ? 'executive' : 'student',
+        role: stillExecutive ? 'club_executive' : 'student',
         activeRole: 'student',
       });
 
