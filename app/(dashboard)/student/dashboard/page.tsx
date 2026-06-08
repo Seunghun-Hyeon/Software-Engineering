@@ -32,6 +32,7 @@ interface BackendEvent {
   time?: string;
   location: string;
   category?: string;
+  event_date?: string;
 }
 
 interface BackendClub {
@@ -94,6 +95,7 @@ export default function StudentDashboard() {
             time: item.time || '',
             location: item.location,
             category: item.category || 'General',
+            event_date: item.event_date,
           }));
           setSavedEvents(mappedEvents);
         } catch (err) {

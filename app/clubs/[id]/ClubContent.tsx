@@ -25,7 +25,7 @@ export function ClubContent({ clubData }: { clubData: ClubDataProps }) {
   return (
     <>
       {/* Sticky Content Menu */}
-      <nav className="no-scrollbar sticky top-20 z-40 mb-8 flex gap-8 overflow-x-auto border-b border-gray-200/50 bg-[#F3F4F6]/90 pb-0 backdrop-blur-md">
+      <nav className="no-scrollbar sticky top-16 z-40 mb-8 flex gap-8 overflow-x-auto border-b border-gray-200/50 bg-[#F3F4F6]/90 pb-0 backdrop-blur-md">
         {tabs.map((tab) => (
           <button
             key={tab.id}

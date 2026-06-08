@@ -150,25 +150,14 @@ function HeaderContent({}: { activeLabel?: string }) {
             </>
           ) : (
             <>
-              {activeRole === 'club_executive' ? (
-                <Link
-                  href="/manager/dashboard"
-                  className={cn(
-                    'text-sm font-semibold text-[#4F46E5] transition-colors hover:text-[#4338CA]'
-                  )}
-                >
-                  Manager Dashboard
-                </Link>
-              ) : (
-                <Link
-                  href="/become-manager"
-                  className={cn(
-                    'text-sm font-semibold text-gray-700 transition-colors hover:text-[#4F46E5]'
-                  )}
-                >
-                  For Clubs
-                </Link>
-              )}
+              <Link
+                href="/become-manager"
+                className={cn(
+                  'text-sm font-semibold text-gray-700 transition-colors hover:text-[#4F46E5]'
+                )}
+              >
+                For Clubs
+              </Link>
               <div className="relative" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() =>
@@ -299,15 +288,6 @@ function HeaderContent({}: { activeLabel?: string }) {
                 </>
               ) : (
                 <>
-                  {activeRole !== 'club_executive' && (
-                    <Link
-                      href="/become-manager"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="py-2 text-center text-sm font-semibold text-gray-700 hover:text-[#4F46E5]"
-                    >
-                      For Clubs
-                    </Link>
-                  )}
                   <Link
                     href="/student/dashboard"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -315,7 +295,14 @@ function HeaderContent({}: { activeLabel?: string }) {
                   >
                     View Profile
                   </Link>
-                  {activeRole === 'club_executive' ? (
+                  <Link
+                    href="/become-manager"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="rounded-full border border-gray-200 bg-white py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                  >
+                    For Clubs
+                  </Link>
+                  {activeRole === 'club_executive' || isExecutive ? (
                     <Link
                       href="/manager/dashboard"
                       onClick={() => setIsMobileMenuOpen(false)}
@@ -327,7 +314,7 @@ function HeaderContent({}: { activeLabel?: string }) {
                     <Link
                       href="/become-manager/register"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="rounded-full border border-emerald-500 bg-emerald-50 py-2.5 text-center text-sm font-semibold text-emerald-600 hover:bg-emerald-100"
+                      className="rounded-full bg-[#4F46E5] py-2.5 text-center text-sm font-semibold text-white shadow-md hover:bg-[#4338CA]"
                     >
                       Become a Manager
                     </Link>

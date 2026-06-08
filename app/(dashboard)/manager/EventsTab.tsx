@@ -13,7 +13,8 @@ interface EventData {
   title: string;
   description: string;
   event_date: string;
-  poster_url: string;
+  poster_url: string | null;
+  location?: string;
 }
 
 interface Club {
@@ -62,6 +63,9 @@ export default function EventsTab() {
   const [eventDate, setEventDate] = useState('');
   const [description, setDescription] = useState('');
   const [posterUrl, setPosterUrl] = useState('');
+  const [posterFile, setPosterFile] = useState<File | null>(null);
+  const [posterPreview, setPosterPreview] = useState<string | null>(null);
+  const [location, setLocation] = useState('');
 
   // Fetch manager's club and events
   useEffect(() => {
@@ -146,7 +150,8 @@ export default function EventsTab() {
           title,
           description,
           event_date: formattedDate,
-          ...(posterUrl ? { poster_url: posterUrl } : {}),
+          location,
+          poster_url: posterValue,
         });
         newEvent = response.data;
         setEvents((prev) =>
@@ -160,7 +165,8 @@ export default function EventsTab() {
           title,
           description,
           event_date: formattedDate,
-          ...(posterUrl ? { poster_url: posterUrl } : {}),
+          location,
+          poster_url: posterValue,
         });
         newEvent = response.data;
         setEvents((prev) => [newEvent, ...prev]);
@@ -176,6 +182,9 @@ export default function EventsTab() {
       setEventDate('');
       setDescription('');
       setPosterUrl('');
+      setPosterFile(null);
+      setPosterPreview(null);
+      setLocation('');
     } catch (err: unknown) {
       console.error('Failed to publish event:', err);
       let friendlyMessage = 'Unknown network error';
@@ -345,20 +354,54 @@ export default function EventsTab() {
                   />
                 </div>
 
-                {/* Poster Image URL */}
+                {/* Poster Image File Upload */}
                 <div>
                   <label className="mb-2 block text-[10px] font-bold tracking-wider text-gray-400 uppercase">
-                    POSTER IMAGE URL
+                    POSTER IMAGE
                   </label>
-                  <input
-                    type="text"
-                    value={posterUrl}
-                    onChange={(e) => setPosterUrl(e.target.value)}
-                    placeholder="e.g. https://images.unsplash.com/photo-..."
-                    className="w-full rounded-xl border border-gray-200 bg-[#FAFAFA]/70 px-4 py-3 text-xs font-medium transition outline-none placeholder:text-gray-300 focus:border-[#4F46E5] focus:bg-white"
-                    disabled={isLoading}
-                  />
+                  <div className="flex flex-col gap-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setPosterFile(file);
+                        if (file) {
+                          setPosterPreview(URL.createObjectURL(file));
+                        } else {
+                          setPosterPreview(null);
+                        }
+                      }}
+                      className="w-full rounded-xl border border-gray-200 bg-[#FAFAFA]/70 px-4 py-2 text-xs font-medium transition outline-none file:mr-4 file:rounded-full file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#4F46E5] hover:file:bg-indigo-100 focus:border-[#4F46E5] focus:bg-white"
+                      disabled={isLoading}
+                    />
+                    {posterPreview && (
+                      <div className="relative mt-1 h-32 w-32 overflow-hidden rounded-xl border border-gray-100 bg-gray-50 shadow-sm">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={posterPreview}
+                          alt="Poster Preview"
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
+              </div>
+
+              {/* Location */}
+              <div>
+                <label className="mb-2 block text-[10px] font-bold tracking-wider text-gray-400 uppercase">
+                  LOCATION
+                </label>
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="e.g. HGU Chapel, Auditorium"
+                  className="w-full rounded-xl border border-gray-200 bg-[#FAFAFA]/70 px-4 py-3 text-xs font-medium transition outline-none placeholder:text-gray-300 focus:border-[#4F46E5] focus:bg-white"
+                  disabled={isLoading}
+                />
               </div>
 
               {/* Event Description */}
@@ -406,7 +449,8 @@ export default function EventsTab() {
                     {e.title}
                   </h3>
                   <p className="mb-4 text-xs font-medium text-gray-400">
-                    Date: {new Date(e.event_date).toLocaleString()}
+                    Date: {new Date(e.event_date).toLocaleString()} | Location:{' '}
+                    {e.location || 'TBD'}
                   </p>
                   <p className="text-xs leading-relaxed font-medium text-gray-500">
                     {e.description}
@@ -418,6 +462,9 @@ export default function EventsTab() {
                         setDescription(e.description);
                         setEventDate(e.event_date.slice(0, 16));
                         setPosterUrl(e.poster_url || '');
+                        setPosterPreview(e.poster_url || null);
+                        setPosterFile(null);
+                        setLocation(e.location || '');
                         setEditingEventId(e.id || null);
                         setActiveSubTab('create');
                       }}
@@ -472,7 +519,8 @@ export default function EventsTab() {
                     {e.title}
                   </h3>
                   <p className="mb-4 text-xs font-medium text-gray-400">
-                    Date: {new Date(e.event_date).toLocaleString()}
+                    Date: {new Date(e.event_date).toLocaleString()} | Location:{' '}
+                    {e.location || 'TBD'}
                   </p>
                   <p className="text-xs leading-relaxed font-medium text-gray-500">
                     {e.description}
@@ -481,7 +529,7 @@ export default function EventsTab() {
                     <button
                       onClick={() =>
                         alert(
-                          `Event: ${e.title}\nDate: ${new Date(e.event_date).toLocaleString()}\n\n${e.description}`
+                          `Event: ${e.title}\nDate: ${new Date(e.event_date).toLocaleString()}\nLocation: ${e.location || 'TBD'}\n\n${e.description}`
                         )
                       }
                       className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100"

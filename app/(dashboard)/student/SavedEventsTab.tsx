@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Bookmark, MapPin, Calendar, Clock } from 'lucide-react';
+import Link from 'next/link';
 import { SavedEvent } from '../../../types/types';
 import { Badge } from '@/app/components/Badge';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -70,15 +71,26 @@ export function SavedEventsTab({ events }: SavedEventsTabProps) {
                 <div className="mb-6 space-y-3 text-sm font-medium text-gray-500">
                   <div className="flex items-center gap-3">
                     <Calendar className="h-[18px] w-[18px] shrink-0 text-[#4F46E5]" />
-                    <span>{event.date}</span>
+                    <span>
+                      {event.event_date
+                        ? new Date(event.event_date).toLocaleDateString()
+                        : 'TBD'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Clock className="h-[18px] w-[18px] shrink-0 text-[#4F46E5]" />
-                    <span>{event.time}</span>
+                    <span>
+                      {event.event_date
+                        ? new Date(event.event_date).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                        : 'TBD'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <MapPin className="h-[18px] w-[18px] shrink-0 text-[#4F46E5]" />
-                    <span>{event.location}</span>
+                    <span>{event.location || 'TBD'}</span>
                   </div>
                 </div>
               </div>
@@ -89,9 +101,12 @@ export function SavedEventsTab({ events }: SavedEventsTabProps) {
                   <span className="h-2 w-2 animate-pulse rounded-full bg-[#10B981]" />
                   Saved
                 </span>
-                <span className="cursor-pointer text-sm font-bold text-[#4F46E5] hover:underline">
+                <Link
+                  href={`/events/${event.id}`}
+                  className="cursor-pointer text-sm font-bold text-[#4F46E5] hover:underline"
+                >
                   View Details
-                </span>
+                </Link>
               </div>
             </div>
           );

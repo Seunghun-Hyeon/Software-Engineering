@@ -45,8 +45,8 @@ interface AuthState {
     lastName?: string,
     major?: string
   ) => Promise<Role>; // Registers a new user account profile
-  toggleFavouriteClub: (clubId: string) => void; // Toggles favourite status of a club
-  toggleSavedEvent: (eventId: string) => void; // Toggles saved status of an event
+  toggleFavouriteClub: (clubId: string) => Promise<void>; // Toggles favourite status of a club
+  toggleSavedEvent: (eventId: string) => Promise<void>; // Toggles saved status of an event
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -86,23 +86,25 @@ export const useAuthStore = create<AuthState>()(
           major: null,
           isExecutive: false,
           activeRole: null,
-          favouriteClubIds: [],
-          savedEventIds: [],
           userId: null,
         }),
       setActiveRole: (role) => set({ activeRole: role }),
-      toggleFavouriteClub: (clubId) =>
+      toggleFavouriteClub: async (clubId) => {
         set((state) => ({
           favouriteClubIds: state.favouriteClubIds.includes(clubId)
             ? state.favouriteClubIds.filter((id) => id !== clubId)
             : [...state.favouriteClubIds, clubId],
-        })),
-      toggleSavedEvent: (eventId) =>
+        }));
+        // TODO: Replace with GET /api/interactions/clubs/following and GET /api/interactions/events/saved when backend adds these endpoints
+      },
+      toggleSavedEvent: async (eventId) => {
         set((state) => ({
           savedEventIds: state.savedEventIds.includes(eventId)
             ? state.savedEventIds.filter((id) => id !== eventId)
             : [...state.savedEventIds, eventId],
-        })),
+        }));
+        // TODO: Replace with GET /api/interactions/clubs/following and GET /api/interactions/events/saved when backend adds these endpoints
+      },
 
       // ----------------------------------------------------
       // Async Authentication API Actions (Connected to Backend)
@@ -144,15 +146,24 @@ export const useAuthStore = create<AuthState>()(
 
           // Check executive status by matching userId against exec_user_id in clubs
           let isExec = false;
+          // Keep existing favorites and saved events from state if backend endpoints don't exist
+          const favouriteClubIds = useAuthStore.getState().favouriteClubIds;
+          const savedEventIds = useAuthStore.getState().savedEventIds;
+
           try {
             const clubsResponse = await api.get('/clubs/');
-            const clubs = clubsResponse.data;
-            isExec = clubs.some(
-              (club: { exec_user_id: string }) => club.exec_user_id === userId
-            );
+            const clubs = clubsResponse?.data;
+            if (Array.isArray(clubs)) {
+              isExec = clubs.some(
+                (club: { exec_user_id: string }) => club.exec_user_id === userId
+              );
+            }
           } catch {
             isExec = false;
           }
+
+          // TODO: Replace with GET /api/interactions/clubs/following and GET /api/interactions/events/saved when backend adds these endpoints
+          // TODO: On login, fetch and restore user favourites and saved events from backend
 
           const userRole: Role = isExec ? 'club_executive' : 'student';
 
@@ -162,6 +173,8 @@ export const useAuthStore = create<AuthState>()(
             userName,
             major,
             isExecutive: isExec,
+            favouriteClubIds,
+            savedEventIds,
             isLoading: false,
             activeRole: isExec ? null : 'student',
             userId,
