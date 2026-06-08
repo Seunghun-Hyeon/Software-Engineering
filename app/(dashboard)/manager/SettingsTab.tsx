@@ -61,8 +61,6 @@ function YoutubeIcon({ className }: { className?: string }) {
 interface ClubData {
   id: string;
   name: string;
-  email?: string;
-  slogan?: string;
   description?: string;
   is_recruiting?: boolean;
   exec_user_id: string;
@@ -72,7 +70,6 @@ interface ClubData {
   history?: string;
   cover_image_url?: string;
   logo_url?: string;
-  memberCount?: number;
   meeting_schedule?: string;
   meeting_location?: string;
   membership_fee?: string;
@@ -134,6 +131,17 @@ function getUserIdFromToken(token: string | null): string | null {
   }
 }
 
+function isValidUrl(url?: string): boolean {
+  if (!url) return false;
+  const trimmed = url.trim();
+  if (trimmed === 'N/A' || trimmed === '') return false;
+  return (
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('/')
+  );
+}
+
 export default function SettingsTab() {
   const token = useAuthStore((state) => state.token);
   const userId = getUserIdFromToken(token);
@@ -143,7 +151,7 @@ export default function SettingsTab() {
     'profile'
   );
   const [clubId, setClubId] = useState<string | null>(null);
-  const [isRecruiting, setIsRecruiting] = useState(true);
+
   const [dbUsers, setDbUsers] = useState<
     { id: string; name: string | null; email: string; role: string | null }[]
   >([]);
@@ -158,11 +166,10 @@ export default function SettingsTab() {
   // Extended Club Info editor fields mapping DB schema properties
   const [clubInfo, setClubInfo] = useState({
     name: '',
-    email: '',
-    slogan: '',
     description: '',
     category: '',
-    history_goals: '',
+    mission: '',
+    history: '',
     instagram: '',
     kakao: '',
     youtube: '',
@@ -170,7 +177,6 @@ export default function SettingsTab() {
     cover_image_url: '',
     logo_url: '',
     core_values: [] as string[],
-    memberCount: 0,
     meeting_schedule: '',
     meeting_location: '',
     membership_fee: '',
@@ -241,7 +247,7 @@ export default function SettingsTab() {
         return { data: [] }; // fallback to empty array if categories fetch fails
       });
 
-      const clubsPromise = api.get('/clubs/');
+      const clubsPromise = api.get('/api/clubs/');
 
       const supabase = createClient();
 
@@ -256,11 +262,16 @@ export default function SettingsTab() {
           console.log('clubs:', clubs, 'userId:', userId);
 
           if (Array.isArray(clubs)) {
-            const myClub = clubs.find(
+            const myClubSummary = clubs.find(
               (c: ClubData) => c.exec_user_id === userId
             );
-            if (myClub) {
-              setClubId(myClub.id);
+            if (myClubSummary) {
+              setClubId(myClubSummary.id);
+
+              const clubDetailRes = await api.get(
+                `/api/clubs/${myClubSummary.id}`
+              );
+              const myClub = clubDetailRes.data;
 
               // Restrict candidate list to members of the current club
               const { data: membersData, error: membersError } = await supabase
@@ -313,21 +324,12 @@ export default function SettingsTab() {
                 }
               }
 
-              // Combine Mission and History
-              const combinedHistoryGoals = [
-                myClub.mission?.trim(),
-                myClub.history?.trim(),
-              ]
-                .filter(Boolean)
-                .join('\n\n');
-
               setClubInfo({
                 name: myClub.name || '',
-                email: myClub.email || '',
-                slogan: myClub.slogan || '',
                 description: myClub.description || '',
                 category: matchedCategoryName || myClub.category || '',
-                history_goals: combinedHistoryGoals,
+                mission: myClub.mission || '',
+                history: myClub.history || '',
                 instagram: myClub.social_links?.instagram || '',
                 kakao: myClub.social_links?.kakao || '',
                 youtube: myClub.social_links?.youtube || '',
@@ -342,7 +344,6 @@ export default function SettingsTab() {
                         .map((v: string) => v.trim())
                         .filter(Boolean)
                     : [],
-                memberCount: myClub.memberCount || 0,
                 meeting_schedule: myClub.meeting_schedule || '',
                 meeting_location: myClub.meeting_location || '',
                 membership_fee: myClub.membership_fee || '',
@@ -363,7 +364,6 @@ export default function SettingsTab() {
                     )
                   : []
               );
-              setIsRecruiting(myClub.is_recruiting ?? true);
             } else {
               setErrorMsg('No club found for your account');
             }
@@ -422,105 +422,336 @@ export default function SettingsTab() {
     }
   }, [token, userId]);
 
-  // Handles updating the club data profile settings
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  function getFriendlyErrorMessage(err: unknown): string {
+    let friendlyMessage = 'Unknown error';
+    if (axios.isAxiosError(err)) {
+      const data = err.response?.data;
+      if (data) {
+        if (typeof data.error === 'string') {
+          friendlyMessage = data.error;
+        } else if (data.error && typeof data.error === 'object') {
+          const fieldErrors = data.error.fieldErrors;
+          if (fieldErrors && typeof fieldErrors === 'object') {
+            const messages = Object.entries(fieldErrors).map(
+              ([field, msgs]) => {
+                const fieldName = field.replace('_', ' ');
+                const msgStr = Array.isArray(msgs)
+                  ? msgs.join(', ')
+                  : String(msgs);
+                return `${fieldName}: ${msgStr}`;
+              }
+            );
+            if (messages.length > 0) {
+              friendlyMessage = messages.join('; ');
+            } else if (data.error.message) {
+              friendlyMessage = String(data.error.message);
+            } else {
+              friendlyMessage = JSON.stringify(data.error);
+            }
+          } else if (data.error.message) {
+            friendlyMessage = String(data.error.message);
+          } else {
+            friendlyMessage = JSON.stringify(data.error);
+          }
+        } else if (typeof data.message === 'string') {
+          friendlyMessage = data.message;
+        } else {
+          friendlyMessage = JSON.stringify(data);
+        }
+      } else {
+        friendlyMessage = err.message;
+      }
+    } else if (err instanceof Error) {
+      friendlyMessage = err.message;
+    }
+    return friendlyMessage;
+  }
+
+  // Save handlers for individual sections
+  const handleSaveClubInfo = async () => {
     setErrorMsg(null);
     setSuccessMsg(null);
-
     if (!clubId) {
       setErrorMsg('No club is associated with this administrator account.');
       return;
     }
-
+    console.log('Token being sent:', useAuthStore.getState().token);
     setIsLoading(true);
-
     try {
-      // Find the category_id corresponding to selected category name
-      const selectedCat = categories.find(
-        (cat) => cat.name === clubInfo.category
-      );
-      const categoryIdToSend = selectedCat ? selectedCat.id : null;
+      const categoryToSend = clubInfo.category?.trim();
+      const selectedCat = categoryToSend
+        ? categories.find((cat) => cat.name === categoryToSend)
+        : null;
+      const categoryIdToSend = selectedCat ? selectedCat.id : '';
 
-      if (!categoryIdToSend) {
-        setErrorMsg('Please select a valid club category.');
-        setIsLoading(false);
-        return;
-      }
+      const coreValuesToSend =
+        clubInfo.core_values.length > 0
+          ? clubInfo.core_values.map((v) => v?.trim()).filter(Boolean)
+          : [];
 
-      // Connected to PATCH /api/clubs/:id
-      await api.patch(`/clubs/${clubId}`, {
-        name: clubInfo.name,
-        email: clubInfo.email,
-        slogan: clubInfo.slogan,
-        description: clubInfo.description,
-        is_recruiting: isRecruiting,
-        category: clubInfo.category,
+      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
+      await api.patch(`/api/clubs/${clubId}`, {
+        name: clubInfo.name?.trim() || '',
+        description: clubInfo.description?.trim() || '',
+        mission: clubInfo.mission?.trim() || '',
+        history: clubInfo.history?.trim() || '',
+        core_values: coreValuesToSend,
         category_id: categoryIdToSend,
-        // TODO: Backend needs to clarify how mission, history and goals are stored
-        mission: clubInfo.history_goals,
-        history: clubInfo.history_goals,
-        cover_image_url: clubInfo.cover_image_url,
-        logo_url: clubInfo.logo_url,
-        memberCount: Number(clubInfo.memberCount),
-        meeting_schedule: clubInfo.meeting_schedule,
-        meeting_location: clubInfo.meeting_location,
-        membership_fee: clubInfo.membership_fee,
-        core_values: clubInfo.core_values,
-        executives: executives,
-        social_links: {
-          instagram: clubInfo.instagram,
-          kakao: clubInfo.kakao,
-          youtube: clubInfo.youtube,
-          website: clubInfo.website,
-        },
+      });
+      setSuccessMsg('Club Information saved successfully');
+    } catch (err: unknown) {
+      console.error('Failed to save club info:', err);
+      setErrorMsg(
+        `Failed to save Club Information: ${getFriendlyErrorMessage(err)}`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveClubDetails = async () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    if (!clubId) {
+      setErrorMsg('No club is associated with this administrator account.');
+      return;
+    }
+    console.log('Token being sent:', useAuthStore.getState().token);
+    setIsLoading(true);
+    try {
+      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
+      await api.patch(`/api/clubs/${clubId}`, {
+        meeting_schedule: clubInfo.meeting_schedule?.trim() || '',
+        meeting_location: clubInfo.meeting_location?.trim() || '',
+        membership_fee: clubInfo.membership_fee?.trim() || '',
+      });
+      setSuccessMsg('Club Details saved successfully');
+    } catch (err: unknown) {
+      console.error('Failed to save club details:', err);
+      setErrorMsg(
+        `Failed to save Club Details: ${getFriendlyErrorMessage(err)}`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveLeadership = async () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    if (!clubId) {
+      setErrorMsg('No club is associated with this administrator account.');
+      return;
+    }
+    console.log('Token being sent:', useAuthStore.getState().token);
+    setIsLoading(true);
+    try {
+      const executivesToSend = executives.map((ex) => {
+        const item: { name: string; role: string; avatar?: string } = {
+          name: ex.name?.trim() || '',
+          role: ex.role?.trim() || '',
+        };
+        if (
+          ex.avatar &&
+          (ex.avatar.startsWith('http://') || ex.avatar.startsWith('https://'))
+        ) {
+          item.avatar = ex.avatar.trim();
+        }
+        return item;
       });
 
-      setSuccessMsg('Club profile updated successfully');
-    } catch (err) {
-      console.error('Failed to update club profile details:', err);
-      let specificMessage = 'Unknown error';
-      if (axios.isAxiosError(err)) {
-        const data = err.response?.data;
-        if (data) {
-          if (typeof data.error === 'string') {
-            specificMessage = data.error;
-          } else if (data.error && typeof data.error === 'object') {
-            const fieldErrors = data.error.fieldErrors;
-            if (fieldErrors && typeof fieldErrors === 'object') {
-              const messages = Object.entries(fieldErrors).map(
-                ([field, msgs]) => {
-                  const fieldName = field.replace('_', ' ');
-                  const msgStr = Array.isArray(msgs)
-                    ? msgs.join(', ')
-                    : String(msgs);
-                  return `${fieldName}: ${msgStr}`;
-                }
-              );
-              if (messages.length > 0) {
-                specificMessage = messages.join('; ');
-              } else if (data.error.message) {
-                specificMessage = String(data.error.message);
-              } else {
-                specificMessage = JSON.stringify(data.error);
-              }
-            } else if (data.error.message) {
-              specificMessage = String(data.error.message);
-            } else {
-              specificMessage = JSON.stringify(data.error);
-            }
-          } else if (typeof data.message === 'string') {
-            specificMessage = data.message;
-          } else {
-            specificMessage = JSON.stringify(data);
-          }
-        } else {
-          specificMessage = err.message;
-        }
-      } else if (err instanceof Error) {
-        specificMessage = err.message;
+      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
+      await api.patch(`/api/clubs/${clubId}`, {
+        executives: executivesToSend,
+      });
+      setSuccessMsg('Leadership Team saved successfully');
+    } catch (err: unknown) {
+      console.error('Failed to save leadership team:', err);
+      setErrorMsg(
+        `Failed to save Leadership Team: ${getFriendlyErrorMessage(err)}`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveSocialLinks = async () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    if (!clubId) {
+      setErrorMsg('No club is associated with this administrator account.');
+      return;
+    }
+    console.log('Token being sent:', useAuthStore.getState().token);
+    setIsLoading(true);
+    try {
+      const socialLinksObj: {
+        instagram?: string;
+        kakao?: string;
+        youtube?: string;
+        website?: string;
+      } = {};
+      if (clubInfo.instagram?.trim()) {
+        socialLinksObj.instagram = clubInfo.instagram.trim();
       }
-      setErrorMsg(`Could not update club profile settings: ${specificMessage}`);
+      if (
+        clubInfo.kakao &&
+        (clubInfo.kakao.startsWith('http://') ||
+          clubInfo.kakao.startsWith('https://'))
+      ) {
+        socialLinksObj.kakao = clubInfo.kakao.trim();
+      }
+      if (
+        clubInfo.youtube &&
+        (clubInfo.youtube.startsWith('http://') ||
+          clubInfo.youtube.startsWith('https://'))
+      ) {
+        socialLinksObj.youtube = clubInfo.youtube.trim();
+      }
+      if (
+        clubInfo.website &&
+        (clubInfo.website.startsWith('http://') ||
+          clubInfo.website.startsWith('https://'))
+      ) {
+        socialLinksObj.website = clubInfo.website.trim();
+      }
+
+      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
+      await api.patch(`/api/clubs/${clubId}`, {
+        social_links: socialLinksObj,
+      });
+      setSuccessMsg('Social Channels and Links saved successfully');
+    } catch (err: unknown) {
+      console.error('Failed to save social links:', err);
+      setErrorMsg(
+        `Failed to save Social Channels and Links: ${getFriendlyErrorMessage(err)}`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveClubAssets = async () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    if (!clubId) {
+      setErrorMsg('No club is associated with this administrator account.');
+      return;
+    }
+    console.log('Token being sent:', useAuthStore.getState().token);
+    setIsLoading(true);
+    try {
+      const payload: { cover_image_url?: string; logo_url?: string } = {};
+      if (
+        clubInfo.cover_image_url &&
+        (clubInfo.cover_image_url.startsWith('http://') ||
+          clubInfo.cover_image_url.startsWith('https://'))
+      ) {
+        payload.cover_image_url = clubInfo.cover_image_url.trim();
+      }
+      if (
+        clubInfo.logo_url &&
+        (clubInfo.logo_url.startsWith('http://') ||
+          clubInfo.logo_url.startsWith('https://'))
+      ) {
+        payload.logo_url = clubInfo.logo_url.trim();
+      }
+
+      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
+      await api.patch(`/api/clubs/${clubId}`, payload);
+      setSuccessMsg('Club Assets Preview saved successfully');
+    } catch (err: unknown) {
+      console.error('Failed to save club assets:', err);
+      setErrorMsg(
+        `Failed to save Club Assets Preview: ${getFriendlyErrorMessage(err)}`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveClubNews = async () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    if (!clubId) {
+      setErrorMsg('No club is associated with this administrator account.');
+      return;
+    }
+    console.log('Token being sent:', useAuthStore.getState().token);
+    setIsLoading(true);
+    try {
+      const articlesToSend = articles.map((art) => {
+        const item: {
+          id: string;
+          date: string;
+          title: string;
+          type: string;
+          content: string;
+          summary: string;
+          url?: string;
+        } = {
+          id: art.id || '',
+          date: art.date?.trim() || '',
+          title: art.title?.trim() || '',
+          type: art.type || '',
+          content: art.content?.trim() || '',
+          summary: art.summary?.trim() || '',
+        };
+        if (
+          art.url &&
+          (art.url.startsWith('http://') || art.url.startsWith('https://'))
+        ) {
+          item.url = art.url.trim();
+        }
+        return item;
+      });
+
+      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
+      await api.patch(`/api/clubs/${clubId}`, {
+        articles: articlesToSend,
+      });
+      setSuccessMsg('Club News saved successfully');
+    } catch (err: unknown) {
+      console.error('Failed to save club news:', err);
+      setErrorMsg(`Failed to save Club News: ${getFriendlyErrorMessage(err)}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveGallery = async () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    if (!clubId) {
+      setErrorMsg('No club is associated with this administrator account.');
+      return;
+    }
+    console.log('Token being sent:', useAuthStore.getState().token);
+    setIsLoading(true);
+    try {
+      const galleryToSend = gallery.map((item) => {
+        const res: { type: string; url?: string } = {
+          type: item.type || '',
+        };
+        if (
+          item.url &&
+          (item.url.startsWith('http://') || item.url.startsWith('https://'))
+        ) {
+          res.url = item.url.trim();
+        }
+        return res;
+      });
+
+      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
+      await api.patch(`/api/clubs/${clubId}`, {
+        gallery: galleryToSend,
+      });
+      setSuccessMsg('Gallery Showcase saved successfully');
+    } catch (err: unknown) {
+      console.error('Failed to save gallery showcase:', err);
+      setErrorMsg(
+        `Failed to save Gallery Showcase: ${getFriendlyErrorMessage(err)}`
+      );
     } finally {
       setIsLoading(false);
     }
@@ -902,41 +1133,6 @@ export default function SettingsTab() {
     // TODO: Connect to PATCH /api/clubs/:id/leadership when backend adds this endpoint
   };
 
-  // Club Asset Preview in-place loaders
-  const handleCoverImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setClubInfo((prev) => ({
-            ...prev,
-            cover_image_url: reader.result as string,
-          }));
-          // TODO: Connect image upload to backend storage when available
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleLogoImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setClubInfo((prev) => ({
-            ...prev,
-            logo_url: reader.result as string,
-          }));
-          // TODO: Connect image upload to backend storage when available
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   // Reusable Classes mapping Glassmorphism guidelines
   const bentoCardClass =
     'rounded-[24px] border border-white/30 bg-white/70 backdrop-blur-md p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)]';
@@ -964,14 +1160,6 @@ export default function SettingsTab() {
               Manage your club&apos;s lifecycle and administrative settings.
             </p>
           </div>
-
-          <button
-            onClick={handleSave}
-            disabled={isLoading}
-            className={primaryBtnClass}
-          >
-            Save Changes
-          </button>
         </div>
 
         {/* Tab Selection */}
@@ -1053,20 +1241,6 @@ export default function SettingsTab() {
                     </div>
 
                     <div>
-                      <label className={labelClass}>Slogan</label>
-                      <input
-                        type="text"
-                        value={clubInfo.slogan}
-                        onChange={(e) =>
-                          setClubInfo({ ...clubInfo, slogan: e.target.value })
-                        }
-                        placeholder="e.g. Innovation in Action"
-                        className={inputClass}
-                        disabled={isLoading}
-                      />
-                    </div>
-
-                    <div>
                       <label className={labelClass}>Description</label>
                       <textarea
                         rows={4}
@@ -1083,17 +1257,34 @@ export default function SettingsTab() {
                     </div>
 
                     <div>
-                      <label className={labelClass}>History & Goals</label>
+                      <label className={labelClass}>Mission</label>
                       <textarea
-                        rows={6}
-                        value={clubInfo.history_goals}
+                        rows={4}
+                        value={clubInfo.mission}
                         onChange={(e) =>
                           setClubInfo({
                             ...clubInfo,
-                            history_goals: e.target.value,
+                            mission: e.target.value,
                           })
                         }
-                        placeholder="Combine mission, history, and goals..."
+                        placeholder="Enter the club's mission statement..."
+                        className={cn(inputClass, 'resize-none')}
+                        disabled={isLoading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>History</label>
+                      <textarea
+                        rows={4}
+                        value={clubInfo.history}
+                        onChange={(e) =>
+                          setClubInfo({
+                            ...clubInfo,
+                            history: e.target.value,
+                          })
+                        }
+                        placeholder="Enter the club's history..."
                         className={cn(inputClass, 'resize-none')}
                         disabled={isLoading}
                       />
@@ -1175,79 +1366,38 @@ export default function SettingsTab() {
                       </div>
                     </div>
 
-                    {/* Image Links */}
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <label className={labelClass}>Cover Image URL</label>
-                        <input
-                          type="text"
-                          value={clubInfo.cover_image_url}
-                          onChange={(e) =>
-                            setClubInfo({
-                              ...clubInfo,
-                              cover_image_url: e.target.value,
-                            })
-                          }
-                          placeholder="/handongbackground.jpg"
-                          className={inputClass}
-                          disabled={isLoading}
-                        />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Logo URL</label>
-                        <input
-                          type="text"
-                          value={clubInfo.logo_url}
-                          onChange={(e) =>
-                            setClubInfo({
-                              ...clubInfo,
-                              logo_url: e.target.value,
-                            })
-                          }
-                          placeholder="/handonglogo.jpg"
-                          className={inputClass}
-                          disabled={isLoading}
-                        />
-                      </div>
+                    {/* Club Category */}
+                    <div>
+                      <label className={labelClass}>Club Category</label>
+                      <select
+                        value={clubInfo.category}
+                        onChange={(e) =>
+                          setClubInfo({
+                            ...clubInfo,
+                            category: e.target.value,
+                          })
+                        }
+                        className={selectClass}
+                        disabled={isLoading}
+                      >
+                        <option value="">Select Category</option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.name}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-
-                    {/* Category Dropdown & Email */}
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <label className={labelClass}>Club Category</label>
-                        <select
-                          value={clubInfo.category}
-                          onChange={(e) =>
-                            setClubInfo({
-                              ...clubInfo,
-                              category: e.target.value,
-                            })
-                          }
-                          className={selectClass}
-                          disabled={isLoading}
-                        >
-                          <option value="">Select Category</option>
-                          {categories.map((cat) => (
-                            <option key={cat.id} value={cat.name}>
-                              {cat.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className={labelClass}>Club Email</label>
-                        <input
-                          type="email"
-                          value={clubInfo.email}
-                          onChange={(e) =>
-                            setClubInfo({ ...clubInfo, email: e.target.value })
-                          }
-                          className={inputClass}
-                          disabled={isLoading}
-                        />
-                      </div>
-                    </div>
+                  </div>
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleSaveClubInfo}
+                      disabled={isLoading}
+                      className={primaryBtnClass}
+                    >
+                      Save
+                    </button>
                   </div>
                 </div>
 
@@ -1257,22 +1407,6 @@ export default function SettingsTab() {
                     Club Details
                   </h2>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <label className={labelClass}>Number of Members</label>
-                      <input
-                        type="number"
-                        value={clubInfo.memberCount}
-                        onChange={(e) =>
-                          setClubInfo({
-                            ...clubInfo,
-                            memberCount: Number(e.target.value),
-                          })
-                        }
-                        className={inputClass}
-                        disabled={isLoading}
-                      />
-                    </div>
-
                     <div>
                       <label className={labelClass}>Meeting Schedule</label>
                       <input
@@ -1323,6 +1457,16 @@ export default function SettingsTab() {
                         disabled={isLoading}
                       />
                     </div>
+                  </div>
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleSaveClubDetails}
+                      disabled={isLoading}
+                      className={primaryBtnClass}
+                    >
+                      Save
+                    </button>
                   </div>
                 </div>
 
@@ -1488,6 +1632,16 @@ export default function SettingsTab() {
                     )}
                   </div>
                   {/* TODO: Connect to PATCH /api/clubs/:id/leadership when backend adds this endpoint */}
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleSaveLeadership}
+                      disabled={isLoading}
+                      className={primaryBtnClass}
+                    >
+                      Save
+                    </button>
+                  </div>
                 </div>
 
                 {/* Social Media Section */}
@@ -1573,6 +1727,16 @@ export default function SettingsTab() {
                       </div>
                     </div>
                   </div>
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleSaveSocialLinks}
+                      disabled={isLoading}
+                      className={primaryBtnClass}
+                    >
+                      Save
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1584,9 +1748,9 @@ export default function SettingsTab() {
                     Club Assets Preview
                   </label>
 
-                  {/* Cover Preview with hover overlay upload */}
-                  <div className="group relative mb-4 flex h-24 w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200/50 bg-slate-100 text-gray-300">
-                    {clubInfo.cover_image_url ? (
+                  {/* Cover Preview */}
+                  <div className="relative mb-4 flex h-24 w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200/50 bg-slate-100 text-gray-300">
+                    {isValidUrl(clubInfo.cover_image_url) ? (
                       <img
                         src={clubInfo.cover_image_url}
                         alt="Cover Preview"
@@ -1597,23 +1761,11 @@ export default function SettingsTab() {
                         No cover image
                       </span>
                     )}
-                    {/* Overlay upload trigger */}
-                    <label className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/45 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <span className="rounded-full border border-white/40 bg-white/20 px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-white/40">
-                        Change Photo
-                      </span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleCoverImageUpload}
-                      />
-                    </label>
                   </div>
 
-                  {/* Logo Preview with hover overlay upload */}
-                  <div className="group relative mb-4 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-indigo-100/60 bg-indigo-50 text-xl font-bold text-[#4F46E5] shadow-inner">
-                    {clubInfo.logo_url ? (
+                  {/* Logo Preview */}
+                  <div className="relative mb-4 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-indigo-100/60 bg-indigo-50 text-xl font-bold text-[#4F46E5] shadow-inner">
+                    {isValidUrl(clubInfo.logo_url) ? (
                       <img
                         src={clubInfo.logo_url}
                         alt="Logo Preview"
@@ -1624,22 +1776,45 @@ export default function SettingsTab() {
                     ) : (
                       'CH'
                     )}
-                    {/* Overlay upload trigger */}
-                    <label className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/45 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <span className="text-center text-[10px] leading-tight font-bold text-white">
-                        Change
-                        <br />
-                        Logo
-                      </span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleLogoImageUpload}
-                      />
-                    </label>
                   </div>
-                  {/* TODO: Connect image upload to backend storage when available */}
+
+                  {/* URL Text Inputs */}
+                  <div className="mb-4 w-full space-y-3 text-left">
+                    <div>
+                      <label className={labelClass}>Cover Image URL</label>
+                      <input
+                        type="text"
+                        value={clubInfo.cover_image_url}
+                        onChange={(e) =>
+                          setClubInfo({
+                            ...clubInfo,
+                            cover_image_url: e.target.value,
+                          })
+                        }
+                        placeholder="https://example.com/cover.jpg"
+                        className={inputClass}
+                        disabled={isLoading}
+                      />
+                    </div>
+                    {/* TODO: Add file upload support when backend adds image storage endpoint */}
+
+                    <div>
+                      <label className={labelClass}>Logo URL</label>
+                      <input
+                        type="text"
+                        value={clubInfo.logo_url}
+                        onChange={(e) =>
+                          setClubInfo({
+                            ...clubInfo,
+                            logo_url: e.target.value,
+                          })
+                        }
+                        placeholder="https://example.com/logo.jpg"
+                        className={inputClass}
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
 
                   <h3 className="max-w-full truncate font-sans text-sm font-bold text-gray-800">
                     {clubInfo.name || 'Your Club Name'}
@@ -1647,35 +1822,16 @@ export default function SettingsTab() {
                   <p className="mt-1 font-sans text-xs font-medium text-[#4F46E5]">
                     {clubInfo.category || 'No Category Selected'}
                   </p>
-                </div>
-
-                {/* Recruitment status Card */}
-                <div className="flex items-center justify-between rounded-[24px] border border-white/30 bg-white/70 p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md">
-                  <div className="pr-4">
-                    <h3 className="text-sm font-bold tracking-tight text-gray-800">
-                      Recruitment Status
-                    </h3>
-                    <p className="mt-0.5 text-[11px] leading-normal font-medium text-gray-400">
-                      Toggle whether students can apply to your club.
-                    </p>
+                  <div className="mt-4 flex w-full justify-center">
+                    <button
+                      type="button"
+                      onClick={handleSaveClubAssets}
+                      disabled={isLoading}
+                      className={primaryBtnClass}
+                    >
+                      Save
+                    </button>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsRecruiting(!isRecruiting)}
-                    className={cn(
-                      'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none',
-                      isRecruiting ? 'bg-[#4F46E5]' : 'bg-gray-200'
-                    )}
-                    disabled={isLoading}
-                  >
-                    <span
-                      className={cn(
-                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                        isRecruiting ? 'translate-x-5' : 'translate-x-0'
-                      )}
-                    />
-                  </button>
                 </div>
 
                 {/* News Articles Panel */}
@@ -1880,6 +2036,16 @@ export default function SettingsTab() {
                       </p>
                     )}
                   </div>
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleSaveClubNews}
+                      disabled={isLoading}
+                      className={primaryBtnClass}
+                    >
+                      Save
+                    </button>
+                  </div>
                 </div>
 
                 {/* Gallery Section */}
@@ -1996,6 +2162,16 @@ export default function SettingsTab() {
                         No gallery items added.
                       </p>
                     )}
+                  </div>
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleSaveGallery}
+                      disabled={isLoading}
+                      className={primaryBtnClass}
+                    >
+                      Save
+                    </button>
                   </div>
                 </div>
               </div>

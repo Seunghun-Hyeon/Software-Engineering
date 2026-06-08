@@ -5,6 +5,21 @@ import { HeroProfile } from '@/app/clubs/[id]/HeroProfile';
 import { ClubContent } from '@/app/clubs/[id]/ClubContent';
 import { headers } from 'next/headers';
 
+interface Article {
+  id: string;
+  date: string;
+  title: string;
+  type: string;
+  url?: string;
+  content?: string;
+  summary?: string;
+}
+
+interface GalleryItem {
+  type: string;
+  url: string;
+}
+
 interface ApiClub {
   id: string;
   name: string;
@@ -13,6 +28,22 @@ interface ApiClub {
   logoUrl?: string;
   coverImageUrl?: string;
   is_recruiting?: boolean;
+  mission?: string;
+  history?: string;
+  core_values?: string[] | string;
+  memberCount?: number;
+  meeting_schedule?: string;
+  meeting_location?: string;
+  membership_fee?: string;
+  executives?: { name: string; role: string; avatar?: string }[];
+  social_links?: {
+    instagram?: string;
+    kakao?: string;
+    youtube?: string;
+    website?: string;
+  };
+  articles?: Article[];
+  gallery?: GalleryItem[];
 }
 
 export default async function ClubProfilePage({
@@ -38,16 +69,20 @@ export default async function ClubProfilePage({
     apiEndpoint = `${protocol}://${host}/api/clubs`;
   }
 
-  // TODO: Replace with GET /api/clubs/:id when backend adds this endpoint
   let foundClub: ApiClub | null = null;
   try {
-    const res = await fetch(apiEndpoint);
+    const res = await fetch(`${apiEndpoint}/${id}`);
     if (res.ok) {
-      const clubs: ApiClub[] = await res.json();
-      foundClub = clubs.find((c) => String(c.id) === id) || null;
+      foundClub = await res.json();
+    } else {
+      const listRes = await fetch(apiEndpoint);
+      if (listRes.ok) {
+        const clubs: ApiClub[] = await listRes.json();
+        foundClub = clubs.find((c) => String(c.id) === id) || null;
+      }
     }
   } catch (err) {
-    console.error('Failed to fetch clubs from backend:', err);
+    console.error('Failed to fetch club from backend:', err);
   }
 
   if (!foundClub) {
@@ -74,21 +109,29 @@ export default async function ClubProfilePage({
     shortDescription: foundClub.description || 'No description available.',
     logo: foundClub.logoUrl || '',
     heroImage: foundClub.coverImageUrl || '',
-    isAcceptingApplications: foundClub.is_recruiting ?? false, // Dynamic check
-
-    // Placeholders for fields the backend doesn't return yet
-    mission: 'No mission statement provided.',
-    coreValues: 'No core values listed.',
-    memberCount: 0,
-    meetingTime: 'TBD',
-    meetingLocation: 'TBD',
-    fee: 'TBD',
-    executives: [],
+    isAcceptingApplications: foundClub.is_recruiting ?? false,
+    mission: foundClub.mission || 'No mission statement provided.',
+    history: foundClub.history || 'No history provided.',
+    coreValues: Array.isArray(foundClub.core_values)
+      ? foundClub.core_values
+      : typeof foundClub.core_values === 'string'
+        ? foundClub.core_values
+            .split(',')
+            .map((v: string) => v.trim())
+            .filter(Boolean)
+        : 'No core values listed.',
+    memberCount: foundClub.memberCount || 0,
+    meetingTime: foundClub.meeting_schedule || 'TBD',
+    meetingLocation: foundClub.meeting_location || 'TBD',
+    fee: foundClub.membership_fee || 'TBD',
+    executives: foundClub.executives || [],
     socials: {
-      instagram: 'TBD',
-      kakao: 'TBD',
-      youtube: 'TBD',
+      instagram: foundClub.social_links?.instagram || 'TBD',
+      kakao: foundClub.social_links?.kakao || 'TBD',
+      youtube: foundClub.social_links?.youtube || 'TBD',
     },
+    articles: foundClub.articles || [],
+    gallery: foundClub.gallery || [],
   };
 
   return (
