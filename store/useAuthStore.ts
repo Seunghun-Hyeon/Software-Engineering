@@ -277,15 +277,3 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
-
-// Add axios interceptor to automatically send Bearer token
-// api.interceptors.request.use((config) => {
-//   const token = useAuthStore.getState().token;
-//   if (token) {
-//     if (!config.headers) {
-//       config.headers = {} as typeof config.headers;
-//     }
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });

@@ -139,7 +139,7 @@ export default function EventsTab() {
       const formattedDate = new Date(eventDate).toISOString();
 
       // Connected to POST /api/events/
-      let newEvent;
+      let newEvent: EventData;
       if (editingEventId) {
         // Update existing event
         const response = await api.patch(`/events/${editingEventId}`, {
