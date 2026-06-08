@@ -79,6 +79,7 @@ interface ClubData {
     kakao?: string;
     youtube?: string;
     website?: string;
+    leadership?: { name: string; title: string; avatar?: string }[];
   };
   core_values?: string[] | string;
 }
@@ -192,6 +193,13 @@ export default function SettingsTab() {
     avatar: '',
   });
 
+  // Club members list fetched from Supabase
+  const [clubMembers, setClubMembers] = useState<
+    { id: string; name: string; email: string }[]
+  >([]);
+  // Currently selected member ID for adding/editing leadership members
+  const [selectedMemberId, setSelectedMemberId] = useState<string>('');
+
   // News states
   const [articles, setArticles] = useState<Article[]>([
     {
@@ -285,7 +293,46 @@ export default function SettingsTab() {
                   membersError
                 );
               } else if (Array.isArray(membersData)) {
-                // Extract unique users, filter out current owner
+                // Extract all members
+                const allMembers = (
+                  membersData as unknown as {
+                    users: {
+                      id: string;
+                      name: string | null;
+                      email: string;
+                      role: string | null;
+                    } | null;
+                  }[]
+                )
+                  .map((m) => m.users)
+                  .filter(
+                    (
+                      u
+                    ): u is {
+                      id: string;
+                      name: string | null;
+                      email: string;
+                      role: string | null;
+                    } => u !== null
+                  )
+                  .map((u) => {
+                    const dbName = u.name || '';
+                    let name = dbName;
+                    if (dbName.includes('|')) {
+                      name = dbName.split('|')[0].trim();
+                    }
+                    if (!name) {
+                      name = u.email || 'No Name';
+                    }
+                    return {
+                      id: u.id,
+                      name,
+                      email: u.email,
+                    };
+                  });
+                setClubMembers(allMembers);
+
+                // Extract unique users, filter out current owner for Transfer Ownership
                 const candidateUsers = (
                   membersData as unknown as {
                     users: {
@@ -306,7 +353,23 @@ export default function SettingsTab() {
                       email: string;
                       role: string | null;
                     } => u !== null && u.id !== userId
-                  );
+                  )
+                  .map((u) => {
+                    const dbName = u.name || '';
+                    let name = dbName;
+                    if (dbName.includes('|')) {
+                      name = dbName.split('|')[0].trim();
+                    }
+                    if (!name) {
+                      name = u.email || 'No Name';
+                    }
+                    return {
+                      id: u.id,
+                      name,
+                      email: u.email,
+                      role: u.role,
+                    };
+                  });
                 setDbUsers(candidateUsers);
                 if (candidateUsers.length > 0) {
                   setSelectedUserId(candidateUsers[0].id);
@@ -331,7 +394,10 @@ export default function SettingsTab() {
                 mission: myClub.mission || '',
                 history: myClub.history || '',
                 instagram: myClub.social_links?.instagram || '',
-                kakao: myClub.social_links?.kakao || '',
+                kakao:
+                  myClub.social_links?.kakaotalk ||
+                  myClub.social_links?.kakao ||
+                  '',
                 youtube: myClub.social_links?.youtube || '',
                 website: myClub.social_links?.website || '',
                 cover_image_url: myClub.cover_image_url || '',
@@ -349,20 +415,35 @@ export default function SettingsTab() {
                 membership_fee: myClub.membership_fee || '',
               });
 
+              // Load leadership from social_links?.leadership or fall back to executives
+              const leadershipFromSocialLinks = myClub.social_links?.leadership;
               setExecutives(
-                Array.isArray(myClub.executives)
-                  ? myClub.executives.map(
+                Array.isArray(leadershipFromSocialLinks)
+                  ? leadershipFromSocialLinks.map(
                       (ex: {
                         name?: string;
+                        title?: string;
                         role?: string;
                         avatar?: string;
                       }) => ({
                         name: ex.name || '',
-                        role: ex.role || '',
+                        role: ex.title || ex.role || '',
                         avatar: ex.avatar || '',
                       })
                     )
-                  : []
+                  : Array.isArray(myClub.executives)
+                    ? myClub.executives.map(
+                        (ex: {
+                          name?: string;
+                          role?: string;
+                          avatar?: string;
+                        }) => ({
+                          name: ex.name || '',
+                          role: ex.role || '',
+                          avatar: ex.avatar || '',
+                        })
+                      )
+                    : []
               );
             } else {
               setErrorMsg('No club found for your account');
@@ -546,10 +627,43 @@ export default function SettingsTab() {
     console.log('Token being sent:', useAuthStore.getState().token);
     setIsLoading(true);
     try {
+      const socialLinksObj: {
+        instagram?: string;
+        kakaotalk?: string;
+        youtube?: string;
+        website?: string;
+        leadership?: { name: string; title: string; avatar?: string }[];
+      } = {};
+
+      if (clubInfo.instagram?.trim()) {
+        socialLinksObj.instagram = clubInfo.instagram.trim();
+      }
+      if (
+        clubInfo.kakao &&
+        (clubInfo.kakao.startsWith('http://') ||
+          clubInfo.kakao.startsWith('https://'))
+      ) {
+        socialLinksObj.kakaotalk = clubInfo.kakao.trim();
+      }
+      if (
+        clubInfo.youtube &&
+        (clubInfo.youtube.startsWith('http://') ||
+          clubInfo.youtube.startsWith('https://'))
+      ) {
+        socialLinksObj.youtube = clubInfo.youtube.trim();
+      }
+      if (
+        clubInfo.website &&
+        (clubInfo.website.startsWith('http://') ||
+          clubInfo.website.startsWith('https://'))
+      ) {
+        socialLinksObj.website = clubInfo.website.trim();
+      }
+
       const executivesToSend = executives.map((ex) => {
-        const item: { name: string; role: string; avatar?: string } = {
+        const item: { name: string; title: string; avatar?: string } = {
           name: ex.name?.trim() || '',
-          role: ex.role?.trim() || '',
+          title: ex.role?.trim() || '',
         };
         if (
           ex.avatar &&
@@ -559,10 +673,14 @@ export default function SettingsTab() {
         }
         return item;
       });
+      socialLinksObj.leadership = executivesToSend;
+
+      const socialLinks = socialLinksObj;
+      console.log('Saving social links:', socialLinks);
 
       // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
       await api.patch(`/api/clubs/${clubId}`, {
-        executives: executivesToSend,
+        social_links: socialLinksObj,
       });
       setSuccessMsg('Leadership Team saved successfully');
     } catch (err: unknown) {
@@ -587,9 +705,10 @@ export default function SettingsTab() {
     try {
       const socialLinksObj: {
         instagram?: string;
-        kakao?: string;
+        kakaotalk?: string;
         youtube?: string;
         website?: string;
+        leadership?: { name: string; title: string; avatar?: string }[];
       } = {};
       if (clubInfo.instagram?.trim()) {
         socialLinksObj.instagram = clubInfo.instagram.trim();
@@ -599,7 +718,7 @@ export default function SettingsTab() {
         (clubInfo.kakao.startsWith('http://') ||
           clubInfo.kakao.startsWith('https://'))
       ) {
-        socialLinksObj.kakao = clubInfo.kakao.trim();
+        socialLinksObj.kakaotalk = clubInfo.kakao.trim();
       }
       if (
         clubInfo.youtube &&
@@ -615,6 +734,24 @@ export default function SettingsTab() {
       ) {
         socialLinksObj.website = clubInfo.website.trim();
       }
+
+      const executivesToSend = executives.map((ex) => {
+        const item: { name: string; title: string; avatar?: string } = {
+          name: ex.name?.trim() || '',
+          title: ex.role?.trim() || '',
+        };
+        if (
+          ex.avatar &&
+          (ex.avatar.startsWith('http://') || ex.avatar.startsWith('https://'))
+        ) {
+          item.avatar = ex.avatar.trim();
+        }
+        return item;
+      });
+      socialLinksObj.leadership = executivesToSend;
+
+      const socialLinks = socialLinksObj;
+      console.log('Saving social links:', socialLinks);
 
       // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
       await api.patch(`/api/clubs/${clubId}`, {
@@ -1119,11 +1256,15 @@ export default function SettingsTab() {
     }
 
     setNewMember({ name: '', role: '', avatar: '' });
+    setSelectedMemberId('');
     setIsAddingMember(false);
   };
 
   const handleEditMember = (idx: number) => {
-    setNewMember(executives[idx]);
+    const memberToEdit = executives[idx];
+    setNewMember(memberToEdit);
+    const found = clubMembers.find((m) => m.name === memberToEdit.name);
+    setSelectedMemberId(found ? found.id : '');
     setEditingMemberIdx(idx);
     setIsAddingMember(true);
   };
@@ -1502,76 +1643,103 @@ export default function SettingsTab() {
 
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
-                          <label className={labelClass}>Member Name</label>
-                          <input
-                            type="text"
-                            value={newMember.name}
-                            onChange={(e) =>
-                              setNewMember({
-                                ...newMember,
-                                name: e.target.value,
-                              })
-                            }
-                            placeholder="e.g. Alex Kim"
-                            className={inputClass}
+                          <label className={labelClass}>Select Member</label>
+                          <select
+                            value={selectedMemberId}
+                            onChange={(e) => {
+                              const mId = e.target.value;
+                              setSelectedMemberId(mId);
+                              const found = clubMembers.find(
+                                (m) => m.id === mId
+                              );
+                              if (found) {
+                                setNewMember({
+                                  ...newMember,
+                                  name: found.name,
+                                });
+                              } else {
+                                setNewMember({
+                                  ...newMember,
+                                  name: '',
+                                });
+                              }
+                            }}
+                            className={selectClass}
                             required
-                          />
+                          >
+                            <option value="">Select a member</option>
+                            {clubMembers.map((m) => (
+                              <option key={m.id} value={m.id}>
+                                {m.name}
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
-                        <div>
-                          <label className={labelClass}>Role / Title</label>
-                          <input
-                            type="text"
-                            value={newMember.role}
-                            onChange={(e) =>
-                              setNewMember({
-                                ...newMember,
-                                role: e.target.value,
-                              })
-                            }
-                            placeholder="e.g. President"
-                            className={inputClass}
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className={labelClass}>Profile Picture</label>
-                        <div className="flex items-center gap-4">
-                          {newMember.avatar && (
-                            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-gray-200">
-                              <img
-                                src={newMember.avatar}
-                                alt="New member thumbnail"
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                          )}
-                          <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-gray-300 bg-white/20 px-4 py-2.5 text-xs font-semibold text-gray-500 transition hover:bg-gray-50">
-                            <Upload size={14} />
-                            Choose Picture File
+                        {(selectedMemberId || newMember.name) && (
+                          <div>
+                            <label className={labelClass}>Role / Title</label>
                             <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleMemberAvatarUpload}
-                              className="hidden"
+                              type="text"
+                              value={newMember.role}
+                              onChange={(e) =>
+                                setNewMember({
+                                  ...newMember,
+                                  role: e.target.value,
+                                })
+                              }
+                              placeholder="e.g. President"
+                              className={inputClass}
+                              required
                             />
-                          </label>
-                        </div>
+                          </div>
+                        )}
                       </div>
+
+                      {(selectedMemberId || newMember.name) && (
+                        <div>
+                          <label className={labelClass}>Profile Picture</label>
+                          <div className="flex items-center gap-4">
+                            {newMember.avatar && (
+                              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-gray-200">
+                                <img
+                                  src={newMember.avatar}
+                                  alt="New member thumbnail"
+                                  className="h-full w-full object-cover"
+                                />
+                              </div>
+                            )}
+                            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-gray-300 bg-white/20 px-4 py-2.5 text-xs font-semibold text-gray-500 transition hover:bg-gray-50">
+                              <Upload size={14} />
+                              Choose Picture File
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleMemberAvatarUpload}
+                                className="hidden"
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      )}
 
                       <div className="flex justify-end gap-2 pt-1">
                         <button
                           type="button"
-                          onClick={() => setIsAddingMember(false)}
+                          onClick={() => {
+                            setIsAddingMember(false);
+                            setSelectedMemberId('');
+                            setNewMember({ name: '', role: '', avatar: '' });
+                          }}
                           className={secondaryBtnClass}
                         >
                           Cancel
                         </button>
-                        <button type="submit" className={primaryBtnClass}>
-                          Save Member
-                        </button>
+                        {(selectedMemberId || newMember.name) && (
+                          <button type="submit" className={primaryBtnClass}>
+                            Save Member
+                          </button>
+                        )}
                       </div>
                     </form>
                   )}
@@ -1748,38 +1916,8 @@ export default function SettingsTab() {
                     Club Assets Preview
                   </label>
 
-                  {/* Cover Preview */}
-                  <div className="relative mb-4 flex h-24 w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200/50 bg-slate-100 text-gray-300">
-                    {isValidUrl(clubInfo.cover_image_url) ? (
-                      <img
-                        src={clubInfo.cover_image_url}
-                        alt="Cover Preview"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <span className="font-sans text-xs font-semibold">
-                        No cover image
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Logo Preview */}
-                  <div className="relative mb-4 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-indigo-100/60 bg-indigo-50 text-xl font-bold text-[#4F46E5] shadow-inner">
-                    {isValidUrl(clubInfo.logo_url) ? (
-                      <img
-                        src={clubInfo.logo_url}
-                        alt="Logo Preview"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : clubInfo.name ? (
-                      clubInfo.name.substring(0, 2).toUpperCase()
-                    ) : (
-                      'CH'
-                    )}
-                  </div>
-
-                  {/* URL Text Inputs */}
-                  <div className="mb-4 w-full space-y-3 text-left">
+                  {/* URL Text Inputs with Previews Below */}
+                  <div className="mb-4 w-full space-y-4 text-left">
                     <div>
                       <label className={labelClass}>Cover Image URL</label>
                       <input
@@ -1795,6 +1933,19 @@ export default function SettingsTab() {
                         className={inputClass}
                         disabled={isLoading}
                       />
+                      <div className="relative mt-2 flex h-24 w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200/50 bg-slate-100 text-gray-300">
+                        {isValidUrl(clubInfo.cover_image_url) ? (
+                          <img
+                            src={clubInfo.cover_image_url}
+                            alt="Cover Preview"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="font-sans text-xs font-semibold">
+                            No cover image
+                          </span>
+                        )}
+                      </div>
                     </div>
                     {/* TODO: Add file upload support when backend adds image storage endpoint */}
 
@@ -1813,6 +1964,21 @@ export default function SettingsTab() {
                         className={inputClass}
                         disabled={isLoading}
                       />
+                      <div className="mt-2 flex justify-center">
+                        <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-indigo-100/60 bg-indigo-50 text-xl font-bold text-[#4F46E5] shadow-inner">
+                          {isValidUrl(clubInfo.logo_url) ? (
+                            <img
+                              src={clubInfo.logo_url}
+                              alt="Logo Preview"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : clubInfo.name ? (
+                            clubInfo.name.substring(0, 2).toUpperCase()
+                          ) : (
+                            'CH'
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
 

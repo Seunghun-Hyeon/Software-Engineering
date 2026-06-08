@@ -13,7 +13,12 @@ export type ClubDataProps = {
   fee?: string;
   isAcceptingApplications?: boolean;
   executives?: ClubExecutive[];
-  socials?: { instagram?: string; kakao?: string; youtube?: string };
+  socials?: {
+    instagram?: string;
+    kakao?: string;
+    youtube?: string;
+    website?: string;
+  };
   articles?: unknown[];
   gallery?: unknown[];
   [key: string]: unknown;

@@ -25,8 +25,8 @@ interface ApiClub {
   name: string;
   categories: { name: string } | null;
   description?: string;
-  logoUrl?: string;
-  coverImageUrl?: string;
+  logo_url?: string;
+  cover_image_url?: string;
   is_recruiting?: boolean;
   mission?: string;
   history?: string;
@@ -41,6 +41,7 @@ interface ApiClub {
     kakao?: string;
     youtube?: string;
     website?: string;
+    leadership?: { name: string; title: string; avatar?: string }[];
   };
   articles?: Article[];
   gallery?: GalleryItem[];
@@ -107,8 +108,8 @@ export default async function ClubProfilePage({
     name: foundClub.name,
     category: foundClub.categories?.name || 'Uncategorized',
     shortDescription: foundClub.description || 'No description available.',
-    logo: foundClub.logoUrl || '',
-    heroImage: foundClub.coverImageUrl || '',
+    logo: foundClub.logo_url || '',
+    heroImage: foundClub.cover_image_url || '',
     isAcceptingApplications: foundClub.is_recruiting ?? false,
     mission: foundClub.mission || 'No mission statement provided.',
     history: foundClub.history || 'No history provided.',
@@ -124,11 +125,24 @@ export default async function ClubProfilePage({
     meetingTime: foundClub.meeting_schedule || 'TBD',
     meetingLocation: foundClub.meeting_location || 'TBD',
     fee: foundClub.membership_fee || 'TBD',
-    executives: foundClub.executives || [],
+    executives: Array.isArray(foundClub.social_links?.leadership)
+      ? foundClub.social_links.leadership.map(
+          (ex: { name: string; title: string }) => ({
+            name: ex.name || '',
+            role: ex.title || '',
+          })
+        )
+      : Array.isArray(foundClub.executives)
+        ? foundClub.executives.map((ex: { name: string; role: string }) => ({
+            name: ex.name || '',
+            role: ex.role || '',
+          }))
+        : [],
     socials: {
       instagram: foundClub.social_links?.instagram || 'TBD',
       kakao: foundClub.social_links?.kakao || 'TBD',
       youtube: foundClub.social_links?.youtube || 'TBD',
+      website: foundClub.social_links?.website || 'TBD',
     },
     articles: foundClub.articles || [],
     gallery: foundClub.gallery || [],
