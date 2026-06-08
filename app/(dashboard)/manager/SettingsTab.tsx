@@ -627,39 +627,6 @@ export default function SettingsTab() {
     console.log('Token being sent:', useAuthStore.getState().token);
     setIsLoading(true);
     try {
-      const socialLinksObj: {
-        instagram?: string;
-        kakaotalk?: string;
-        youtube?: string;
-        website?: string;
-        leadership?: { name: string; title: string; avatar?: string }[];
-      } = {};
-
-      if (clubInfo.instagram?.trim()) {
-        socialLinksObj.instagram = clubInfo.instagram.trim();
-      }
-      if (
-        clubInfo.kakao &&
-        (clubInfo.kakao.startsWith('http://') ||
-          clubInfo.kakao.startsWith('https://'))
-      ) {
-        socialLinksObj.kakaotalk = clubInfo.kakao.trim();
-      }
-      if (
-        clubInfo.youtube &&
-        (clubInfo.youtube.startsWith('http://') ||
-          clubInfo.youtube.startsWith('https://'))
-      ) {
-        socialLinksObj.youtube = clubInfo.youtube.trim();
-      }
-      if (
-        clubInfo.website &&
-        (clubInfo.website.startsWith('http://') ||
-          clubInfo.website.startsWith('https://'))
-      ) {
-        socialLinksObj.website = clubInfo.website.trim();
-      }
-
       const executivesToSend = executives.map((ex) => {
         const item: { name: string; title: string; avatar?: string } = {
           name: ex.name?.trim() || '',
@@ -673,14 +640,20 @@ export default function SettingsTab() {
         }
         return item;
       });
-      socialLinksObj.leadership = executivesToSend;
 
-      const socialLinks = socialLinksObj;
-      console.log('Saving social links:', socialLinks);
+      const payload = {
+        instagram: clubInfo.instagram?.trim() || '',
+        youtube: clubInfo.youtube?.trim() || '',
+        kakaotalk: clubInfo.kakao?.trim() || '',
+        website: clubInfo.website?.trim() || '',
+        leadership: executivesToSend,
+      };
+
+      console.log('Saving social links:', payload);
 
       // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
       await api.patch(`/api/clubs/${clubId}`, {
-        social_links: socialLinksObj,
+        social_links: payload,
       });
       setSuccessMsg('Leadership Team saved successfully');
     } catch (err: unknown) {
@@ -703,38 +676,6 @@ export default function SettingsTab() {
     console.log('Token being sent:', useAuthStore.getState().token);
     setIsLoading(true);
     try {
-      const socialLinksObj: {
-        instagram?: string;
-        kakaotalk?: string;
-        youtube?: string;
-        website?: string;
-        leadership?: { name: string; title: string; avatar?: string }[];
-      } = {};
-      if (clubInfo.instagram?.trim()) {
-        socialLinksObj.instagram = clubInfo.instagram.trim();
-      }
-      if (
-        clubInfo.kakao &&
-        (clubInfo.kakao.startsWith('http://') ||
-          clubInfo.kakao.startsWith('https://'))
-      ) {
-        socialLinksObj.kakaotalk = clubInfo.kakao.trim();
-      }
-      if (
-        clubInfo.youtube &&
-        (clubInfo.youtube.startsWith('http://') ||
-          clubInfo.youtube.startsWith('https://'))
-      ) {
-        socialLinksObj.youtube = clubInfo.youtube.trim();
-      }
-      if (
-        clubInfo.website &&
-        (clubInfo.website.startsWith('http://') ||
-          clubInfo.website.startsWith('https://'))
-      ) {
-        socialLinksObj.website = clubInfo.website.trim();
-      }
-
       const executivesToSend = executives.map((ex) => {
         const item: { name: string; title: string; avatar?: string } = {
           name: ex.name?.trim() || '',
@@ -748,14 +689,20 @@ export default function SettingsTab() {
         }
         return item;
       });
-      socialLinksObj.leadership = executivesToSend;
 
-      const socialLinks = socialLinksObj;
-      console.log('Saving social links:', socialLinks);
+      const payload = {
+        instagram: clubInfo.instagram?.trim() || '',
+        youtube: clubInfo.youtube?.trim() || '',
+        kakaotalk: clubInfo.kakao?.trim() || '',
+        website: clubInfo.website?.trim() || '',
+        leadership: executivesToSend,
+      };
+
+      console.log('Saving social links:', payload);
 
       // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
       await api.patch(`/api/clubs/${clubId}`, {
-        social_links: socialLinksObj,
+        social_links: payload,
       });
       setSuccessMsg('Social Channels and Links saved successfully');
     } catch (err: unknown) {
@@ -1077,7 +1024,7 @@ export default function SettingsTab() {
       // 5. Update local Zustand state
       useAuthStore.setState({
         isExecutive: stillExecutive,
-        role: stillExecutive ? 'executive' : 'student',
+        role: stillExecutive ? 'club_executive' : 'student',
         activeRole: 'student',
       });
 

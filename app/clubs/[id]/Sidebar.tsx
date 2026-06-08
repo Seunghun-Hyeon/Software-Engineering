@@ -75,10 +75,10 @@ export function Sidebar({ clubData }: { clubData: ClubDataProps }) {
     },
   };
 
-  console.log('Social links from backend:', club.social_links);
+  console.log('Reading social links:', club.social_links);
 
-  const hasLink = (val?: string) => {
-    if (!val) return false;
+  const hasLink = (val?: string | null) => {
+    if (val === null || val === undefined) return false;
     const trimmed = val.trim();
     return trimmed !== '' && trimmed !== 'TBD' && trimmed !== 'N/A';
   };
@@ -106,18 +106,6 @@ export function Sidebar({ clubData }: { clubData: ClubDataProps }) {
         </h3>
 
         <div className="flex flex-col gap-5">
-          <div className="flex items-start gap-4">
-            <div className="shrink-0 rounded-full bg-[#e1e0ff]/50 p-3 text-[#3323cc]">
-              <Users className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Members</p>
-              <p className="text-sm font-bold text-gray-900">
-                {clubData.memberCount}+ Active
-              </p>
-            </div>
-          </div>
-
           <div className="flex items-start gap-4">
             <div className="shrink-0 rounded-full bg-[#e1e0ff]/50 p-3 text-[#3323cc]">
               <Calendar className="h-5 w-5" />
