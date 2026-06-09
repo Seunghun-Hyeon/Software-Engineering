@@ -12,7 +12,6 @@ import {
   X,
   Edit2,
   Image as ImageIcon,
-  Video,
   Globe,
   MessageCircle,
   Upload,
@@ -518,15 +517,17 @@ export default function SettingsTab() {
           ? clubInfo.core_values.map((v) => v?.trim()).filter(Boolean)
           : [];
 
-      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
-      await api.patch(`/api/clubs/${clubId}`, {
+      const payload: Record<string, unknown> = {
         name: clubInfo.name?.trim() || '',
         description: clubInfo.description?.trim() || '',
         mission: clubInfo.mission?.trim() || '',
         history: clubInfo.history?.trim() || '',
         core_values: coreValuesToSend,
-        category_id: categoryIdToSend,
-      });
+        category_id: categoryIdToSend || null,
+      };
+
+      // Connected to PATCH /api/clubs/:id
+      await api.patch(`/api/clubs/${clubId}`, payload);
       setSuccessMsg('Club Information saved successfully');
     } catch (err: unknown) {
       console.error('Failed to save club info:', err);
@@ -548,7 +549,7 @@ export default function SettingsTab() {
     console.log('Token being sent:', useAuthStore.getState().token);
     setIsLoading(true);
     try {
-      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
+      // Connected to PATCH /api/clubs/:id
       await api.patch(`/api/clubs/${clubId}`, {
         meeting_schedule: clubInfo.meeting_schedule?.trim() || '',
         meeting_location: clubInfo.meeting_location?.trim() || '',
@@ -599,7 +600,7 @@ export default function SettingsTab() {
 
       console.log('Saving social links:', payload);
 
-      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
+      // Connected to PATCH /api/clubs/:id
       await api.patch(`/api/clubs/${clubId}`, {
         social_links: payload,
       });
@@ -648,7 +649,7 @@ export default function SettingsTab() {
 
       console.log('Saving social links:', payload);
 
-      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
+      // Connected to PATCH /api/clubs/:id
       await api.patch(`/api/clubs/${clubId}`, {
         social_links: payload,
       });
@@ -681,7 +682,7 @@ export default function SettingsTab() {
         payload.logo_url = clubInfo.logo_url.trim();
       }
 
-      // TODO: Connected to PATCH /api/clubs/:id - update when backend confirms request body format
+      // Connected to PATCH /api/clubs/:id
       await api.patch(`/api/clubs/${clubId}`, payload);
       setSuccessMsg('Club Assets Preview saved successfully');
     } catch (err: unknown) {
@@ -716,7 +717,9 @@ export default function SettingsTab() {
         throw new Error('No image URL returned from upload.');
       }
     } catch (err) {
-      setErrorMsg(`Failed to upload cover image: ${getFriendlyErrorMessage(err)}`);
+      setErrorMsg(
+        `Failed to upload cover image: ${getFriendlyErrorMessage(err)}`
+      );
     } finally {
       setIsCoverUploading(false);
       e.target.value = '';
@@ -1675,20 +1678,26 @@ export default function SettingsTab() {
                         )}
 
                         {/* Placeholder when no image */}
-                        {!isValidUrl(clubInfo.cover_image_url) && !isCoverUploading && (
-                          <div className="flex flex-col items-center gap-2 text-gray-400">
-                            <ImageIcon size={28} />
-                            <span className="text-xs font-bold">Upload Cover Image</span>
-                            <span className="text-[10px] font-medium text-gray-400">
-                              PNG, JPG, WEBP · max 10 MB
-                            </span>
-                          </div>
-                        )}
+                        {!isValidUrl(clubInfo.cover_image_url) &&
+                          !isCoverUploading && (
+                            <div className="flex flex-col items-center gap-2 text-gray-400">
+                              <ImageIcon size={28} />
+                              <span className="text-xs font-bold">
+                                Upload Cover Image
+                              </span>
+                              <span className="text-[10px] font-medium text-gray-400">
+                                PNG, JPG, WEBP · max 10 MB
+                              </span>
+                            </div>
+                          )}
 
                         {/* Uploading overlay */}
                         {isCoverUploading && (
                           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/80">
-                            <Loader2 size={22} className="animate-spin text-[#4F46E5]" />
+                            <Loader2
+                              size={22}
+                              className="animate-spin text-[#4F46E5]"
+                            />
                             <span className="text-xs font-semibold text-gray-500">
                               Uploading...
                             </span>
@@ -1696,14 +1705,15 @@ export default function SettingsTab() {
                         )}
 
                         {/* Hover overlay (only when image exists and not uploading) */}
-                        {isValidUrl(clubInfo.cover_image_url) && !isCoverUploading && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                            <Upload size={20} className="text-white" />
-                            <span className="text-xs font-bold text-white">
-                              Change Cover
-                            </span>
-                          </div>
-                        )}
+                        {isValidUrl(clubInfo.cover_image_url) &&
+                          !isCoverUploading && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                              <Upload size={20} className="text-white" />
+                              <span className="text-xs font-bold text-white">
+                                Change Cover
+                              </span>
+                            </div>
+                          )}
 
                         <input
                           type="file"
