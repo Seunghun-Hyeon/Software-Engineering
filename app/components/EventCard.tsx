@@ -22,6 +22,7 @@ export interface EventProps {
   tabPeriod?: 'this-week' | 'next-month'; // Category filter grouping
   event_date?: string;
   poster_url?: string | null;
+  poster_image_url?: string | null;
 }
 
 // Props contract for the EventCard component wrapper
@@ -55,7 +56,11 @@ export const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
             })
           : 'TBD'),
       location: rawEvent.location || 'TBD',
-      image: rawEvent.image || rawEvent.poster_image_url || rawEvent.poster_url || '/handongbackground.jpg',
+      image:
+        rawEvent.image ||
+        rawEvent.poster_image_url ||
+        rawEvent.poster_url ||
+        '/handongbackground.jpg',
       requiresTickets: rawEvent.requiresTickets || false,
       categoryBadge: rawEvent.categoryBadge || 'EVENT',
       styleType: rawEvent.styleType || 'image-top',
