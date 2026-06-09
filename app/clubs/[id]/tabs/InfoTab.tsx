@@ -14,8 +14,10 @@ export function InfoTab({ clubData }: { clubData: ClubDataProps }) {
             Description
           </h3>
           <p className="leading-relaxed text-gray-600">
-            {clubData.shortDescription ||
-              'We are a dedicated group of students passionate about bringing change and innovation to Handong Global University. Our club serves as a platform for growth, learning, and collaboration.'}
+            {clubData.shortDescription &&
+            clubData.shortDescription !== 'No description available.'
+              ? clubData.shortDescription
+              : 'No description provided.'}
           </p>
         </div>
 
@@ -31,20 +33,7 @@ export function InfoTab({ clubData }: { clubData: ClubDataProps }) {
             ) : typeof clubData.coreValues === 'string' ? (
               <li>{clubData.coreValues}</li>
             ) : (
-              <>
-                <li>
-                  <strong>Community:</strong> Building strong relationships
-                  among members.
-                </li>
-                <li>
-                  <strong>Excellence:</strong> Striving for the best in all our
-                  endeavors.
-                </li>
-                <li>
-                  <strong>Innovation:</strong> Finding creative solutions to
-                  real-world problems.
-                </li>
-              </>
+              <li>No core values listed.</li>
             )}
           </ul>
         </div>
